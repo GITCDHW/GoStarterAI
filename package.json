@@ -1,0 +1,13 @@
+{
+  "name": "go-starter-ai",
+  "version": "1.0.0",
+  "type":"module",
+  "dependencies": {
+    "busboy": "^1.6.0",
+    "axios": "^1.7.2",
+    "form-data": "^4.0.0",
+    "fs-extra": "^11.2.0",
+    "@google/generative-ai": "^0.15.0",
+    "firebase-admin":"^11.10.1"
+  }
+}
