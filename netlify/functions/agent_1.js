@@ -26,7 +26,7 @@ const handler = async (event, context) => {
     try {
         const { userPrompt } = JSON.parse(event.body)
         const prompt = `Act as a professional market research analyst. I need a comprehensive market research report. Please include an executive summary, competitor analysis, target audience demographics, market size, key trends, marketing strategy and a SWOT analysis. The business idea is: ${userPrompt} if you don't find a business idea in the prompt respond with:
-"DATA NOT FOUND" 
+"DATA NOT FOUND,Data I got: ${userPrompt}" 
 //STRICTLY don't include any other text,code delimiters or anything just the core text in plane paragraph`;
         
         const result = await model.generateContent(prompt)
