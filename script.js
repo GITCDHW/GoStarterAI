@@ -13,6 +13,7 @@ async function makeApiCall(userPrompt) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
+        console.log(data)
         const bs64Data = data.pdf
         if (bs64Data) {
             // 1. Decode the Base64 string to a binary string
@@ -46,7 +47,7 @@ async function makeApiCall(userPrompt) {
 
 const form = document.getElementById("prompt_form")
 form.addEventListener("submit", (e) => {
-    const prompt = document.getElementById("prompt")
+    const prompt = document.getElementById("prompt").value
     e.preventDefault()
     makeApiCall(prompt)
 })

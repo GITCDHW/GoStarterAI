@@ -1,4 +1,5 @@
 const agent_1 = require("./agent_1")
+const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 
 exports.handler = async (event, context) => {
   
