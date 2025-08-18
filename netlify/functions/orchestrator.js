@@ -28,7 +28,7 @@ exports.handler = async (event, context) => {
       })
       const responseBody = agent1Response.body
       const parsedBody = JSON.parse(responseBody)
-      const report = parsedBody.report
+      const reportText = parsedBody.report
       
       const pdfDoc = await PDFDocument.create();
         const page = pdfDoc.addPage();
@@ -63,7 +63,7 @@ exports.handler = async (event, context) => {
                 'Access-Control-Allow-Origin': '*',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(report),
+            body: JSON.stringify({pdf:base64Pdf}),
         };
     } catch (e) {
       throw e
