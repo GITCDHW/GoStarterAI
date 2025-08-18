@@ -26,14 +26,16 @@ exports.handler = async (event, context) => {
         body:JSON.stringify({userPrompt}),
         httpMethod:'POST'
       })
-      const responseBody = JSON.parse({agent1Response})
+      const responseBody = agent1Response.body
+      const parsedBody = JSON.parse(responseBody)
+      const report = parsedBody.report
       return {
             statusCode: 200,
             headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(responseBody.body),
+            body: JSON.stringify(report),
         };
     } catch (e) {
       throw e
