@@ -26,7 +26,7 @@ const handler = async (event, context) => {
     try {
         const { userPrompt } = await JSON.parse(event.body)
         const prompt = `Act as a professional market research analyst. I need a comprehensive market research report for a new business. Please include an executive summary, competitor analysis, target audience demographics, market size, key trends, and a SWOT analysis. The business idea is: ${userPrompt} STRICTLY don't include any other text,code delimiters or anything just the core text in plane paragraph`
-        const result = model.generateContent(prompt)
+        const result = await model.generateContent(prompt)
         const response = await result.response;
         const text = response.text();
         return {
