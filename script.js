@@ -1,3 +1,8 @@
+const promptForm = document.getElementById('prompt_form');
+const downloadPopup = document.getElementById('download-popup');
+const downloadBtn = document.getElementById('download-btn');
+const closeBtn = document.getElementById('close-btn');
+
 async function makeApiCall(userPrompt) {
     try {
         const response = await fetch('https://gostarterai.netlify.app/.netlify/functions/orchestrator', {
@@ -13,11 +18,10 @@ async function makeApiCall(userPrompt) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        console.log(data)
         const bs64Data = data.pdf
         if (bs64Data) {
             // 1. Decode the Base64 string to a binary string
-            const binaryString = atob(bse64Pdf);
+            const binaryString = atob(bs64Pdf);
             
             // 2. Convert the binary string to a Uint8Array
             const len = binaryString.length;
