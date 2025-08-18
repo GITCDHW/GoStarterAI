@@ -44,7 +44,7 @@ exports.handler = async (event, context) => {
                 'Access-Control-Allow-Origin': '*',
                 'Content-Type': 'application/json',
             },
-            body:"agent_1 error",
+            body:"agent_1 error"+e,
         };
     }
     
