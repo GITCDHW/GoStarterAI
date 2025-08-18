@@ -29,6 +29,34 @@ exports.handler = async (event, context) => {
       const responseBody = agent1Response.body
       const parsedBody = JSON.parse(responseBody)
       const report = parsedBody.report
+      
+      const pdfDoc = await PDFDocument.create();
+        const page = pdfDoc.addPage();
+        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+        const margin = 50;
+        const fontSize = 12;
+        const lines = reportText.split('\n');
+        let yPosition = page.getSize().height - margin;
+
+        for (const line of lines) {
+            if (yPosition < margin) {
+                const newPage = pdfDoc.addPage();
+                yPosition = newPage.getSize().height - margin;
+            }
+            page.drawText(line, {
+                x: margin,
+                y: yPosition,
+                size: fontSize,
+                font: font,
+                color: rgb(0, 0, 0)
+            });
+            yPosition -= 15;
+        }
+
+        const pdfBytes = await pdfDoc.save();
+        const base64Pdf = Buffer.from(pdfBytes).toString('base64');
+        
       return {
             statusCode: 200,
             headers: {
