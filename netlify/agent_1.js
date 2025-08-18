@@ -30,16 +30,22 @@ exports.handler = async (event, context) => {
         const response = await result.response;
         const text = response.text();
         return {
-    statusCode: 200,
-    headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ report: text }),
-};
-
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ report: text }),
+        };
     } catch (e) {
-        throw e
+        return {
+            statusCode: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json',
+            },
+            body:"agent_1 error",
+        };
     }
     
 }
