@@ -1,6 +1,6 @@
 async function makeApiCall(userPrompt) {
     try {
-        const response = await fetch('gostarterai.netlify.app/.netlify/functions/orchestrator', {
+        const response = await fetch('https://gostarterai.netlify.app/.netlify/functions/orchestrator', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -21,6 +21,8 @@ async function makeApiCall(userPrompt) {
 
 
 const form = document.getElementById("prompt_form")
-form.addEventListener("submit",()=>{
-  
+form.addEventListener("submit",(e)=>{
+    const prompt = document.getElementById("prompt")
+  e.preventDefault()
+  makeApiCall(prompt)
 })
