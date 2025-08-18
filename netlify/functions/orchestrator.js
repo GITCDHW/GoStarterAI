@@ -22,7 +22,7 @@ exports.handler = async (event, context) => {
     }
     try {
       const {userPrompt} = JSON.parse(event.body)
-      const agent1Response = await agent_1.handler({
+      const agent1Response = await agent_1({
         body:JSON.stringify({userPrompt}),
         httpMethod:'POST'
       })
