@@ -17,7 +17,7 @@ async function makeApiCall(userPrompt) {
         const bs64Data = data.pdf
         if (bs64Data) {
             // 1. Decode the Base64 string to a binary string
-            const binaryString = atob(base64Pdf);
+            const binaryString = atob(bse64Pdf);
             
             // 2. Convert the binary string to a Uint8Array
             const len = binaryString.length;
