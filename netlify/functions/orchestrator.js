@@ -33,7 +33,7 @@ exports.handler = async (event, context) => {
                 'Access-Control-Allow-Origin': '*',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(responseBody.report),
+            body: JSON.stringify(responseBody.body),
         };
     } catch (e) {
       throw e
