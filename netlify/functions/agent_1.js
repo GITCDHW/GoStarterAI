@@ -3,7 +3,7 @@ const api_key = process.env.GEMINI_API_KEY;
 const genAi = new GoogleGenerativeAI(api_key);
 const model = genAi.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-exports.handler = async (event, context) => {
+const handler = async (event, context) => {
     if (event.httpMethod === 'OPTIONS') {
         return {
             statusCode: 204,
@@ -49,3 +49,5 @@ exports.handler = async (event, context) => {
     }
     
 }
+
+module.exports={handler}
