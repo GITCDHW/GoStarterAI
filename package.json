@@ -9,6 +9,7 @@
     "fs-extra": "^11.2.0",
     "@google/generative-ai": "^0.15.0",
     "firebase-admin":"^11.10.1",
-    "pdf-lib": "^1.17.1"
+    "pdf-lib": "^1.17.1",
+    "node-fetch":"^2.6.1"
   }
 }

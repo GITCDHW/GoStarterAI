@@ -2,6 +2,27 @@ const fetch = require('node-fetch');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const { buffer } = require("buffer");
 
+function wrapText(text, font, fontSize, maxWidth) {
+    const lines = [];
+    let currentLine = '';
+    const words = text.split(' ');
+
+    for (const word of words) {
+        const testLine = currentLine === '' ? word : `${currentLine} ${word}`;
+        const textWidth = font.widthOfTextAtSize(testLine, fontSize);
+
+        if (textWidth <= maxWidth) {
+            currentLine = testLine;
+        } else {
+            lines.push(currentLine);
+            currentLine = word;
+        }
+    }
+    lines.push(currentLine); // Push the last line
+    return lines;
+}
+
+
 exports.handler = async (event, context) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -49,7 +70,9 @@ exports.handler = async (event, context) => {
     // PDF rendering logic
     const margin = 50;
     const fontSize = 12;
-    const lines = reportText.split('\n');
+    const maxWidth = page.getWidth() - (2 * margin);
+const lines = wrapText(reportText, font, fontSize, maxWidth);
+
     let yPosition = page.getSize().height - margin;
 
     for (const line of lines) {
