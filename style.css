@@ -1,6 +1,8 @@
 body {
-    background-color: #f4f4f4;
-    font-family: Arial, sans-serif;
+    background-color: #10142C; /* Updated to our dark blue background */
+    color: #F4F4F4; /* Set a default light text color for the body */
+    font-family: 'Poppins', sans-serif; /* Poppins for all main text */
+    padding:20px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -17,21 +19,24 @@ body {
     height: 100%;
 }
 
-
 .form-container {
-    background-color: #fff;
+    background-color: rgba(16, 20, 44, 0.7); /* Translucent version of our dark blue */
     padding: 40px;
     border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 20px rgba(0, 191, 255, 0.3); /* A subtle blue glow effect */
     width: 100%;
     max-width: 600px;
     box-sizing: border-box;
 }
 
 h2 {
-    color: #00008b; /* Dark Blue */
+    color: #00BFFF; /* Electric Blue accent for the heading */
     text-align: center;
     margin-bottom: 20px;
+    font-family: 'Orbitron', sans-serif; /* Orbitron for the main heading */
+    font-weight: 700; /* Bold heading font */
+    text-transform: uppercase; /* Makes it more futuristic */
+    letter-spacing: 2px;
 }
 
 .form-group {
@@ -41,88 +46,89 @@ h2 {
 label {
     display: block;
     margin-bottom: 8px;
-    color: #00008b; /* Dark Blue */
-    font-weight: bold;
+    color: #F4F4F4; /* Off-white for the label text */
+    font-weight: 500;
 }
 
 textarea {
     width: 100%;
     padding: 12px;
-    border: 1px solid #ccc;
+    border: 1px solid #3d4661; /* Dark border color */
     border-radius: 5px;
     box-sizing: border-box;
     font-size: 16px;
-    color: #00008b; /* Dark Blue */
+    color: #F4F4F4; /* Text color inside the textarea */
+    background-color: #1a2034; /* Darker background for the input */
+    resize: vertical; /* Allows resizing only vertically */
 }
 
 textarea:focus {
     outline: none;
-    border-color: #ffa500; /* Bright Orange */
-    box-shadow: 0 0 5px rgba(255, 165, 0, 0.5);
+    border-color: #00BFFF; /* Electric Blue focus border */
+    box-shadow: 0 0 8px rgba(0, 191, 255, 0.8); /* Brighter blue glow on focus */
 }
 
 button {
     width: 100%;
     padding: 15px;
-    background-color: #ffa500; /* Bright Orange */
-    color: white;
+    background-color: #00BFFF; 
+    color: #10142C; /* The button text should be a dark color for contrast */
     border: none;
     border-radius: 5px;
     font-size: 18px;
-    font-weight: bold;
+    font-weight: 700;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 button:hover {
-    background-color: #e69500; /* Slightly darker orange */
+    background-color: #00A3DD;
+    box-shadow: 0 0 15px rgba(0, 191, 255, 0.6);
 }
 
-/* Styling for the entire popup container */
+/* Updated styling for the popup to match the new dark theme */
 #download-popup {
-    position: fixed; /* Ensures the popup stays in place even when scrolling */
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* A semi-transparent dark overlay */
-    display:none;
-
-    justify-content: center; /* Centers the content horizontally */
-    align-items: center; /* Centers the content vertically */
-    z-index: 1000; /* Ensures it is on top of other content */
+    background-color: rgba(16, 20, 44, 0.8); /* A darker, more fitting overlay */
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
-/* Styling for the popup's content box */
 .popup-content {
-    background-color: #ffffff;
+    background-color: #1a2034; /* A dark color for the popup box */
+    color: #F4F4F4; /* Light text for the popup */
     padding: 30px;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow for depth */
+    box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
     text-align: center;
     max-width: 400px;
     width: 90%;
-    font-family: Arial, sans-serif;
+    font-family: 'Poppins', sans-serif;
     display: flex;
     justify-content: center;
-    align-items:center;
+    align-items: center;
     flex-direction: column;
-    animation: fadeIn 0.3s ease-in-out; /* Adds a fade-in animation */
+    animation: fadeIn 0.3s ease-in-out;
 }
 
-/* Styling for the text within the popup */
 .popup-content h3 {
     margin-top: 0;
-    color: #333;
+    color: #00BFFF; /* Electric Blue for the heading */
     font-size: 1.5rem;
+    font-family: 'Orbitron', sans-serif;
 }
 
 .popup-content p {
-    color: #666;
+    color: #F4F4F4;
     line-height: 1.5;
 }
 
-/* Styling for the buttons */
 .popup-content a {
     padding: 5px;
     border: none;
@@ -131,6 +137,7 @@ button:hover {
     font-weight: bold;
     margin: 5px;
     transition: background-color 0.3s;
+    text-decoration: none; /* Removes underline from links */
 }
 .popup-content button {
     padding: 5px;
@@ -141,33 +148,21 @@ button:hover {
     margin: 5px;
     transition: background-color 0.3s;
 }
+
 #download-btn {
-    background-color: #4CAF50; /* A green color for the primary action */
-    color: white;
+    background-color: #00BFFF;
+    color: #10142C;
 }
 
 #download-btn:hover {
-    background-color: #45a049;
+    background-color: #00A3DD;
 }
 
 #close-btn {
-    background-color: #f44336; /* A red color for the close action */
-    color: white;
+    background-color: #FF0099; /* Changed to a cool magenta for a different pop */
+    color: #F4F4F4;
 }
 
 #close-btn:hover {
-    background-color: #da190b;
+    background-color: #E6008A;
 }
-
-/* Keyframe animation for a smooth fade-in effect */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
