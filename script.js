@@ -21,7 +21,6 @@ async function makeApiCall(userPrompt) {
         }
         const data = await response.json();
         const bs64Data = await data.pdf
-        console.log(data.report)
         if (bs64Data) {
     // 1. Decode the Base64 string to a binary string
     const binaryString = atob(bs64Data);
@@ -38,7 +37,6 @@ async function makeApiCall(userPrompt) {
     
     // 4. Create a URL for the Blob
     const blobUrl = URL.createObjectURL(blob);
-    console.log(blobUrl)
     // 5. Set the download link and filename
     downloadBtn.href = blobUrl;
     downloadBtn.download = 'GoStarterAI-Report.pdf';

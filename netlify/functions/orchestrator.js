@@ -77,7 +77,7 @@ exports.handler = async (event, context) => {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ pdf: base64Pdf,report:reportText}),
+      body: JSON.stringify({ pdf: base64Pdf}),
     };
 
   } catch (e) {
