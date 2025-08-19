@@ -43,7 +43,7 @@ exports.handler = async (event, context) => {
 
     //Create PDF from the report text
     const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage();
+    let page = pdfDoc.addPage();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     
     // PDF rendering logic
@@ -54,7 +54,7 @@ exports.handler = async (event, context) => {
 
     for (const line of lines) {
       if (yPosition < margin) {
-        const newPage = pdfDoc.addPage();
+        let page = pdfDoc.addPage();
         yPosition = newPage.getSize().height - margin;
       }
       page.drawText(line, {

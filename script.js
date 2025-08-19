@@ -21,6 +21,7 @@ async function makeApiCall(userPrompt) {
         }
         const data = await response.json();
         const bs64Data = await data.pdf
+        console.log(data.report)
         if (bs64Data) {
     // 1. Decode the Base64 string to a binary string
     const binaryString = atob(bs64Data);
@@ -32,7 +33,6 @@ async function makeApiCall(userPrompt) {
     for (let i = 0; i < len; i++) {
         bytes[i] = binaryString.charCodeAt(i);
     }
-    console.log(bytes)
     // 3. Create a Blob from the byte array
     const blob = new Blob([bytes], { type: 'application/pdf' });
     
