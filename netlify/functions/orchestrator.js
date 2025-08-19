@@ -1,6 +1,6 @@
 const agent_1 = require("./agent_1")
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
-
+const {buffer} = require("buffer")
 exports.handler = async (event, context) => {
   
   if (event.httpMethod === 'OPTIONS') {
