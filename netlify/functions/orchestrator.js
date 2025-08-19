@@ -67,29 +67,43 @@ exports.handler = async (event, context) => {
     let page = pdfDoc.addPage();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     
-    // PDF rendering logic
-    const margin = 50;
-    const fontSize = 12;
+// ... (Your other code)
+
+// PDF rendering logic
+const margin = 50;
+const fontSize = 12;
+const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+const paragraphs = reportText.split('\n');
+
+let page = pdfDoc.addPage();
+let yPosition = page.getSize().height - margin;
+
+// Loop through each paragraph
+for (const paragraph of paragraphs) {
     const maxWidth = page.getWidth() - (2 * margin);
-const lines = wrapText(reportText, font, fontSize, maxWidth);
+    const wrappedLines = wrapText(paragraph, font, fontSize, maxWidth);
 
-    let yPosition = page.getSize().height - margin;
+    // Loop through each line of the now-wrapped paragraph
+    for (const line of wrappedLines) {
+        if (yPosition < margin) {
+            page = pdfDoc.addPage();
+            yPosition = page.getSize().height - margin;
+        }
 
-    for (const line of lines) {
-      if (yPosition < margin) {
-        let page = pdfDoc.addPage();
-        yPosition = newPage.getSize().height - margin;
-      }
-      page.drawText(line, {
-        x: margin,
-        y: yPosition,
-        size: fontSize,
-        font: font,
-        color: rgb(0, 0, 0)
-      });
-      yPosition -= 15;
+        page.drawText(line, {
+            x: margin,
+            y: yPosition,
+            size: fontSize,
+            font: font,
+            color: rgb(0, 0, 0)
+        });
+        yPosition -= 15;
     }
 
+    // Add some extra space between paragraphs
+    yPosition -= 15;
+}
     const pdfBytes = await pdfDoc.save();
     const base64Pdf = Buffer.from(pdfBytes).toString('base64');
     
