@@ -1,58 +1,46 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const api_key = process.env.AGENT_1_KEY;
+const api_key = process.env.GEMINI_ORCHESTRATOR_KEY;
 const genAi = new GoogleGenerativeAI(api_key);
-const model = genAi.getGenerativeModel({ model: "gemini-2.5-flash" });
+const model = genAi.getGenerativeModel({ model: "gemini-2.0-flash-preview-image-generation" });
 
-const handler = async (event, context) => {
-    if (event.httpMethod === 'OPTIONS') {
-        return {
-            statusCode: 204,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'POST,OPTIONS',
-            },
-            body: ""
-        };
-    }
+exports.handler = async (event, context) => {
     
-    if (event.httpMethod !== 'POST') {
-        return {
-            statusCode: 405,
-            headers: { 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({ message: 'Method Not Allowed' }),
-        };
-    }
     try {
-        const { userPrompt } = JSON.parse(event.body)
-        console.log(userPrompt)
-        const prompt = `Act as a professional market research analyst. I need a comprehensive market research report. Please include an executive summary, competitor analysis, target audience demographics, market size, key trends, marketing strategy and a SWOT analysis. The business idea is: ${userPrompt},first check if the idea is valid,if not use a closer but valid idea,in executive summary try to include easy to execute,profitable and practical soultion.
-        //if you don't find a business idea in the prompt respond with:
-"DATA NOT FOUND" 
-//STRICTLY don't include any other text,code delimiters or anything just the core text in plane paragraph`;
+        const { prompt } = JSON.parse(event.body);
         
-        const result = await model.generateContent(prompt)
+        // This is where you make the actual API call to generate the image
+        const result = await model.generateContent(prompt);
         const response = await result.response;
-        const text = response.text();
+        const imageParts = response.candidates[0].content.parts.filter(part => part.inlineData);
+        
+        // Check if an image was generated
+        if (imageParts.length > 0) {
+            const imageData = imageParts[0].inlineData.data;
+            const mimeType = imageParts[0].inlineData.mimeType;
+            
+            return {
+                statusCode: 200,
+                body: JSON.stringify({
+                    success: true,
+                    message: "Logo generated successfully.",
+                    image: {
+                        data: imageData,
+                        mimeType: mimeType
+                    }
+                })
+            };
+        } else {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ success: false, message: "Image generation failed. No image data returned." })
+            };
+        }
+    } catch (error) {
+        // If an error occurs, log it and send a clear error message
+        console.error("Function error:", error);
         return {
-            statusCode: 200,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ report: text }),
-        };
-    } catch (e) {
-        return {
-            statusCode: 400,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Content-Type': 'application/json',
-            },
-            body: "agent_1 error" + e,
+            statusCode: 500,
+            body: JSON.stringify({ success: false, message: "An internal server error occurred." })
         };
     }
-    
-}
-
-module.exports = { handler }
+};
