@@ -6,11 +6,11 @@ function wrapText(text, font, fontSize, maxWidth) {
     const lines = [];
     let currentLine = '';
     const words = text.split(' ');
-
+    
     for (const word of words) {
         const testLine = currentLine === '' ? word : `${currentLine} ${word}`;
         const textWidth = font.widthOfTextAtSize(testLine, fontSize);
-
+        
         if (textWidth <= maxWidth) {
             currentLine = testLine;
         } else {
@@ -35,7 +35,7 @@ exports.handler = async (event, context) => {
             body: ""
         };
     }
-
+    
     if (event.httpMethod !== 'POST') {
         return {
             statusCode: 405,
@@ -43,10 +43,10 @@ exports.handler = async (event, context) => {
             body: JSON.stringify({ message: 'Method Not Allowed' }),
         };
     }
-
+    
     try {
         const { userPrompt } = JSON.parse(event.body);
-
+        
         // Call agent_1 via HTTP request
         const agent1Url = `${process.env.URL}/.netlify/functions/agent_1`;
         const agent1Response = await fetch(agent1Url, {
@@ -54,34 +54,43 @@ exports.handler = async (event, context) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userPrompt }),
         });
-
+        //call agent 2
+        const agent2Url = `${process.env.URL}/.netlify/functions/agent_2`;
+        const agent2Response = await fetch(agent2Url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userPrompt }),
+        });
         if (!agent1Response.ok) {
             throw new Error(`agent_1 returned an error: ${agent1Response.statusText}`);
         }
-
+                if (!agent2Response.ok) {
+            throw new Error(`agent_1 returned an error: ${agent2Response.statusText}`);
+        }
+        const {code}=await agent2Response.json()
         const { report: reportText } = await agent1Response.json();
-
+        
         const pdfDoc = await PDFDocument.create();
         const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
+        
         // PDF rendering logic
         const margin = 50;
         const fontSize = 12;
-
+        
         const paragraphs = reportText.split('\n');
         let page = pdfDoc.addPage();
         let yPosition = page.getSize().height - margin;
-
+        
         for (const paragraph of paragraphs) {
             const maxWidth = page.getWidth() - (2 * margin);
             const wrappedLines = wrapText(paragraph, font, fontSize, maxWidth);
-
+            
             for (const line of wrappedLines) {
                 if (yPosition < margin) {
                     page = pdfDoc.addPage();
                     yPosition = page.getSize().height - margin;
                 }
-
+                
                 page.drawText(line, {
                     x: margin,
                     y: yPosition,
@@ -93,19 +102,21 @@ exports.handler = async (event, context) => {
             }
             yPosition -= 15;
         }
-
+        
         const pdfBytes = await pdfDoc.save();
         const base64Pdf = Buffer.from(pdfBytes).toString('base64');
-
+        
         return {
             statusCode: 200,
             headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ pdf: base64Pdf, report: reportText }),
+            body: JSON.stringify({ pdf: base64Pdf, report: reportText,
+            landingPageCode:code
+            }),
         };
-
+        
     } catch (e) {
         return {
             statusCode: 500,
@@ -117,4 +128,3 @@ exports.handler = async (event, context) => {
         };
     }
 };
-
