@@ -7,7 +7,6 @@
     "axios": "^1.7.2",
     "form-data": "^4.0.0",
     "fs-extra": "^11.2.0",
-    "deepai": "^2.0.0",
     "firebase-admin":"^11.10.1",
     "pdf-lib": "^1.17.1",
     "node-fetch":"^2.6.1"
