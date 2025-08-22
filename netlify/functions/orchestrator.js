@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
-const { buffer } = require("buffer");
+const { Buffer } = require("buffer");
 
 function wrapText(text, font, fontSize, maxWidth) {
     const lines = [];
@@ -21,7 +21,6 @@ function wrapText(text, font, fontSize, maxWidth) {
     lines.push(currentLine);
     return lines;
 }
-
 
 exports.handler = async (event, context) => {
     if (event.httpMethod === 'OPTIONS') {
@@ -47,33 +46,36 @@ exports.handler = async (event, context) => {
     try {
         const { userPrompt } = JSON.parse(event.body);
         
-        // Call agent_1 via HTTP request
-        const agent1Url = `${process.env.URL}/.netlify/functions/agent_1`;
-        const agent1Response = await fetch(agent1Url, {
+        // 1. CALL AGENTS IN PARALLEL FOR BETTER PERFORMANCE
+        const agent1Promise = fetch(`${process.env.URL}/.netlify/functions/agent_1`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userPrompt }),
         });
-        //call agent 2
-        const agent2Url = `${process.env.URL}/.netlify/functions/agent_2`;
-        const agent2Response = await fetch(agent2Url, {
+        
+        const agent2Promise = fetch(`${process.env.URL}/.netlify/functions/agent_2`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userPrompt }),
         });
+        
+        const [agent1Response, agent2Response] = await Promise.all([agent1Promise, agent2Promise]);
+        
+        // 2. CHECK RESPONSES FOR ERRORS
         if (!agent1Response.ok) {
             throw new Error(`agent_1 returned an error: ${agent1Response.statusText}`);
         }
-                if (!agent2Response.ok) {
-            throw new Error(`agent_1 returned an error: ${agent2Response.statusText}`);
+        if (!agent2Response.ok) {
+            throw new Error(`agent_2 returned an error: ${agent2Response.statusText}`);
         }
-        const {code}=await agent2Response.json()
-        const { report: reportText } = await agent1Response.json();
         
+        const { report: reportText } = await agent1Response.json();
+        const { code } = await agent2Response.json();
+        
+        // 3. PDF RENDERING LOGIC
         const pdfDoc = await PDFDocument.create();
         const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
         
-        // PDF rendering logic
         const margin = 50;
         const fontSize = 12;
         
@@ -112,8 +114,9 @@ exports.handler = async (event, context) => {
                 'Access-Control-Allow-Origin': '*',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ pdf: base64Pdf, report: reportText,
-            landingPageCode:code
+            body: JSON.stringify({
+                pdf: base64Pdf,
+                landingPageCode: code
             }),
         };
         

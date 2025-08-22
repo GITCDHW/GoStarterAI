@@ -43,6 +43,7 @@ async function makeApiCall(userPrompt) {
     
     // Show the popup
     downloadPopup.style.display = 'flex';
+    console.log(data.landingPageCode)
 }
     } catch (error) {
         console.error('Error:', error);
