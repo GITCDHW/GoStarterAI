@@ -45,7 +45,7 @@ exports.handler = async (event, context) => {
     
     try {
         const { userPrompt } = JSON.parse(event.body);
-        const baseUrl = process.env.URL || "";
+        const baseUrl = process.env.URL || "http://localhost:7070";
         
         // 1. Call agents in parallel
         const agent1Promise = fetch(`${baseUrl}/.netlify/functions/agent_1`, {
