@@ -1,6 +1,5 @@
 const fetch = require('node-fetch');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
-const { Buffer } = require("buffer");
 
 function wrapText(text, font, fontSize, maxWidth) {
     const lines = [];
@@ -18,17 +17,18 @@ function wrapText(text, font, fontSize, maxWidth) {
             currentLine = word;
         }
     }
-    lines.push(currentLine);
+    if (currentLine) lines.push(currentLine); // avoid empty push
     return lines;
 }
 
 exports.handler = async (event, context) => {
+    // Handle preflight CORS
     if (event.httpMethod === 'OPTIONS') {
         return {
             statusCode: 204,
             headers: {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Headers': '*', // allow all headers
                 'Access-Control-Allow-Methods': 'POST,OPTIONS',
             },
             body: ""
@@ -45,15 +45,16 @@ exports.handler = async (event, context) => {
     
     try {
         const { userPrompt } = JSON.parse(event.body);
+        const baseUrl = process.env.URL || "";
         
-        // 1. CALL AGENTS IN PARALLEL FOR BETTER PERFORMANCE
-        const agent1Promise = fetch(`${process.env.URL}/.netlify/functions/agent_1`, {
+        // 1. Call agents in parallel
+        const agent1Promise = fetch(`${baseUrl}/.netlify/functions/agent_1`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userPrompt }),
         });
         
-        const agent2Promise = fetch(`${process.env.URL}/.netlify/functions/agent_2`, {
+        const agent2Promise = fetch(`${baseUrl}/.netlify/functions/agent_2`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userPrompt }),
@@ -61,18 +62,14 @@ exports.handler = async (event, context) => {
         
         const [agent1Response, agent2Response] = await Promise.all([agent1Promise, agent2Promise]);
         
-        // 2. CHECK RESPONSES FOR ERRORS
-        if (!agent1Response.ok) {
-            throw new Error(`agent_1 returned an error: ${agent1Response.statusText}`);
-        }
-        if (!agent2Response.ok) {
-            throw new Error(`agent_2 returned an error: ${agent2Response.statusText}`);
-        }
+        // 2. Validate responses
+        if (!agent1Response.ok) throw new Error(`agent_1 error: ${agent1Response.statusText}`);
+        if (!agent2Response.ok) throw new Error(`agent_2 error: ${agent2Response.statusText}`);
         
         const { report: reportText } = await agent1Response.json();
         const { code } = await agent2Response.json();
         
-        // 3. PDF RENDERING LOGIC
+        // 3. Build PDF
         const pdfDoc = await PDFDocument.create();
         const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
         
@@ -102,12 +99,13 @@ exports.handler = async (event, context) => {
                 });
                 yPosition -= 15;
             }
-            yPosition -= 15;
+            yPosition -= 15; // extra gap between paragraphs
         }
         
         const pdfBytes = await pdfDoc.save();
         const base64Pdf = Buffer.from(pdfBytes).toString('base64');
         
+        // 4. Return response
         return {
             statusCode: 200,
             headers: {
