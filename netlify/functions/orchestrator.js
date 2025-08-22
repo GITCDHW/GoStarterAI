@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 
+// Helper to wrap text in PDF
 function wrapText(text, font, fontSize, maxWidth) {
     const lines = [];
     let currentLine = '';
@@ -9,7 +10,6 @@ function wrapText(text, font, fontSize, maxWidth) {
     for (const word of words) {
         const testLine = currentLine === '' ? word : `${currentLine} ${word}`;
         const textWidth = font.widthOfTextAtSize(testLine, fontSize);
-        
         if (textWidth <= maxWidth) {
             currentLine = testLine;
         } else {
@@ -17,18 +17,18 @@ function wrapText(text, font, fontSize, maxWidth) {
             currentLine = word;
         }
     }
-    if (currentLine) lines.push(currentLine); // avoid empty push
+    if (currentLine) lines.push(currentLine);
     return lines;
 }
 
-exports.handler = async (event, context) => {
+exports.handler = async (event) => {
     // Handle preflight CORS
     if (event.httpMethod === 'OPTIONS') {
         return {
             statusCode: 204,
             headers: {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': '*', // allow all headers
+                'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Methods': 'POST,OPTIONS',
             },
             body: ""
@@ -45,67 +45,56 @@ exports.handler = async (event, context) => {
     
     try {
         const { userPrompt } = JSON.parse(event.body);
-        const baseUrl = process.env.URL || "http://localhost:7070";
+        const baseUrl = "https://gostarterai.netlify.app/.netlify/functions";
         
-        // 1. Call agents in parallel
-        const agent1Promise = fetch(`${baseUrl}/.netlify/functions/agent_1`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userPrompt }),
-        });
+        // Call agents in parallel
+        const [agent1Resp, agent2Resp] = await Promise.all([
+            fetch(`${baseUrl}/agent_1`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userPrompt }),
+            }),
+            fetch(`${baseUrl}/agent_2`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userPrompt }),
+            })
+        ]);
         
-        const agent2Promise = fetch(`${baseUrl}/.netlify/functions/agent_2`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userPrompt }),
-        });
+        if (!agent1Resp.ok) throw new Error(`agent_1 failed: ${await agent1Resp.text()}`);
+        if (!agent2Resp.ok) throw new Error(`agent_2 failed: ${await agent2Resp.text()}`);
         
-        const [agent1Response, agent2Response] = await Promise.all([agent1Promise, agent2Promise]);
+        const { report } = await agent1Resp.json();
+        const { code } = await agent2Resp.json();
         
-        // 2. Validate responses
-        if (!agent1Response.ok) throw new Error(`agent_1 error: ${agent1Response.statusText}`);
-        if (!agent2Response.ok) throw new Error(`agent_2 error: ${agent2Response.statusText}`);
-        
-        const { report: reportText } = await agent1Response.json();
-        const { code } = await agent2Response.json();
-        
-        // 3. Build PDF
+        // Build PDF
         const pdfDoc = await PDFDocument.create();
         const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        
         const margin = 50;
         const fontSize = 12;
+        const paragraphs = report.split('\n');
         
-        const paragraphs = reportText.split('\n');
         let page = pdfDoc.addPage();
-        let yPosition = page.getSize().height - margin;
+        let y = page.getHeight() - margin;
         
-        for (const paragraph of paragraphs) {
-            const maxWidth = page.getWidth() - (2 * margin);
-            const wrappedLines = wrapText(paragraph, font, fontSize, maxWidth);
+        for (const para of paragraphs) {
+            const maxWidth = page.getWidth() - 2 * margin;
+            const lines = wrapText(para, font, fontSize, maxWidth);
             
-            for (const line of wrappedLines) {
-                if (yPosition < margin) {
+            for (const line of lines) {
+                if (y < margin) {
                     page = pdfDoc.addPage();
-                    yPosition = page.getSize().height - margin;
+                    y = page.getHeight() - margin;
                 }
-                
-                page.drawText(line, {
-                    x: margin,
-                    y: yPosition,
-                    size: fontSize,
-                    font: font,
-                    color: rgb(0, 0, 0)
-                });
-                yPosition -= 15;
+                page.drawText(line, { x: margin, y, size: fontSize, font, color: rgb(0, 0, 0) });
+                y -= 15;
             }
-            yPosition -= 15; // extra gap between paragraphs
+            y -= 15; // extra gap between paragraphs
         }
         
         const pdfBytes = await pdfDoc.save();
         const base64Pdf = Buffer.from(pdfBytes).toString('base64');
         
-        // 4. Return response
         return {
             statusCode: 200,
             headers: {
@@ -114,18 +103,16 @@ exports.handler = async (event, context) => {
             },
             body: JSON.stringify({
                 pdf: base64Pdf,
-                landingPageCode: code
+                landingPageCode: code,
             }),
         };
         
     } catch (e) {
+        console.error("Orchestrator error:", e?.message || e);
         return {
             statusCode: 500,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ message: "Orchestrator error: " + e.message }),
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ message: "Orchestrator error: " + (e?.message || e) }),
         };
     }
 };

@@ -1,58 +1,64 @@
+// DOM elements
 const promptForm = document.getElementById('prompt_form');
 const downloadPopup = document.getElementById('download-popup');
 const downloadBtn = document.getElementById('download-btn');
 const closeBtn = document.getElementById('close-btn');
-closeBtn.onclick = ()=>{
-    downloadPopup.style.display="none"
-}
+
+// Close popup
+closeBtn.onclick = () => {
+    downloadPopup.style.display = "none";
+};
+
+// API call function
 async function makeApiCall(userPrompt) {
     try {
         const response = await fetch('https://gostarterai.netlify.app/.netlify/functions/orchestrator', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userPrompt }),
         });
         
+        // Check HTTP status
         if (!response.ok) {
-            // If the server responded with an error status
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const text = await response.text();
+            throw new Error(`HTTP ${response.status}: ${text}`);
         }
+        
         const data = await response.json();
-        const bs64Data = await data.pdf
-        if (bs64Data) {
-    // 1. Decode the Base64 string to a binary string
-    const binaryString = atob(bs64Data);
-    
-    // 2. Convert the binary string to a Uint8Array
-    const len = binaryString.length;
-    
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-    }
-    // 3. Create a Blob from the byte array
-    const blob = new Blob([bytes], { type: 'application/pdf' });
-    
-    // 4. Create a URL for the Blob
-    const blobUrl = URL.createObjectURL(blob);
-    // 5. Set the download link and filename
-    downloadBtn.href = blobUrl;
-    downloadBtn.download = 'GoStarterAI-Report.pdf';
-    
-    // Show the popup
-    downloadPopup.style.display = 'flex';
-    console.log(data.landingPageCode)
-}
-    } catch (error) {
-        console.error('Error:', error.message);
+        
+        if (!data.pdf) throw new Error("No PDF returned from orchestrator");
+        
+        // Convert Base64 PDF to Blob
+        const binary = atob(data.pdf);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        
+        const blob = new Blob([bytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        
+        // Set download link
+        downloadBtn.href = url;
+        downloadBtn.download = 'GoStarterAI-Report.pdf';
+        downloadPopup.style.display = 'flex';
+        
+        // Log landing page code for debugging
+        console.log("Landing page code:", data.landingPageCode);
+        
+    } catch (err) {
+        console.error("API call error:", err?.message || err);
+        alert("Something went wrong. Check console for details.");
     }
 }
 
-const form = document.getElementById("prompt_form")
-form.addEventListener("submit", (e) => {
-    const prompt = document.getElementById("prompt").value
-    e.preventDefault()
-    makeApiCall(prompt)
-})
+// Form submit event
+promptForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const prompt = document.getElementById("prompt").value.trim();
+    if (!prompt) {
+        alert("Please enter a business idea.");
+        return;
+    }
+    makeApiCall(prompt);
+});

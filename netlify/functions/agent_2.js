@@ -1,39 +1,47 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const api_key = process.env.GEMINI_ORCHESTRATOR_KEY;
+const api_key = process.env.AGENT_2_KEY;
 const genAi = new GoogleGenerativeAI(api_key);
 const model = genAi.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-exports.handler = async (event, context) => {
-      if (event.httpMethod === 'OPTIONS') {
-        return {
-            statusCode: 204,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'POST,OPTIONS',
-            },
-            body: ""
-        };
-    }
-  try {
-    const { userPrompt } = JSON.parse(event.body);
-    const masterPrompt = `you are a master frontend developer, your goal is to use the following user prompt: ${userPrompt}, which is their business idea, and your goal is to generate a single HTML landing page for the proposed idea. If the idea is not comprehensive enough, make educated guesses for the missing features. Do not include any other text, explanations, or code delimiters; just the plain HTML code.`
-    
-    const result = await model.generateContent(masterPrompt)
-    const response = await result.response;
-    const text = response.text();
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          success: true,
-          code:text
-        })
-      };
-  } catch (error) {
-    console.error("Function error:", error);
+exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
     return {
-      statusCode: 500,
-      body: JSON.stringify({ success: false, message: "An internal server error occurred." })
+      statusCode: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'POST,OPTIONS',
+      },
+      body: ""
     };
   }
-};''
+  
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ message: 'Method Not Allowed' }),
+    };
+  }
+  
+  try {
+    const { userPrompt } = JSON.parse(event.body);
+    const prompt = `Generate a complete HTML landing page for: ${userPrompt}. Only plain HTML, no explanations, no delimiters.`;
+    
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = await response.text();
+    
+    return {
+      statusCode: 200,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ code: text }),
+    };
+  } catch (e) {
+    return {
+      statusCode: 500,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ message: "agent_2 error: " + (e?.message || e) }),
+    };
+  }
+};
