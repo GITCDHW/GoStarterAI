@@ -17,8 +17,7 @@ exports.handler = async (event, context) => {
     }
   try {
     const { prompt } = JSON.parse(event.body);
-    const masterPrompt = `you are a master frontend developer,your goal is to use the following user prompt: ${prompt},which is their business idea,and your goal is to generate a single html landing page for the proposed idea,if it contains something irrelevant, return a html page with one header: irrelevant business idea,if the idea is not comprehensive enough try to make educated guesses for the missing features
-    strictly dont include any other text or code delimiters,just plain text code`
+    const masterPrompt = `you are a master frontend developer, your goal is to use the following user prompt: ${prompt}, which is their business idea, and your goal is to generate a single HTML landing page for the proposed idea. If the idea is not comprehensive enough, make educated guesses for the missing features. Do not include any other text, explanations, or code delimiters; just the plain HTML code.`
     
     const result = await model.generateContent(masterPrompt)
     const response = await result.response;
