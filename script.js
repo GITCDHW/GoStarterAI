@@ -46,7 +46,7 @@ async function makeApiCall(userPrompt) {
     console.log(data.landingPageCode)
 }
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error:', error.message);
     }
 }
 
