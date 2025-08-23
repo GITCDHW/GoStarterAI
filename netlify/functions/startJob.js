@@ -25,32 +25,40 @@ exports.handler = async (event, context) => {
   
   try {
     const { userPrompt } = JSON.parse(event.body);
-    const kv = context.kv;
-    const jobId = uuidv4();
-    
-    // Set initial job status to 'pending'
-    await kv.set(jobId, JSON.stringify({ status: 'pending' }));
+    if (context && context.kv) {
+      const kv = context.kv;
+const jobId = uuidv4();
 
-    const baseUrl = "https://gostarterai.netlify.app/.netlify/functions";
-    
-    // Asynchronously call agent_1 and agent_2 without awaiting
-    fetch(`${baseUrl}/agent_1`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userPrompt, jobId }),
-    }).catch(err => console.error("Agent 1 failed:", err));
-    
-    fetch(`${baseUrl}/agent_2`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userPrompt, jobId }),
-    }).catch(err => console.error("Agent 2 failed:", err));
-    
-    return {
-      statusCode: 202, // 202 Accepted, indicating the request is being processed
+// Set initial job status to 'pending'
+await kv.set(jobId, JSON.stringify({ status: 'pending' }));
+
+const baseUrl = "https://gostarterai.netlify.app/.netlify/functions";
+
+// Asynchronously call agent_1 and agent_2 without awaiting
+fetch(`${baseUrl}/agent_1`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ userPrompt, jobId }),
+}).catch(err => console.error("Agent 1 failed:", err));
+
+fetch(`${baseUrl}/agent_2`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ userPrompt, jobId }),
+}).catch(err => console.error("Agent 2 failed:", err));
+
+return {
+  statusCode: 202, // 202 Accepted, indicating the request is being processed
+  headers: { 'Access-Control-Allow-Origin': '*' },
+  body: JSON.stringify({ jobId }),
+};
+    }else{
+      return { 
+      statusCode: 500, 
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ jobId }),
+      body: JSON.stringify({message:"kv not found"})
     };
+    }
   } catch (e) {
     return { 
       statusCode: 500, 
