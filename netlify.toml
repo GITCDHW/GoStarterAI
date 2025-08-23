@@ -6,6 +6,5 @@
   node_bundler = "esbuild"
   included_files = ["./**/*"]
 
-  [[functions.environment]]
-    name = "NETLIFY_KV_ENABLED"
-    value = "true"
+  [functions.environment]
+    NETLIFY_KV_ENABLED = "true"
