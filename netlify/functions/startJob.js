@@ -1,6 +1,8 @@
-const { v4: uuidv4 } = require('uuid')
+const { v4: uuidv4 } = require('uuid');
 const { get_context } = require('@netlify/functions')
+
 exports.handler = async (event, context) => {
+  // Handle preflight CORS requests
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 204,
@@ -13,6 +15,7 @@ exports.handler = async (event, context) => {
     };
   }
   
+  // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -20,14 +23,18 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({ message: 'Method Not Allowed' }),
     };
   }
+  
   try {
-    const { userPrompt } = JSON.parse(event.body)
-    const kv = context.kv
-    const jobId = uuidv4
-    await kv.set(jobId, JSON.stringify({ status: 'pending' }))
+    const { userPrompt } = JSON.parse(event.body);
+    const kv = context.kv;
+    const jobId = uuidv4();
+    
+    // Set initial job status to 'pending'
+    await kv.set(jobId, JSON.stringify({ status: 'pending' }));
+
     const baseUrl = "https://gostarterai.netlify.app/.netlify/functions";
     
-    // Asynchronously call agent_1 and agent_2 without waiting
+    // Asynchronously call agent_1 and agent_2 without awaiting
     fetch(`${baseUrl}/agent_1`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -41,10 +48,15 @@ exports.handler = async (event, context) => {
     }).catch(err => console.error("Agent 2 failed:", err));
     
     return {
-      statusCode: 202,
+      statusCode: 202, // 202 Accepted, indicating the request is being processed
+      headers: { 'Access-Control-Allow-Origin': '*' },
       body: JSON.stringify({ jobId }),
     };
   } catch (e) {
-    return { statusCode: 500, body: e.toString() };
+    return { 
+      statusCode: 500, 
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: e.toString() 
+    };
   }
-}
+};
