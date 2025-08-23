@@ -1,5 +1,4 @@
 const { v4: uuidv4 } = require('uuid');
-const { get_context } = require('@netlify/functions')
 
 exports.handler = async (event, context) => {
   // Handle preflight CORS requests
