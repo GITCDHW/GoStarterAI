@@ -26,7 +26,7 @@ exports.handler = async (event) => {
     
     try {
         const { userPrompt } = JSON.parse(event.body);
-        const prompt = `Act as a professional market research analyst. Generate a full market research report for: ${userPrompt}. If missing, respond with "DATA NOT FOUND". Only plain text.`;
+        const prompt = `Act as a professional market research analyst. Generate a brief market analysis report for: ${userPrompt},in about 500 words If missing, respond with "DATA NOT FOUND". Only plain text.`;
         
         const result = await model.generateContent(prompt);
         const response = await result.response;
