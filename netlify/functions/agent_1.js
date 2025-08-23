@@ -31,11 +31,16 @@ exports.handler = async (event) => {
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = await response.text();
-        
+        const kv = context.kv
+        await kv.set(jobId, JSON.stringify({
+    ...currentJob,
+    report: report,
+    status: 'report_complete'
+}));
         return {
             statusCode: 200,
             headers: { 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({ report: text }),
+            body: JSON.stringify({message:"report successfully generated"}),
         };
     } catch (e) {
         return {

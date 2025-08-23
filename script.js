@@ -9,66 +9,65 @@ closeBtn.onclick = () => {
     downloadPopup.style.display = "none";
 };
 
+// Polling function to check job status
+async function pollForResults(jobId) {
+    try {
+        const checkResp = await fetch(`https://gostarterai.netlify.app/.netlify/functions/check_status?jobId=${jobId}`);
+        const data = await checkResp.json();
+
+        if (data.isComplete) {
+            // Job is complete, generate PDF and show popup
+            const { report, code } = data;
+
+            // Ensure jsPDF library is loaded
+            if (typeof window.jspdf === 'undefined') {
+                throw new Error("jsPDF library not found. Please include it in your HTML.");
+            }
+            
+            // Generate PDF on the frontend using jsPDF
+            const doc = new window.jspdf.jsPDF();
+            const maxWidth = doc.internal.pageSize.getWidth() - 20;
+            const splitText = doc.splitTextToSize(report, maxWidth);
+            doc.text(splitText, 10, 10);
+            
+            // Create a blob and URL for the generated PDF
+            const pdfBlob = doc.output('blob');
+            const url = URL.createObjectURL(pdfBlob);
+            
+            // Set download link and show the popup
+            downloadBtn.href = url;
+            downloadBtn.download = 'GoStarterAI-Report.pdf';
+            downloadPopup.style.display = 'flex';
+            
+            // Log landing page code for debugging
+            console.log("Landing page code:", code);
+        } else {
+            // Job is not yet complete, poll again in 3 seconds
+            setTimeout(() => pollForResults(jobId), 3000);
+        }
+    } catch (err) {
+        console.error("Polling error:", err?.message || err);
+        alert("Something went wrong during polling. Check console for details.");
+    }
+}
+
 // API call function
 async function makeApiCall(userPrompt) {
     try {
-        // Fetch data from both agents in parallel
-        const [agent1Resp, agent2Resp] = await Promise.all([
-            fetch('https://gostarterai.netlify.app/.netlify/functions/agent_1', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userPrompt }),
-            }),
-            fetch('https://gostarterai.netlify.app/.netlify/functions/agent_2', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userPrompt }),
-            })
-        ]);
+        // Step 1: Start the long-running job and get a job ID
+        const startResp = await fetch('https://gostarterai.netlify.app/.netlify/functions/startJob', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userPrompt }),
+        });
 
-        // Check HTTP status for each response
-        if (!agent1Resp.ok) {
-            const text = await agent1Resp.text();
-            throw new Error(`agent_1 failed: HTTP ${agent1Resp.status}: ${text}`);
-        }
-        if (!agent2Resp.ok) {
-            const text = await agent2Resp.text();
-            throw new Error(`agent_2 failed: HTTP ${agent2Resp.status}: ${text}`);
-        }
+        const { jobId } = await startResp.json();
+        if (!jobId) throw new Error("Could not start job. No jobId returned.");
 
-        const agent1Data = await agent1Resp.json();
-        const agent2Data = await agent2Resp.json();
-        
-        const report = agent1Data.report;
-        const landingPageCode = agent2Data.code;
+        // Step 2: Begin polling for the job results
+        alert("Your request is being processed. It may take a minute or two.");
+        pollForResults(jobId);
 
-        // Ensure jsPDF library is loaded
-        if (typeof window.jspdf === 'undefined') {
-            throw new Error("jsPDF library not found. Please include it in your HTML.");
-        }
-        
-        // Generate PDF on the frontend using jsPDF
-        const doc = new window.jspdf.jsPDF();
-        
-        // Split the report text into lines that fit the page width
-        const maxWidth = doc.internal.pageSize.getWidth() - 20; // 10mm margin on each side
-        const splitText = doc.splitTextToSize(report, maxWidth);
-        
-        // Add the split text to the document
-        doc.text(splitText, 10, 10);
-        
-        // Create a blob and URL for the generated PDF
-        const pdfBlob = doc.output('blob');
-        const url = URL.createObjectURL(pdfBlob);
-        
-        // Set download link
-        downloadBtn.href = url;
-        downloadBtn.download = 'GoStarterAI-Report.pdf';
-        downloadPopup.style.display = 'flex';
-        
-        // Log landing page code for debugging
-        console.log("Landing page code:", landingPageCode);
-        
     } catch (err) {
         console.error("API call error:", err?.message || err);
         alert("Something went wrong. Check console for details.");
