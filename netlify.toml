@@ -1,11 +1,11 @@
-  NETLIFY_BLOBS_ENABLED = "true"
-[dev]
+  [dev]
   functions = "netlify/functions"
 
-[[functions]]
+[functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
   included_files = ["./**/*"]
 
   [functions.environment]
     NETLIFY_BLOBS_ENABLED = "true"
+
