@@ -34,7 +34,7 @@ exports.handler = async (event) => {
     const { getStore } = await import('@netlify/blobs');
     const blobs = getStore('jobs', {
       siteId: "cb94ca2e-e8cc-4831-9983-8e2e2eee41a0",
-      token: "nfp_FQQQCDZd6i8mZ3qNYqFYzMU9DVm1MbQe4f03"
+      token: process.env.NETLIFY_TOKEN
       
     });
     const jobData = await blobs.get(jobId, { type: 'json' });
