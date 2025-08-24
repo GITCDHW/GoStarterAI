@@ -4,7 +4,6 @@ const genAi = new GoogleGenerativeAI(api_key);
 const model = genAi.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 exports.handler = async (event, context) => {
-  // Handle preflight CORS requests
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 204,
@@ -17,7 +16,6 @@ exports.handler = async (event, context) => {
     };
   }
   
-  // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -28,11 +26,10 @@ exports.handler = async (event, context) => {
   
   try {
     const { userPrompt, jobId } = JSON.parse(event.body);
-    const { getBlobs } = require('@netlify/blobs');
-
-    const blobs = getBlobs({ name: 'jobs' }); // Get the blobs store
+    // **FIXED:** Using dynamic import for getBlobs
+    const { getBlobs } = await import('@netlify/blobs');
+    const blobs = getBlobs({ name: 'jobs' });
     
-    // Fetch the current job state from the Blobs store
     const currentJob = await blobs.get(jobId, { type: 'json' });
 
     const prompt = `Act as a professional market research analyst. Generate a brief market analysis report, including competitor analysis,and a plan to execute the business, given that the user has got a website,a logo(if its a new Business) from our side: ${userPrompt},If missing, respond with "DATA NOT FOUND".RESPOND Only plain text,NO ADDITIONAL TEXT,CODE DELIMITERS.`;
@@ -41,7 +38,6 @@ exports.handler = async (event, context) => {
     const response = await result.response;
     const report = response.text();
     
-    // Update the job with the report data using setJSON
     await blobs.setJSON(jobId, {
       ...currentJob,
       report: report,

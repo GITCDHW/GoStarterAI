@@ -1,11 +1,9 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const { getBlobs } = require('@netlify/blobs');
 const api_key = process.env.AGENT_2_KEY;
 const genAi = new GoogleGenerativeAI(api_key);
 const model = genAi.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 exports.handler = async (event, context) => {
-  // Handle preflight CORS requests
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 204,
@@ -18,7 +16,6 @@ exports.handler = async (event, context) => {
     };
   }
   
-  // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -29,11 +26,9 @@ exports.handler = async (event, context) => {
   
   try {
     const { userPrompt, jobId } = JSON.parse(event.body);
-    const { getBlobs } = require('@netlify/blobs');
-
+    // **FIXED:** Using dynamic import for getBlobs
+    const { getBlobs } = await import('@netlify/blobs');
     const blobs = getBlobs({ name: 'jobs' });
-
-    // Fetch the current job state from the Blobs store
     const currentJob = await blobs.get(jobId, { type: 'json' });
     
     const prompt = `Generate a complete HTML landing page for: ${userPrompt}. Only plain SINGLE FILED HTML & JAVASCRIPT DESIGN ONLY USING MATERIAL UI, DON'T WRITE ANY CUSTOM CSS,TRY TO MAINTAIN CONSISTENCY IN COLOR,FONT AMD SECURITY no explanations, no delimiters.`;
@@ -42,7 +37,6 @@ exports.handler = async (event, context) => {
     const response = await result.response;
     const code = response.text();
     
-    // Update the job with the HTML code using setJSON
     await blobs.setJSON(jobId, {
       ...currentJob,
       code: code,

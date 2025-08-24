@@ -1,7 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 
 exports.handler = async (event, context) => {
-  // Handle preflight CORS requests
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 204,
@@ -14,7 +13,6 @@ exports.handler = async (event, context) => {
     };
   }
   
-  // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -25,15 +23,16 @@ exports.handler = async (event, context) => {
   
   try {
     const { userPrompt } = JSON.parse(event.body);
-    const { getBlobs } = require("@netlify/blobs")
-
+    
+    // **FIXED:** Using dynamic import for getBlobs
+    const { getBlobs } = await import('@netlify/blobs');
+    
     const blobs = getBlobs({ name: 'jobs' });
     const jobId = uuidv4();
     await blobs.setJSON(jobId, { status: 'pending' });
     
     const baseUrl = "https://gostarterai.netlify.app/.netlify/functions";
     
-    // Asynchronously call agent_1 and agent_2 without awaiting
     fetch(`${baseUrl}/agent_1`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -47,7 +46,7 @@ exports.handler = async (event, context) => {
     }).catch(err => console.error("Agent 2 failed:", err));
     
     return {
-      statusCode: 202, // 202 Accepted, indicating the request is being processed
+      statusCode: 202,
       headers: { 'Access-Control-Allow-Origin': '*' },
       body: JSON.stringify({ jobId }),
     };
