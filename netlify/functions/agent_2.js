@@ -1,4 +1,5 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { getBlobs } = require('@netlify/blobs');
 const api_key = process.env.AGENT_2_KEY;
 const genAi = new GoogleGenerativeAI(api_key);
 const model = genAi.getGenerativeModel({ model: "gemini-2.5-flash" });
@@ -28,24 +29,23 @@ exports.handler = async (event, context) => {
   
   try {
     const { userPrompt, jobId } = JSON.parse(event.body);
-    const kv = context.kv;
+    const blobs = getBlobs({ name: 'jobs' });
 
-    // Fetch the current job state from the KV store
-    const currentJobJson = await kv.get(jobId);
-    const currentJob = currentJobJson ? JSON.parse(currentJobJson) : {};
+    // Fetch the current job state from the Blobs store
+    const currentJob = await blobs.get(jobId, { type: 'json' });
     
-    const prompt = `Generate a complete HTML landing page for: ${userPrompt}. Only plain HTML, no explanations, no delimiters.`;
+    const prompt = `Generate a complete HTML landing page for: ${userPrompt}. Only plain SINGLE FILED HTML & JAVASCRIPT DESIGN ONLY USING MATERIAL UI, DON'T WRITE ANY CUSTOM CSS,TRY TO MAINTAIN CONSISTENCY IN COLOR,FONT AMD SECURITY no explanations, no delimiters.`;
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const code = response.text();
     
-    // Update the job with the HTML code
-    await kv.set(jobId, JSON.stringify({
+    // Update the job with the HTML code using setJSON
+    await blobs.setJSON(jobId, {
       ...currentJob,
       code: code,
       status: 'code_complete'
-    }));
+    });
 
     return {
       statusCode: 200,

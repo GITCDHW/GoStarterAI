@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
+const { getBlobs } = require("@netlify/blobs")
 
 exports.handler = async (event, context) => {
   // Handle preflight CORS requests
@@ -25,45 +26,36 @@ exports.handler = async (event, context) => {
   
   try {
     const { userPrompt } = JSON.parse(event.body);
-    if (context && context.kv) {
-      const kv = context.kv;
-const jobId = uuidv4();
-
-// Set initial job status to 'pending'
-await kv.set(jobId, JSON.stringify({ status: 'pending' }));
-
-const baseUrl = "https://gostarterai.netlify.app/.netlify/functions";
-
-// Asynchronously call agent_1 and agent_2 without awaiting
-fetch(`${baseUrl}/agent_1`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ userPrompt, jobId }),
-}).catch(err => console.error("Agent 1 failed:", err));
-
-fetch(`${baseUrl}/agent_2`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ userPrompt, jobId }),
-}).catch(err => console.error("Agent 2 failed:", err));
-
-return {
-  statusCode: 202, // 202 Accepted, indicating the request is being processed
-  headers: { 'Access-Control-Allow-Origin': '*' },
-  body: JSON.stringify({ jobId }),
-};
-    }else{
-      return { 
-      statusCode: 500, 
+    
+    const blobs = getBlobs({ name: 'jobs' });
+    const jobId = uuidv4();
+    await blobs.setJSON(jobId, { status: 'pending' });
+    
+    const baseUrl = "https://gostarterai.netlify.app/.netlify/functions";
+    
+    // Asynchronously call agent_1 and agent_2 without awaiting
+    fetch(`${baseUrl}/agent_1`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userPrompt, jobId }),
+    }).catch(err => console.error("Agent 1 failed:", err));
+    
+    fetch(`${baseUrl}/agent_2`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userPrompt, jobId }),
+    }).catch(err => console.error("Agent 2 failed:", err));
+    
+    return {
+      statusCode: 202, // 202 Accepted, indicating the request is being processed
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({message:"kv not found"})
+      body: JSON.stringify({ jobId }),
     };
-    }
   } catch (e) {
-    return { 
-      statusCode: 500, 
+    return {
+      statusCode: 500,
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: e.toString() 
+      body: e.toString()
     };
   }
 };
