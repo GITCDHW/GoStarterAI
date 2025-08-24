@@ -29,6 +29,8 @@ exports.handler = async (event, context) => {
   
   try {
     const { userPrompt, jobId } = JSON.parse(event.body);
+    const { getBlobs } = require('@netlify/blobs');
+
     const blobs = getBlobs({ name: 'jobs' });
 
     // Fetch the current job state from the Blobs store

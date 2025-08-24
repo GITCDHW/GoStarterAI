@@ -1,5 +1,4 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const { getBlobs } = require('@netlify/blobs');
 const api_key = process.env.AGENT_1_KEY;
 const genAi = new GoogleGenerativeAI(api_key);
 const model = genAi.getGenerativeModel({ model: "gemini-2.5-flash" });
@@ -29,6 +28,8 @@ exports.handler = async (event, context) => {
   
   try {
     const { userPrompt, jobId } = JSON.parse(event.body);
+    const { getBlobs } = require('@netlify/blobs');
+
     const blobs = getBlobs({ name: 'jobs' }); // Get the blobs store
     
     // Fetch the current job state from the Blobs store

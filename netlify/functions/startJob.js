@@ -1,5 +1,4 @@
 const { v4: uuidv4 } = require('uuid');
-const { getBlobs } = require("@netlify/blobs")
 
 exports.handler = async (event, context) => {
   // Handle preflight CORS requests
@@ -26,7 +25,8 @@ exports.handler = async (event, context) => {
   
   try {
     const { userPrompt } = JSON.parse(event.body);
-    
+    const { getBlobs } = require("@netlify/blobs")
+
     const blobs = getBlobs({ name: 'jobs' });
     const jobId = uuidv4();
     await blobs.setJSON(jobId, { status: 'pending' });
