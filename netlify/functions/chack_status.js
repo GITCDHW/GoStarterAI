@@ -31,8 +31,8 @@ exports.handler = async (event) => {
         body: JSON.stringify({ message: 'jobId is required' }),
       };
     }
-    const { getBlobs } = await import('@netlify/blobs');
-    const blobs = getBlobs({ name: 'jobs' });
+    const { getStore } = await import('@netlify/blobs');
+    const blobs = getStore({ name: 'jobs' });
     const jobData = await blobs.get(jobId, { type: 'json' });
     
     if (!jobData) {
