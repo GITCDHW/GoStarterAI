@@ -1,6 +1,7 @@
-const { v4: uuidv4 } = require('uuid');
+import { v4 as uuidv4 } from 'uuid';
+import { getBlobs } from '@netlify/blobs';
 
-exports.handler = async (event, context) => { // Added 'context' here
+export const handler = async (event, context) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 204,
@@ -23,11 +24,6 @@ exports.handler = async (event, context) => { // Added 'context' here
   
   try {
     const { userPrompt } = JSON.parse(event.body);
-    
-    // **FIXED:** Using dynamic import for getBlobs
-    const { getBlobs } = await import('@netlify/blobs');
-    
-    // **FIXED:** Using getBlobs with a configuration object
     const blobs = getBlobs({ name: 'jobs' });
     const jobId = uuidv4();
     await blobs.setJSON(jobId, { status: 'pending' });

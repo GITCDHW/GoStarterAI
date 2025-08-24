@@ -1,9 +1,11 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getBlobs } from '@netlify/blobs';
+
 const api_key = process.env.AGENT_1_KEY;
 const genAi = new GoogleGenerativeAI(api_key);
 const model = genAi.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-exports.handler = async (event) => {
+export const handler = async (event, context) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 204,
@@ -26,7 +28,6 @@ exports.handler = async (event) => {
   
   try {
     const { userPrompt, jobId } = JSON.parse(event.body);
-    const { getBlobs } = await import('@netlify/blobs');
     const blobs = getBlobs({ name: 'jobs' });
     
     const currentJob = await blobs.get(jobId, { type: 'json' });

@@ -1,6 +1,7 @@
 {
   "name": "go-starter-ai",
   "version": "1.0.0",
+  "type":"module",
   "dependencies": {
     "busboy": "^1.6.0",
     "axios": "^1.7.2",

@@ -1,4 +1,6 @@
-exports.handler = async (event) => {
+import { getBlobs } from '@netlify/blobs';
+
+export const handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 204,
@@ -29,7 +31,6 @@ exports.handler = async (event) => {
         body: JSON.stringify({ message: 'jobId is required' }),
       };
     }
-    const { getBlobs } = await import('@netlify/blobs');
     const blobs = getBlobs({ name: 'jobs' });
     
     const jobData = await blobs.get(jobId, { type: 'json' });
