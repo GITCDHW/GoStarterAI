@@ -28,11 +28,8 @@ exports.handler = async (event, context) => {
     const { userPrompt, jobId } = JSON.parse(event.body);
     // **FIXED:** Using dynamic import for getStore
     const { getStore } = await import('@netlify/blobs');
-    const blobs = getStore('jobs', {
-      siteId: "cb94ca2e-e8cc-4831-9983-8e2e2eee41a0",
-      token: process.env.NETLIFY_TOKEN
-      
-    });
+const blobs = getStore('jobs');
+
     const currentJob = await blobs.get(jobId, { type: 'json' });
     
     const prompt = `Generate a complete HTML landing page for: ${userPrompt}. Only plain SINGLE FILED HTML & JAVASCRIPT DESIGN ONLY USING MATERIAL UI, DON'T WRITE ANY CUSTOM CSS,TRY TO MAINTAIN CONSISTENCY IN COLOR,FONT AMD SECURITY no explanations, no delimiters.`;
