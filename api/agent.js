@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 
   try {
     // Select the model
-    const masterPrompt = `yoy are a professional frontend developer,your goal is to provide a clean,modern efficient landing page,for the given users request: ${prompt},make educated guesses,if user doesnt provides enough information,dont add any other text or code delimiters,just plain text`
+    const masterPrompt = `yoy are a professional frontend developer,your goal is to provide a clean,modern efficient html code for a landing page,for the given users request: ${prompt},make educated guesses,if user doesnt provides enough information,and strictly use material UI framework,dont write any custom css dont add any other text or code delimiters,just plain text`
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // Generate content based on the prompt
