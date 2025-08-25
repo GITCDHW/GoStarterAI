@@ -11,7 +11,16 @@ closeBtn.onclick = () => {
 
 // API call function
 async function makeApiCall(userPrompt) {
-    
+        const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(userPrompt)
+    };
+    const respone = await fetch("https://go-starter-ai.vercel.app/api/agent")
+    const data = await response.text()
+    return data
 }
 
 // Form submit event
@@ -22,5 +31,6 @@ promptForm.addEventListener('submit', (e) => {
         alert("Please enter a business idea.");
         return;
     }
-    makeApiCall(prompt);
+    const code = makeApiCall(prompt);
+    console.log(code)
 });
