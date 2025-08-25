@@ -1,4 +1,4 @@
-import { getBlobs } from '@netlify/blobs';
+import { neon } from '@netlify/neon';
 
 export const handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
@@ -7,12 +7,11 @@ export const handler = async (event) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'GET,OPTIONS',
+        'Access-Control-Allow-Methods': 'POST,GET,OPTIONS',
       },
-      body: ""
+      body: "",
     };
   }
-  
   if (event.httpMethod !== 'GET') {
     return {
       statusCode: 405,
@@ -20,10 +19,9 @@ export const handler = async (event) => {
       body: JSON.stringify({ message: 'Method Not Allowed' }),
     };
   }
-  
+
   try {
     const { jobId } = event.queryStringParameters;
-    
     if (!jobId) {
       return {
         statusCode: 400,
@@ -31,28 +29,35 @@ export const handler = async (event) => {
         body: JSON.stringify({ message: 'jobId is required' }),
       };
     }
-    const blobs = getBlobs({ name: 'jobs' });
     
-    const jobData = await blobs.get(jobId, { type: 'json' });
-    
-    if (!jobData) {
+    const sql = neon(process.env.NETLIFY_DB_URL);
+
+    // Query the database for the specific job
+    const jobData = await sql`
+      SELECT report, code, status
+      FROM jobs
+      WHERE job_id = ${jobId};
+    `;
+
+    if (!jobData || jobData.length === 0) {
       return {
         statusCode: 200,
         headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({ isComplete: false, status: 'not_found' }),
       };
     }
-    
-    const isComplete = jobData.report && jobData.code;
-    
+
+    const job = jobData[0];
+    const isComplete = job.report && job.code;
+
     if (isComplete) {
       return {
         statusCode: 200,
         headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({
           isComplete: true,
-          report: jobData.report,
-          code: jobData.code
+          report: job.report,
+          code: job.code
         }),
       };
     } else {
@@ -61,11 +66,12 @@ export const handler = async (event) => {
         headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({
           isComplete: false,
-          status: jobData.status
+          status: job.status
         }),
       };
     }
   } catch (e) {
+    console.error("check_status error:", e);
     return {
       statusCode: 500,
       headers: { 'Access-Control-Allow-Origin': '*' },

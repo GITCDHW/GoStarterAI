@@ -1,23 +1,22 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { getBlobs } from '@netlify/blobs';
+import { neon } from '@netlify/neon';
 
 const api_key = process.env.AGENT_2_KEY;
 const genAi = new GoogleGenerativeAI(api_key);
 const model = genAi.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-export const handler = async (event, context) => {
-  if (event.httpMethod === 'OPTIONS') {
+export const handler = async (event) => {
+    if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 204,
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST,OPTIONS',
+        'Access-Control-Allow-Methods': 'POST,GET,OPTIONS',
       },
-      body: ""
+      body: "",
     };
   }
-  
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -25,23 +24,23 @@ export const handler = async (event, context) => {
       body: JSON.stringify({ message: 'Method Not Allowed' }),
     };
   }
-  
+
   try {
     const { userPrompt, jobId } = JSON.parse(event.body);
-    const blobs = getBlobs({ name: 'jobs' });
-    const currentJob = await blobs.get(jobId, { type: 'json' });
-    
-    const prompt = `Generate a complete HTML landing page for: ${userPrompt}. Only plain SINGLE FILED HTML & JAVASCRIPT DESIGN ONLY USING MATERIAL UI, DON'T WRITE ANY CUSTOM CSS,TRY TO MAINTAIN CONSISTENCY IN COLOR,FONT AMD SECURITY no explanations, no delimiters.`;
+    const sql = neon(process.env.NETLIFY_DB_URL);
+
+    const prompt = `Generate a complete HTML landing page...`; // Your original prompt
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const code = response.text();
     
-    await blobs.setJSON(jobId, {
-      ...currentJob,
-      code: code,
-      status: 'code_complete'
-    });
+    // Update the database row with the generated code
+    await sql`
+      UPDATE jobs
+      SET code = ${code}, status = 'code_complete'
+      WHERE job_id = ${jobId};
+    `;
     
     return {
       statusCode: 200,
@@ -49,6 +48,7 @@ export const handler = async (event, context) => {
       body: JSON.stringify({ message: "Code generation completed" }),
     };
   } catch (e) {
+    console.error("agent_2 error:", e);
     return {
       statusCode: 500,
       headers: { 'Access-Control-Allow-Origin': '*' },

@@ -1,23 +1,22 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { getBlobs } from '@netlify/blobs';
+import { neon } from '@netlify/neon';
 
 const api_key = process.env.AGENT_1_KEY;
 const genAi = new GoogleGenerativeAI(api_key);
 const model = genAi.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-export const handler = async (event, context) => {
+export const handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 204,
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST,OPTIONS',
+        'Access-Control-Allow-Methods': 'POST,GET,OPTIONS',
       },
-      body: ""
+      body: "",
     };
   }
-  
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -25,24 +24,23 @@ export const handler = async (event, context) => {
       body: JSON.stringify({ message: 'Method Not Allowed' }),
     };
   }
-  
+
   try {
     const { userPrompt, jobId } = JSON.parse(event.body);
-    const blobs = getBlobs({ name: 'jobs' });
-    
-    const currentJob = await blobs.get(jobId, { type: 'json' });
+    const sql = neon(process.env.NETLIFY_DB_URL);
 
-    const prompt = `Act as a professional market research analyst. Generate a brief market analysis report, including competitor analysis,and a plan to execute the business, given that the user has got a website,a logo(if its a new Business) from our side: ${userPrompt},If missing, respond with "DATA NOT FOUND".RESPOND Only plain text,NO ADDITIONAL TEXT,CODE DELIMITERS.`;
+    const prompt = `Act as a professional market research analyst...`; // Your original prompt
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const report = response.text();
     
-    await blobs.setJSON(jobId, {
-      ...currentJob,
-      report: report,
-      status: 'report_complete'
-    });
+    // Update the database row with the generated report
+    await sql`
+      UPDATE jobs
+      SET report = ${report}, status = 'report_complete'
+      WHERE job_id = ${jobId};
+    `;
 
     return {
       statusCode: 200,
@@ -50,6 +48,7 @@ export const handler = async (event, context) => {
       body: JSON.stringify({ message: "Report successfully generated" }),
     };
   } catch (e) {
+    console.error("agent_1 error:", e);
     return {
       statusCode: 500,
       headers: { 'Access-Control-Allow-Origin': '*' },
