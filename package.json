@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "type":"module",
   "dependencies": {
-    "@netlify/functions":"^1.6.0",
-    "@netlify/neon": "^0.1.0",
-    "uuid":"^9.0.0",
     "@google/generative-ai":"^0.1.3"
   }
 }
