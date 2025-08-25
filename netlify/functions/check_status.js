@@ -34,7 +34,7 @@ export const handler = async (event) => {
 
     // Query the database for the specific job
     const jobData = await sql`
-      SELECT report, code, status
+      SELECT code, status
       FROM jobs
       WHERE job_id = ${jobId};
     `;
@@ -48,7 +48,7 @@ export const handler = async (event) => {
     }
 
     const job = jobData[0];
-    const isComplete = job.report && job.code;
+    const isComplete = job.code;
 
     if (isComplete) {
       return {
@@ -56,7 +56,6 @@ export const handler = async (event) => {
         headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({
           isComplete: true,
-          report: job.report,
           code: job.code
         }),
       };

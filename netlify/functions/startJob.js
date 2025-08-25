@@ -1,6 +1,6 @@
 import { neon } from '@netlify/neon';
 
-const AGENT_1_URL = 'https://gostarterai.netlify.app/.netlify/functions/agent_1';
+
 const AGENT_2_URL = 'https://gostarterai.netlify.app/.netlify/functions/agent_2';
 
 export const handler = async (event) => {
@@ -56,13 +56,6 @@ export const handler = async (event) => {
     `;
 
     const jobId = result[0].job_id;
-
-    // Asynchronously call Agent 1 and Agent 2
-    fetch(AGENT_1_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userPrompt, jobId }),
-    }).catch(console.error);
 
     fetch(AGENT_2_URL, {
       method: 'POST',
