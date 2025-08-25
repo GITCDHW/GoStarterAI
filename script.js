@@ -10,18 +10,32 @@ closeBtn.onclick = () => {
 };
 
 // API call function
+// API call function
 async function makeApiCall(userPrompt) {
-        const requestOptions = {
+  try {
+    const requestOptions = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(userPrompt)
+      body: JSON.stringify({ prompt: userPrompt }) // Correctly sends the prompt in a JSON object
     };
-    const respone = await fetch("https://go-starter-ai.vercel.app/api/agent")
-    const data = await response.text()
-    return data
+
+    const response = await fetch("https://go-starter-ai.vercel.app/api/agent", requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json(); // Use .json() to parse the JSON response
+    return data.code; // Return the code property from the response
+  } catch (error) {
+    console.error("API call failed:", error);
+    alert("Something went wrong. Check the console for details.");
+    return null;
+  }
 }
+
 
 // Form submit event
 promptForm.addEventListener('submit', (e) => {
