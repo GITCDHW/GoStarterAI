@@ -38,13 +38,13 @@ async function makeApiCall(userPrompt) {
 
 
 // Form submit event
-promptForm.addEventListener('submit', (e) => {
+promptForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const prompt = document.getElementById("prompt").value.trim();
     if (!prompt) {
         alert("Please enter a business idea.");
         return;
     }
-    const code = makeApiCall(prompt);
+    const code = await makeApiCall(prompt);
     console.log(code)
 });
