@@ -28,7 +28,7 @@ async function makeApiCall(userPrompt) {
     }
 
     const data = await response.json(); // Use .json() to parse the JSON response
-    return data.code; // Return the code property from the response
+    return data
   } catch (error) {
     console.error("API call failed:", error);
     alert("Something went wrong. Check the console for details.");
@@ -45,6 +45,11 @@ promptForm.addEventListener('submit', async (e) => {
         alert("Please enter a business idea.");
         return;
     }
-    const code = await makeApiCall(prompt);
-    console.log(code)
+    const data = await makeApiCall(prompt);
+    if (data) {
+        console.log(data.websiteCode)
+        console.log(data.marketReport)
+    }else{
+      console.error("dats not found")
+    }
 });
