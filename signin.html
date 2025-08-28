@@ -46,7 +46,7 @@ if (typeof firebase !== 'undefined' && typeof firebaseui !== 'undefined') {
     const ui = new firebaseui.auth.AuthUI(firebase.auth());
 
     const uiConfig = {
-        signInSuccessUrl: 'index.html', // This redirects to your home page
+        signInSuccessUrl: 'go-starter-ai.vercel.app', // This redirects to your home page
         signInOptions: [
             firebase.auth.GoogleAuthProvider.PROVIDER_ID
         ],
