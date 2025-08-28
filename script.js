@@ -1,9 +1,3 @@
-// Close popup
-closeBtn.onclick = () => {
-    downloadPopup.style.display = "none";
-};
-
-// API call function
 // API call function
 async function makeApiCall(userPrompt) {
   try {
@@ -30,7 +24,9 @@ async function makeApiCall(userPrompt) {
   }
 }
 
-
+auth.onAuthStateChanged(user=>{
+  if (user) {
+    const promptForm=document.getElementById("prompt_form")
 // Form submit event
 promptForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -46,3 +42,7 @@ promptForm.addEventListener('submit', async (e) => {
       console.error("dats not found")
     }
 });
+  } else {
+    window.location.href="signin.html"
+  }
+})
