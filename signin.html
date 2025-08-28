@@ -7,31 +7,27 @@
     <title>GoStarterAI Sign In</title>
     <style>
         body {
-    background-color: #10142C;
-    color: #F4F4F4;
-    font-family: 'Poppins', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    padding: 20px;
-    box-sizing: border-box;
-}
-
-#firebaseui-auth-container {
-    background-color: rgba(16, 20, 44, 0.7);
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-}
-
-/* You can add more specific CSS here to match your theme, 
-   like button and heading colors within the Firebase UI widget. */
-
+            background-color: #10142C;
+            color: #F4F4F4;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        #firebaseui-auth-container {
+            background-color: rgba(16, 20, 44, 0.7);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
     </style>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.8.0/firebase-ui-auth.css" />
 </head>
@@ -39,7 +35,7 @@
 <body>
     <div id="firebaseui-auth-container"></div>
     <div id="loader">Loading...</div>
-
+    
     <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-database-compat.js"></script>
@@ -47,29 +43,65 @@
     <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
     
     <script>
-// Check if Firebase is initialized and if firebaseui is available
-if (typeof firebase !== 'undefined' && typeof firebaseui !== 'undefined') {
-
-    // Initialize the FirebaseUI Widget
-    const ui = new firebaseui.auth.AuthUI(firebase.auth());
-
-    // Configure the sign-in options
-    const uiConfig = {
-        signInSuccessUrl: 'index.html', // Redirect to your index.html after a successful login
-        signInOptions: [
-            firebase.auth.GoogleAuthProvider.PROVIDER_ID
-        ],
-        tosUrl: 'dashboard.html', 
-        privacyPolicyUrl: 'dashboard.html'
-    };
-
-    // Start the authentication flow
-    ui.start('#firebaseui-auth-container', uiConfig);
-
-} else {
-    console.error("Firebase SDK or FirebaseUI library is not loaded.");
-}
-
+        
+        if (typeof firebase !== 'undefined' && typeof firebaseui !== 'undefined') {
+            
+            const ui = new firebaseui.auth.AuthUI(firebase.auth());
+            
+            
+            const uiConfig = {
+                callbacks: {
+                    signInSuccessWithAuthResult: (authResult, redirectUrl) => {
+                        const user = authResult.user;
+                        console.log("User successfully signed in:", user.uid);
+                        
+                        // Create a reference to the user's data in the database
+                        const userRef = db.ref('users/' + user.uid);
+                        
+                        // Check if the user's profile already exists
+                        userRef.once('value')
+                            .then(snapshot => {
+                                if (!snapshot.exists()) {
+                                    // User data does not exist, so create a new profile
+                                    console.log("Creating new user profile...");
+                                    userRef.set({
+                                        uid: user.uid,
+                                        email: user.email,
+                                        displayName: user.displayName,
+                                        createdAt: new Date().toISOString()
+                                    }).then(() => {
+                                        console.log("New user profile created successfully.");
+                                        window.location.href = 'index.html'; // Manual redirect after creation
+                                    });
+                                } else {
+                                    // User data already exists, just redirect
+                                    console.log("User profile already exists. Redirecting...");
+                                    window.location.href = 'index.html';
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error checking user profile:", error);
+                                // Redirect anyway to avoid getting stuck
+                                window.location.href = 'index.html';
+                            });
+                        
+                        // Return false to prevent the default redirect
+                        return false;
+                    }
+                },
+                signInOptions: [
+                    firebase.auth.GoogleAuthProvider.PROVIDER_ID
+                ],
+                
+                tosUrl: 'dashboard.html',
+                privacyPolicyUrl: 'dashboard.html'
+            };
+            
+            ui.start('#firebaseui-auth-container', uiConfig);
+            
+        } else {
+            console.error("Firebase SDK or FirebaseUI library is not loaded.");
+        }
     </script>
 </body>
 
