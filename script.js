@@ -1,9 +1,3 @@
-// DOM elements
-const promptForm = document.getElementById('prompt_form');
-const downloadPopup = document.getElementById('download-popup');
-const downloadBtn = document.getElementById('download-btn');
-const closeBtn = document.getElementById('close-btn');
-
 // Close popup
 closeBtn.onclick = () => {
     downloadPopup.style.display = "none";
@@ -47,8 +41,7 @@ promptForm.addEventListener('submit', async (e) => {
     }
     const data = await makeApiCall(prompt);
     if (data) {
-        console.log(data.websiteCode)
-        console.log(data.marketReport)
+        
     }else{
       console.error("dats not found")
     }
