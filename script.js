@@ -1,3 +1,6 @@
+    const promptForm=document.getElementById("prompt_form")
+
+
 // API call function
 async function makeApiCall(userPrompt) {
   try {
@@ -26,7 +29,29 @@ async function makeApiCall(userPrompt) {
 
 auth.onAuthStateChanged(user=>{
   if (user) {
-    const promptForm=document.getElementById("prompt_form")
+        console.log("User is signed in:", user.uid);
+        const userRef = db.ref('users/' + user.uid);
+        userRef.once('value')
+            .then(snapshot => {
+                if (!snapshot.exists()) {
+                    // This is a brand new user. Create their profile.
+                    userRef.set({
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: user.displayName,
+                        createdAt: new Date().toISOString()
+                    }).then(() => {
+                        console.log("New user profile created successfully.");
+                    });
+        // Now you can display the prompt form and other content
+        document.getElementById('promptForm').style.display = 'block';
+
+    } else {
+        // User is not signed in. Redirect them to the sign-in page.
+        console.log("User is not signed in. Redirecting...");
+        window.location.href = 'signin.html';
+    }
+});
 // Form submit event
 promptForm.addEventListener('submit', async (e) => {
     e.preventDefault();
