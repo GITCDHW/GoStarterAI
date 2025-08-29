@@ -48,21 +48,6 @@
               });
             }
           });
-        document.getElementById('promptForm').style.display = 'block';
-        promptForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const prompt = document.getElementById("prompt").value.trim();
-          if (!prompt) {
-            alert("Please enter a business idea.");
-            return;
-          }
-          const data = await makeApiCall(prompt);
-          if (data) {
-            console.log(data.data)
-          } else {
-            console.error("data not found")
-          }
-        })
       } else {
         // User is not signed in. Redirect them to the sign-in page.
         document.querySelector(".main-container").style.display = "none"
@@ -81,3 +66,18 @@
         ui.start('#firebase-ui', uiConfig);
       }
     })
+            document.getElementById('promptForm').style.display = 'block';
+        promptForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const prompt = document.getElementById("prompt").value.trim();
+          if (!prompt) {
+            alert("Please enter a business idea.");
+            return;
+          }
+          const data = await makeApiCall(prompt);
+          if (data) {
+            console.log(data.data)
+          } else {
+            console.error("data not found")
+          }
+        })
