@@ -40,7 +40,7 @@ auth.onAuthStateChanged(user => {
       }
       const data = await makeApiCall(prompt);
       if (data) {
-        console.log(data.data)
+        console.log(data.websiteCode)
       } else {
         console.error("data not found")
       }
