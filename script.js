@@ -48,8 +48,19 @@ auth.onAuthStateChanged(user=>{
 
     } else {
         // User is not signed in. Redirect them to the sign-in page.
-        console.log("User is not signed in. Redirecting...");
-        window.location.href = 'signin.html';
+        document.querySelector(".main-container").style.display="none"
+          const ui = new firebaseui.auth.AuthUI(firebase.auth());
+
+    const uiConfig = {
+        signInSuccessUrl: 'go-starter-ai.vercel.app/',
+        signInOptions: [
+            firebase.auth.GoogleAuthProvider.PROVIDER_ID
+        ],
+        tosUrl: 'dashboard.html',
+        privacyPolicyUrl: 'dashboard.html'
+    };
+    
+    ui.start('#firebase-ui', uiConfig);
     }
 });
 // Form submit event
