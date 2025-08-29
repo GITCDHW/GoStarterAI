@@ -13,16 +13,11 @@ async function generateAllContent(prompt) {
     You are a professional business asset generator. Your goal is to provide a complete set of assets for a user's business idea. The entire response must be a single, valid JSON object. Do not include any other text or delimiters outside of the JSON.
 
     For the given user request: ${prompt}, generate the following:
-
-    1.  **A modern and clean landing page in HTML/CSS:** Assume a professional frontend developer is creating this. The code should be well-formatted, efficient, and ready to be used. Use Material UI framework, but do not include any custom CSS or other frameworks.
-    2.  **A compelling business name:** Provide a concise, professional, and memorable name for the business.
-    3.  **A comprehensive market report:** Assume you are a business analyst. Provide a brief market analysis and a SWOT analysis for the business idea, in about 500-600 words. The tone should be professional and easy to read.
+    1.a compelling and professional business name
 
     The final output must be a single JSON object with the following keys:
     {
-        "BusinessName": "[The generated business name]",
-        "WebsiteCode": "[The generated HTML code]",
-        "MarketReport": "[The generated market report text]"
+        "BusinessName": "[The generated business name]"
     }
     
     Make educated guesses and reasonable assumptions if the user's information is not detailed enough.
