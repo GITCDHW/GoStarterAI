@@ -30,6 +30,21 @@
     auth.onAuthStateChanged(user => {
       if (user) {
         console.log("User is signed in:", user.uid);
+        document.getElementById('promptForm').style.display = 'block';
+            promptForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const prompt = document.getElementById("prompt").value.trim();
+      if (!prompt) {
+        alert("Please enter a business idea.");
+        return;
+      }
+      const data = await makeApiCall(prompt);
+      if (data) {
+        console.log(data.data)
+      } else {
+        console.error("data not found")
+      }
+    })
         const userRef = db.ref('users/' + user.uid);
         
         const userBusinessesRef = db.ref(`users/${user.uid}/businesses`)
@@ -66,18 +81,3 @@
         ui.start('#firebase-ui', uiConfig);
       }
     })
-            document.getElementById('promptForm').style.display = 'block';
-        promptForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const prompt = document.getElementById("prompt").value.trim();
-          if (!prompt) {
-            alert("Please enter a business idea.");
-            return;
-          }
-          const data = await makeApiCall(prompt);
-          if (data) {
-            console.log(data.data)
-          } else {
-            console.error("data not found")
-          }
-        })
