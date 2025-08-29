@@ -28,7 +28,7 @@ auth.onAuthStateChanged(user => {
   const promptForm = document.getElementById("prompt_form")
   if (user) {
     console.log("User is signed in:", user.uid);
-    document.getElementById('promptForm').style.display = 'block';
+    document.getElementById('prompt_form').style.display = 'block';
     
     promptForm.addEventListener('submit', async (e) => {
       e.preventDefault();
