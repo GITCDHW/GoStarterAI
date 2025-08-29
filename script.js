@@ -46,25 +46,23 @@
               }).then(() => {
                 console.log("New user profile created successfully.");
               });
-              // Now we can display the prompt form and other content
-              document.getElementById('promptForm').style.display = 'block';
-              // Form submit event
-              promptForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const prompt = document.getElementById("prompt").value.trim();
-                if (!prompt) {
-                  alert("Please enter a business idea.");
-                  return;
-                }
-                const data = await makeApiCall(prompt);
-                if (data) {
-                  console.log(data.data)
-                } else {
-                  console.error("data not found")
-                }
-              })
             }
           });
+        document.getElementById('promptForm').style.display = 'block';
+        promptForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const prompt = document.getElementById("prompt").value.trim();
+          if (!prompt) {
+            alert("Please enter a business idea.");
+            return;
+          }
+          const data = await makeApiCall(prompt);
+          if (data) {
+            console.log(data.data)
+          } else {
+            console.error("data not found")
+          }
+        })
       } else {
         // User is not signed in. Redirect them to the sign-in page.
         document.querySelector(".main-container").style.display = "none"
@@ -72,7 +70,7 @@
         
         const uiConfig = {
           signInSuccessUrl: window.location.href,
-          signInFlow:"popup",
+          signInFlow: "popup",
           signInOptions: [
             firebase.auth.GoogleAuthProvider.PROVIDER_ID
           ],
