@@ -68,7 +68,8 @@
         const ui = new firebaseui.auth.AuthUI(firebase.auth());
         
         const uiConfig = {
-          signInSuccessUrl: 'go-starter-ai.vercel.app/',
+          signInSuccessUrl: window.location.href,
+          signInFlow:"popup",
           signInOptions: [
             firebase.auth.GoogleAuthProvider.PROVIDER_ID
           ],
