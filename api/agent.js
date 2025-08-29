@@ -2,29 +2,48 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Initialize the Google Generative AI with our API key from Vercel's environment variables
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY);
-//code generation 
-async function generateCode(prompt) {
-      // Select the model
-    const masterPrompt = `you are a professional frontend developer,your goal is to provide a clean,modern efficient and well formatted html code for a landing page,for the given users request: ${prompt},make educated guesses,if user doesnt provides enough information,and strictly use material UI framework,dont write any custom css dont add any other text or code delimiters,just plain text,MAKE SURE THE ENTIRE CODE WORKS`
-    
+
+// Define a function to generate all content with one call
+async function generateAllContent(prompt) {
+    // Select the model
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const result = await model.generateContent(masterPrompt);
-    const response = await result.response;
-    const text = response.text();
-    return text
-}
-//market report generation
-async function generateMarketReport(prompt) {
-      // Select the model
-    const masterPrompt = `you are a professional business analyst in the GoStarterAI Team,which takes user input to generate business assets for them,assume our developers has provided the user a cool website for their business idea,your task is to check if the business is valid,if not try to assume the closest possible business idea and then generate a brief market analysis containing: a market report and swot analysis in about 500-600 words strictly,provided the user idea: ${prompt},make the text Professional,easy to read and accurate,DONT INCLUDE ANY OTHER TEXT,OR CODE DELIMITERS`
+
+    // The comprehensive, restrictive prompt
+    const masterPrompt = `
+    You are a professional business asset generator. Your goal is to provide a complete set of assets for a user's business idea. The entire response must be a single, valid JSON object. Do not include any other text or delimiters outside of the JSON.
+
+    For the given user request: ${prompt}, generate the following:
+
+    1.  **A modern and clean landing page in HTML/CSS:** Assume a professional frontend developer is creating this. The code should be well-formatted, efficient, and ready to be used. Use Material UI framework, but do not include any custom CSS or other frameworks.
+    2.  **A compelling business name:** Provide a concise, professional, and memorable name for the business.
+    3.  **A comprehensive market report:** Assume you are a business analyst. Provide a brief market analysis and a SWOT analysis for the business idea, in about 500-600 words. The tone should be professional and easy to read.
+
+    The final output must be a single JSON object with the following keys:
+    {
+        "BusinessName": "[The generated business name]",
+        "WebsiteCode": "[The generated HTML code]",
+        "MarketReport": "[The generated market report text]"
+    }
     
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const result = await model.generateContent(masterPrompt);
-    const response = await result.response;
-    const text = response.text();
-    return text
+    Make educated guesses and reasonable assumptions if the user's information is not detailed enough.
+    `;
+
+    try {
+        const result = await model.generateContent(masterPrompt);
+        const responseText = await result.response.text();
+
+        // Parse the JSON response
+        const data = JSON.parse(responseText.trim());
+        
+        return data;
+
+    } catch (error) {
+        console.error("Error generating content:", error);
+        throw new Error('Failed to generate content from Gemini API.');
+    }
 }
-// Define a function handler
+
+// Define the API handler
 export default async function handler(req, res) {
   // Only allow POST requests
   if (req.method !== 'POST') {
@@ -39,21 +58,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Send the response back to the client
-    // Await all promises in parallel
-let [websiteCode, marketReport] = await Promise.all([
-  generateCode(prompt),
-  generateMarketReport(prompt)
-]);
-websiteCode = websiteCode.replace('```html\n', '').replace('\n```', '');
-
-// Send the response back to the client as a single JSON object
-res.status(200).json({ 
-  websiteCode: websiteCode, 
-  marketReport: marketReport 
-});
+    const combinedData = await generateAllContent(prompt);
+    // Send the response back to the client as a single JSON object
+    res.status(200).json({data:combinedData});
   } catch (error) {
-    console.error('Error with Gemini API:', error);
-    res.status(500).json({ message: 'Failed to generate content' });
+    console.error('Error in API handler:', error);
+    res.status(500).json({ message: 'Failed to process request' });
   }
 }

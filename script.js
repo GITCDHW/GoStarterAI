@@ -31,6 +31,9 @@
       if (user) {
         console.log("User is signed in:", user.uid);
         const userRef = db.ref('users/' + user.uid);
+        
+        const userBusinessesRef = db.ref(`users/${user.uid}/businesses`)
+        
         userRef.once('value')
           .then(snapshot => {
             if (!snapshot.exists()) {
@@ -43,7 +46,7 @@
               }).then(() => {
                 console.log("New user profile created successfully.");
               });
-              // Now you can display the prompt form and other content
+              // Now we can display the prompt form and other content
               document.getElementById('promptForm').style.display = 'block';
               // Form submit event
               promptForm.addEventListener('submit', async (e) => {
@@ -55,9 +58,9 @@
                 }
                 const data = await makeApiCall(prompt);
                 if (data) {
-                  
+                  console.log(data.data)
                 } else {
-                  console.error("dats not found")
+                  console.error("data not found")
                 }
               })
             }
