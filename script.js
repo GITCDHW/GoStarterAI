@@ -45,7 +45,6 @@ async function makeNameApiCall(userPrompt) {
         return null;
     }
 }
-
 auth.onAuthStateChanged(user => {
   if (user) {
     console.log("User is signed in:", user.uid);
@@ -64,16 +63,20 @@ auth.onAuthStateChanged(user => {
         return;
       }
 
-      // Conditionally create a promise for the business name
-      const namePromise = userProvidedName ?
-        Promise.resolve({ name: userProvidedName }) : // Use a resolved promise if a name is provided
-        makeNameApiCall(prompt); // Call the name API if not
-      const mainApiPromise = makeApiCall(prompt);
-      
-      try {
-        const [nameData, mainApiData] = await Promise.all([namePromise, mainApiPromise]);
+      let nameData;
+
+      // First, get the business name. This call runs first.
+      if (userProvidedName) {
+        nameData = { name: userProvidedName };
+      } else {
+        nameData = await makeNameApiCall(prompt);
+      }
         
-        if (nameData && mainApiData) {
+      // If the name call succeeded, proceed to the main API call.
+      if (nameData) {
+        const mainApiData = await makeApiCall(prompt);
+        
+        if (mainApiData) {
           const finalData = {
             BusinessName: nameData.name,
             WebsiteCode: mainApiData.websiteCode,
@@ -81,12 +84,12 @@ auth.onAuthStateChanged(user => {
           };
           
           console.log("Final Combined Data:", finalData);
+  
         } else {
-          console.error("One or more API calls failed or returned null data.");
+          console.error("Main API call failed or returned null data.");
         }
-      } catch (error) {
-        console.error("Failed to generate content:", error);
-        alert("An error occurred. Please check the console.");
+      } else {
+        console.error("Name API call failed or returned null data.");
       }
     });
 
@@ -96,7 +99,6 @@ auth.onAuthStateChanged(user => {
     userRef.once('value')
       .then(snapshot => {
         if (!snapshot.exists()) {
-          // This is a brand new user. Create their profile.
           userRef.set({
             uid: user.uid,
             email: user.email,
