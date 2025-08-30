@@ -86,7 +86,7 @@ promptForm.style.display="block"
           const newBusinessRef = userBusinessesRef.push(finalData);
           const newBusinessKey=newBusinessRef.key;
           
-          promptForm.style.display="none";
+          document.getElementById("prompt_container").style.display="none";
           document.getElementById("success-message").style.display="block"
         } else {
           console.error("Main API call failed or returned null data.");
