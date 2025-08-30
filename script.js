@@ -81,9 +81,7 @@ auth.onAuthStateChanged(user => {
             BusinessName: nameData.name,
             WebsiteCode: mainApiData.websiteCode,
             MarketReport: mainApiData.marketReport
-          }else{
-            console.log("err...hurr")
-          };
+          }
           
           console.log("Final Combined Data:", finalData);
   
