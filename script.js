@@ -34,7 +34,7 @@ async function makeNameApiCall(userPrompt) {
             },
             body: JSON.stringify({ prompt: userPrompt })
         };
-        const response = await fetch("https://go-starter-ai.vercel.app/api/name", requestOptions);
+        const response = await fetch("https://go-starter-ai.vercel.app/api/nameGen", requestOptions);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
