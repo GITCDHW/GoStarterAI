@@ -78,13 +78,13 @@ auth.onAuthStateChanged(user => {
         
         if (mainApiData) {
           const finalData = {
-            BusinessName: nameData.name,
-            WebsiteCode: mainApiData.websiteCode,
-            MarketReport: mainApiData.marketReport
+            businessName: nameData.name,
+            websiteCode: mainApiData.websiteCode,
+            marketReport: mainApiData.marketReport
           }
+          const newBusinessRef = userBusinessesRef.push(finalData);
+          const newBusinessKey=newBusinessRef.key;
           
-          console.log("Final Combined Data:", finalData);
-  
         } else {
           console.error("Main API call failed or returned null data.");
         }
