@@ -6,7 +6,7 @@ async function makeApiCall(userPrompt) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ prompt: userPrompt }) // Correctly sends the prompt in a JSON object
+      body: JSON.stringify({ prompt: userPrompt })
     };
     
     const response = await fetch("https://go-starter-ai.vercel.app/api/agent", requestOptions);
@@ -15,8 +15,8 @@ async function makeApiCall(userPrompt) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const data = await response.json(); // Use .json() to parse the JSON response
-    return data
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error("API call failed:", error);
     alert("Something went wrong. Check the console for details.");
@@ -24,29 +24,73 @@ async function makeApiCall(userPrompt) {
   }
 }
 
+// New API call function for name generation
+async function makeNameApiCall(userPrompt) {
+    try {
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ prompt: userPrompt })
+        };
+        const response = await fetch("https://go-starter-ai.vercel.app/api/name", requestOptions);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Name API call failed:", error);
+        return null;
+    }
+}
+
 auth.onAuthStateChanged(user => {
-  const promptForm = document.getElementById("prompt_form")
   if (user) {
     console.log("User is signed in:", user.uid);
     document.getElementById('prompt_form').style.display = 'block';
     
+    const promptForm = document.getElementById("prompt_form");
+
     promptForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
       const prompt = document.getElementById("prompt").value.trim();
+      const userProvidedName = document.getElementById("name").value.trim();
+      
       if (!prompt) {
         alert("Please enter a business idea.");
         return;
       }
-      const data = await makeApiCall(prompt);
-      if (data) {
-        console.log(data.websiteCode)
-      } else {
-        console.error("data not found")
+
+      // Conditionally create a promise for the business name
+      const namePromise = userProvidedName ?
+        Promise.resolve({ name: userProvidedName }) : // Use a resolved promise if a name is provided
+        makeNameApiCall(prompt); // Call the name API if not
+      const mainApiPromise = makeApiCall(prompt);
+      
+      try {
+        const [nameData, mainApiData] = await Promise.all([namePromise, mainApiPromise]);
+        
+        if (nameData && mainApiData) {
+          const finalData = {
+            BusinessName: nameData.name,
+            WebsiteCode: mainApiData.websiteCode,
+            MarketReport: mainApiData.marketReport
+          };
+          
+          console.log("Final Combined Data:", finalData);
+        } else {
+          console.error("One or more API calls failed or returned null data.");
+        }
+      } catch (error) {
+        console.error("Failed to generate content:", error);
+        alert("An error occurred. Please check the console.");
       }
-    })
+    });
+
     const userRef = db.ref('users/' + user.uid);
-    
     const userBusinessesRef = db.ref(`users/${user.uid}/businesses`)
     
     userRef.once('value')
@@ -64,7 +108,7 @@ auth.onAuthStateChanged(user => {
         }
       });
   } else {
-    // User is not signed in. Redirect them to the sign-in page.
+    // User is not signed in.
     document.querySelector(".main-container").style.display = "none"
     const ui = new firebaseui.auth.AuthUI(firebase.auth());
     
@@ -80,4 +124,4 @@ auth.onAuthStateChanged(user => {
     
     ui.start('#firebase-ui', uiConfig);
   }
-})
+});
