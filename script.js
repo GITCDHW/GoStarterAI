@@ -79,7 +79,9 @@ promptForm.style.display="block"
           const finalData = {
             businessName: nameData.name,
             websiteCode: mainApiData.websiteCode,
-            marketReport: mainApiData.marketReport
+            marketReport: mainApiData.marketReport,
+            isPaid:false,
+            isHosted:false
           }
           const newBusinessRef = userBusinessesRef.push(finalData);
           const newBusinessKey=newBusinessRef.key;
