@@ -48,10 +48,9 @@ async function makeNameApiCall(userPrompt) {
 auth.onAuthStateChanged(user => {
   if (user) {
     console.log("User is signed in:", user.uid);
-    document.getElementById('prompt_form').style.display = 'block';
     
     const promptForm = document.getElementById("prompt_form");
-
+promptForm.style.display="block"
     promptForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -85,6 +84,8 @@ auth.onAuthStateChanged(user => {
           const newBusinessRef = userBusinessesRef.push(finalData);
           const newBusinessKey=newBusinessRef.key;
           
+          promptForm.style.display="none";
+          document.getElementById("success-message").style.display="block"
         } else {
           console.error("Main API call failed or returned null data.");
         }
