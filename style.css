@@ -1,3 +1,4 @@
+/* Body and General Layout */
 body {
     background-color: #10142C; /* Updated to our dark blue background */
     color: #F4F4F4; /* Set a default light text color for the body */
@@ -39,6 +40,7 @@ h2 {
     letter-spacing: 2px;
 }
 
+/* Form Groups and Labels */
 .form-group {
     margin-bottom: 20px;
 }
@@ -50,24 +52,29 @@ label {
     font-weight: 500;
 }
 
-textarea {
+/* Input and Textarea Styling */
+textarea,
+input[type="text"] { /* New rule to target the name input */
     width: 100%;
     padding: 12px;
     border: 1px solid #3d4661; /* Dark border color */
     border-radius: 5px;
     box-sizing: border-box;
     font-size: 16px;
-    color: #F4F4F4; /* Text color inside the textarea */
+    color: #F4F4F4; /* Text color inside the input */
     background-color: #1a2034; /* Darker background for the input */
     resize: vertical; /* Allows resizing only vertically */
 }
 
-textarea:focus {
+/* Focus state for a cleaner look on both inputs */
+textarea:focus,
+input[type="text"]:focus {
     outline: none;
     border-color: #00BFFF; /* Electric Blue focus border */
     box-shadow: 0 0 8px rgba(0, 191, 255, 0.8); /* Brighter blue glow on focus */
 }
 
+/* Button Styling */
 button {
     width: 100%;
     padding: 15px;
