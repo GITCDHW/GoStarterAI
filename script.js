@@ -53,17 +53,23 @@ auth.onAuthStateChanged(user => {
     console.log("User is signed in:", user.uid);
     
     const promptForm = document.getElementById("prompt_form");
-promptForm.style.display="block"
+    const promptContainer = document.getElementById("prompt_container");
+    
+    promptForm.style.display="block";
+    
     promptForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      document.getElementById("loading-overlay").style.display="flex"
-      promptForm.style.display="none"
+      // GoStarterAI: Show the loader here, but don't hide the form just yet
+      document.getElementById("loading-overlay").style.display="flex";
+      
       const prompt = document.getElementById("prompt").value.trim();
       const userProvidedName = document.getElementById("name").value.trim();
       
       if (!prompt) {
         alert("Please enter a business idea.");
+        // GoStarterAI: Hide the loader if the user hasn't entered a prompt
+        document.getElementById("loading-overlay").style.display="none";
         return;
       }
 
@@ -91,22 +97,27 @@ promptForm.style.display="block"
           const newBusinessRef = userBusinessesRef.push(finalData);
           const newBusinessKey=newBusinessRef.key;
           
-          document.getElementById("prompt_container").style.display="none";
-          document.getElementById("loading-overlay").style.display="none"
-          document.getElementById("success-message").style.display="block"
+          // GoStarterAI: Hide the form and loader, then show success message on success
+          promptContainer.style.display="none";
+          document.getElementById("loading-overlay").style.display="none";
+          document.getElementById("success-message").style.display="block";
           document.getElementById("view-business-button").onclick=()=>{
-            window.location.href=`dashboard.html?id=${newBusinessKey}`
-          }
+            window.location.href=`dashboard.html?id=${newBusinessKey}`;
+          };
         } else {
+          // GoStarterAI: Only hide the loader on main API failure
+          document.getElementById("loading-overlay").style.display="none";
           console.error("Main API call failed or returned null data.");
         }
       } else {
+        // GoStarterAI: Only hide the loader on name API failure
+        document.getElementById("loading-overlay").style.display="none";
         console.error("Name API call failed or returned null data.");
       }
     });
 
     const userRef = db.ref('users/' + user.uid);
-    const userBusinessesRef = db.ref(`users/${user.uid}/businesses`)
+    const userBusinessesRef = db.ref(`users/${user.uid}/businesses`);
     
     userRef.once('value')
       .then(snapshot => {
@@ -123,7 +134,7 @@ promptForm.style.display="block"
       });
   } else {
     // User is not signed in.
-    document.querySelector(".main-container").style.display = "none"
+    document.querySelector(".main-container").style.display = "none";
     const ui = new firebaseui.auth.AuthUI(firebase.auth());
     
     const uiConfig = {
