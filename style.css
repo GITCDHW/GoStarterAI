@@ -113,7 +113,7 @@ button:hover {
 }
 
 #loading-overlay iframe {
-  max-width: 600px; /* Limits the width of the loader on desktops */
+  max-width: 90vw; /* Limits the width of the loader on desktops */
   max-height: 90vh; /* Limits the height to 80% of the viewport height */
   aspect-ratio: 9 / 16; /* Maintains a perfect portrait ratio */
   border-radius: 20px;
