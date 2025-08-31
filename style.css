@@ -1,117 +1,128 @@
-/* Body and General Layout */
 body {
-    background-color: #10142C; /* Updated to our dark blue background */
-    color: #F4F4F4; /* Set a default light text color for the body */
-    font-family: 'Poppins', sans-serif; /* Poppins for all main text */
-    padding:20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: transparent; /* Changed to transparent to fit your main page */
 }
 
-.main-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-}
-
-.form-container {
-    background-color: rgba(16, 20, 44, 0.7); /* Translucent version of our dark blue */
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 191, 255, 0.3); /* A subtle blue glow effect */
-    width: 100%;
-    max-width: 600px;
-    box-sizing: border-box;
-}
-
-h2 {
-    color: #00BFFF; /* Electric Blue accent for the heading */
-    text-align: center;
-    margin-bottom: 20px;
-    font-family: 'Orbitron', sans-serif; /* Orbitron for the main heading */
-    font-weight: 700; /* Bold heading font */
-    text-transform: uppercase; /* Makes it more futuristic */
-    letter-spacing: 2px;
-}
-
-/* Form Groups and Labels */
-.form-group {
-    margin-bottom: 20px;
-}
-
-label {
-    display: block;
-    margin-bottom: 8px;
-    color: #F4F4F4; /* Off-white for the label text */
-    font-weight: 500;
-}
-
-/* Input and Textarea Styling */
-textarea,
-input[type="text"] { /* New rule to target the name input */
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #3d4661; /* Dark border color */
-    border-radius: 5px;
-    box-sizing: border-box;
-    font-size: 16px;
-    color: #F4F4F4; /* Text color inside the input */
-    background-color: #1a2034; /* Darker background for the input */
-    resize: vertical; /* Allows resizing only vertically */
-}
-
-/* Focus state for a cleaner look on both inputs */
-textarea:focus,
-input[type="text"]:focus {
-    outline: none;
-    border-color: #00BFFF; /* Electric Blue focus border */
-    box-shadow: 0 0 8px rgba(0, 191, 255, 0.8); /* Brighter blue glow on focus */
-}
-
-/* Button Styling */
-button {
-    width: 100%;
-    padding: 15px;
-    background-color: #00BFFF; 
-    color: #10142C; /* The button text should be a dark color for contrast */
-    border: none;
-    border-radius: 5px;
-    font-size: 18px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-button:hover {
-    background-color: #00A3DD;
-    box-shadow: 0 0 15px rgba(0, 191, 255, 0.6);
-}
-
-/* GoStarterAI: Loader Styles */
-#loading-overlay {
-  /* This rule is crucial to make the loader full screen */
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color:#10142C;
-  z-index: 1000;
+/* This is the new wrapper for all content. It will use Flexbox. */
+#game-content {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  padding: 10px; /* Add some padding to prevent it from touching the iframe edges */
+  box-sizing: border-box;
 }
 
-#loading-overlay iframe {
-  max-width: 90vw; /* Limits the width of the loader on desktops */
-  max-height: 90vh; /* Limits the height to 80% of the viewport height */
-  aspect-ratio: 9 / 16; /* Maintains a perfect portrait ratio */
-  border-radius: 20px;
+#loader-text-container {
+    text-align: center;
+    color: #00BFFF;
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 3px;
+    width: 100%; /* Ensures the text container is responsive */
+}
+
+#loader-text-container h2 {
+    font-size: 5vw;
+    margin: 0;
+}
+
+#loader-text-container h3 {
+    font-size: 3vw;
+    margin: 0;
+}
+
+#game-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #1a2034;
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 100%; /* Ensures the game container fits its parent */
+}
+
+.game-canvas {
+  /* No more fixed size. This will scale to its container. */
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1; /* Keeps the canvas a perfect square */
+}
+
+.keys {
+  font-family: 'Lato', sans-serif;
+  text-align: center;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  margin: auto;
+}
+
+.up {
+  position: relative;
+  top: 0px;
+}
+
+.chevron::before {
+  border-style: solid;
+  border-width: 8px 8px 0 0;
+  content: '';
+  display: inline-block;
+  height: 20px;
+  width: 20px;
+  top: -10px;
+  position: relative;
+  transform: rotate(-45deg);
+  border-color: #00BFFF;
+}
+
+.chevron.down::before {
+  transform: rotate(135deg);
+  top: -15px;
+  border-color: #00BFFF;
+}
+
+.chevron.right::before {
+  transform: rotate(45deg);
+  top: -18px;
+  left: -5px;
+  border-color: #00BFFF;
+}
+
+.chevron.left::before {
+  transform: rotate(225deg);
+  top: -18px;
+  left: 5px;
+  border-color: #00BFFF;
+}
+
+.arr {
+  cursor: pointer;
+  width: 20vw; /* Using viewport units for responsive button size */
+  max-width: 70px;
+  height: 20vw;
+  max-height: 70px;
+  text-align: center;
+  line-height: 20vw;
+  max-line-height: 70px;
+  background: #3d4661;
+  color: white;
+  font-size: 10vw; /* Responsive font size for the arrows */
+  border-right: 10px solid #242424;
+  border-bottom: 10px solid #242424;
+  border-left: 10px solid #5a6485;
+  border-top: 10px solid #6c7694;
+  display: inline-block;
+  margin: 5px;
+  transition: all .05s linear;
+  user-select: none;
+  position: relative;
+}
+
+.arr:active {
+  background: #1a2034;
 }
