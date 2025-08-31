@@ -88,6 +88,9 @@ promptForm.style.display="block"
           
           document.getElementById("prompt_container").style.display="none";
           document.getElementById("success-message").style.display="block"
+          document.getElementById("view-business-button").onclick=()=>{
+            window.location.href=`dashboard.html?id=${newBusinessKey}`
+          }
         } else {
           console.error("Main API call failed or returned null data.");
         }
