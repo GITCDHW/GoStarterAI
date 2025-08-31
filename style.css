@@ -95,6 +95,7 @@ button:hover {
 
 /* GoStarterAI: Loader Styles */
 #loading-overlay {
+    display:none;
   position: fixed;
   top: 200px;
   width: 100%;
