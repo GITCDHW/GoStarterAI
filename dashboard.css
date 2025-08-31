@@ -51,7 +51,7 @@ p {
     text-align: center;
     width: 90%;
     max-width: 900px;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 .website-preview p {
@@ -63,7 +63,7 @@ p {
 
 .iframe-container {
     width: 100%;
-    height: 80vh;
+    height: 90%;
     margin: 0 auto;
     border: 3px solid #00BFFF;
     border-radius: 10px;
