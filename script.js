@@ -6,7 +6,10 @@ async function makeApiCall(userPrompt, businessName) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ prompt: `my idea is ${userPrompt} with name ${businessName}` })
+      body: JSON.stringify({
+        prompt: userPrompt,
+        businessName:businessName
+      })
     };
     
     const response = await fetch("https://go-starter-ai.vercel.app/api/agent", requestOptions);

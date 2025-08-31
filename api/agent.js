@@ -3,9 +3,9 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // Initialize the Google Generative AI with our API key from Vercel's environment variables
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY);
 //code generation 
-async function generateCode(prompt) {
+async function generateCode(prompt,name) {
       // Select the model
-    const masterPrompt = `you are a professional frontend developer,your goal is to provide a clean,modern efficient and well formatted html code for a landing page,for the given users request: ${prompt},make educated guesses,if user doesnt provides enough information,and strictly use material UI framework,dont write any custom css dont add any other text or code delimiters,just plain text,MAKE SURE THE ENTIRE CODE WORKS`
+    const masterPrompt = `you are a professional frontend developer,your goal is to provide a clean,modern efficient and well formatted html code for a responsive landing page,for the given users request: ${prompt},with the business name:${name},make educated guesses,if user doesnt provides enough information,and strictly use material UI framework,dont write any custom css dont add any other text or code delimiters,just plain text,MAKE SURE THE ENTIRE CODE WORKS`
     
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const result = await model.generateContent(masterPrompt);
@@ -32,8 +32,8 @@ export default async function handler(req, res) {
   }
 
   // Get the prompt from the request body
-  const { prompt } = req.body;
-
+  const { prompt } = req.body.prompt;
+  const { name } = req.body.businessName;
   if (!prompt) {
     return res.status(400).json({ message: 'Prompt is required' });
   }
