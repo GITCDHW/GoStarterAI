@@ -32,8 +32,7 @@ export default async function handler(req, res) {
   }
 
   // Get the prompt from the request body
-  const { prompt } = req.body.prompt;
-  const { name } = req.body.businessName;
+  const { prompt,businessName} = req.body;
   if (!prompt) {
     return res.status(400).json({ message: 'Prompt is required' });
   }
@@ -42,7 +41,7 @@ export default async function handler(req, res) {
     // Send the response back to the client
     // Await all promises in parallel
 let [websiteCode, marketReport] = await Promise.all([
-  generateCode(prompt),
+  generateCode(prompt,businessName),
   generateMarketReport(prompt)
 ]);
 websiteCode = websiteCode.replace('```html\n', '').replace('\n```', '');
