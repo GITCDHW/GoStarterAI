@@ -1,6 +1,3 @@
-document.addEventListener("DOMContentLoaded",()=>{
-  document.getElementById("loading-overlay").style.display="none"
-})
 
 // API call function
 async function makeApiCall(userPrompt, businessName) {
