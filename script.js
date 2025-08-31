@@ -1,4 +1,6 @@
-
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("loading-overlay")
+})
 // API call function
 async function makeApiCall(userPrompt, businessName) {
   try {
