@@ -12,5 +12,6 @@ auth.onAuthStateChanged(user => {
     })
   }else{
     window.location.href='index.html'
+
   }
 })
