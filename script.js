@@ -56,7 +56,7 @@ auth.onAuthStateChanged(user => {
 promptForm.style.display="block"
     promptForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+      document.getElementById("loading_overlay").style.display="flex"
       const prompt = document.getElementById("prompt").value.trim();
       const userProvidedName = document.getElementById("name").value.trim();
       
@@ -90,6 +90,7 @@ promptForm.style.display="block"
           const newBusinessKey=newBusinessRef.key;
           
           document.getElementById("prompt_container").style.display="none";
+          document.getElementById("loading_overlay").style.display="none"
           document.getElementById("success-message").style.display="block"
           document.getElementById("view-business-button").onclick=()=>{
             window.location.href=`dashboard.html?id=${newBusinessKey}`
