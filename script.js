@@ -56,7 +56,9 @@ auth.onAuthStateChanged(user => {
 promptForm.style.display="block"
     promptForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      
       document.getElementById("loading-overlay").style.display="flex"
+      promptForm.style.display="none"
       const prompt = document.getElementById("prompt").value.trim();
       const userProvidedName = document.getElementById("name").value.trim();
       
