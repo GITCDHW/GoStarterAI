@@ -73,7 +73,7 @@ promptForm.style.display="block"
         
       // If the name call succeeded, proceed to the main API call.
       if (nameData) {
-        const mainApiData = await makeApiCall(prompt);
+        const mainApiData = await makeApiCall(prompt,nameData.name);
         
         if (mainApiData) {
           const finalData = {
