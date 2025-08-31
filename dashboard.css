@@ -1,42 +1,26 @@
 /* General Layout and Background */
-*{
-    margin: 0;
-    padding: 0;
-    overflow-y: auto;
-    box-sizing: border-box;
-}
 body {
     background-color: #10142C;
     color: #F4F4F4;
     font-family: 'Poppins', sans-serif;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    padding: 0;
     margin: 0;
-}
-
-.main-container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
-    width: 100%;
-    height: 100%;
+    align-items: center;
+    min-height: 100vh;
 }
 
-.dashboard-container {
-    background-color: rgba(16, 20, 44, 0.7);
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+.full-screen-dashboard {
+    background-color: #10142C; /* Ensure the background is our main dark blue */
     width: 100%;
-    max-width: 900px; /* Increased max-width for the dashboard */
+    height: 100vh;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: flex-start; /* Aligns content to the top */
+    padding-top: 5vh; /* Adds some space from the top */
 }
 
 /* Headings and Text */
@@ -60,7 +44,8 @@ p {
 /* Website Preview Section */
 .website-preview {
     text-align: center;
-    width: 100%;
+    width: 90%;
+    max-width: 900px;
     margin-top: 20px;
 }
 
@@ -73,8 +58,7 @@ p {
 
 .iframe-container {
     width: 100%;
-    max-width: 800px;
-    height: 250px;
+    height: 500px;
     margin: 0 auto;
     border: 3px solid #00BFFF;
     border-radius: 10px;
@@ -86,14 +70,15 @@ p {
     width: 100%;
     height: 100%;
     border: none;
-    background-color: #1a2034; /* Dark background to match the theme */
+    background-color: #1a2034;
 }
 
 /* Buttons */
 button {
     width: 100%;
+    max-width: 400px;
     padding: 15px;
-    background-color: #00BFFF; 
+    background-color: #00BFFF;
     color: #10142C;
     border: none;
     border-radius: 5px;
@@ -108,20 +93,3 @@ button:hover {
     background-color: #00A3DD;
     box-shadow: 0 0 15px rgba(0, 191, 255, 0.6);
 }
-
-/* Loader Overlay - Reused from the main page */
-/*.loader-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(16, 20, 44, 0.95);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    text-align: center;
-}
-*/
