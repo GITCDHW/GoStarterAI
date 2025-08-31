@@ -7,6 +7,7 @@ auth.onAuthStateChanged(user => {
       if (snapshot) {
         const data = snapshot.val()
         document.getElementById("website-preview-iframe").srcdoc = data.websiteCode
+        document.getElementById("business-name"). innerHTML=data.businessName
       }
     })
   }else{
