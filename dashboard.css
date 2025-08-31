@@ -1,4 +1,9 @@
 /* General Layout and Background */
+*{
+    margin:0;
+    padding:0;
+    box-sizing: border-box;
+}
 body {
     background-color: #10142C;
     color: #F4F4F4;
