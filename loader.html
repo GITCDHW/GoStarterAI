@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Screen Pong</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
+
+        canvas {
+            background-color: #10142C;
+            border: 2px solid #fff;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        #overlayText {
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.5vw;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.8),
+                         0 0 20px rgba(0, 255, 0, 0.6),
+                         0 0 30px rgba(0, 255, 0, 0.4);
+            z-index: 10;
+            white-space: nowrap;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="overlayText">
+        Have Some Fun Time,<br>While Our AI Brings Your Business To Life
+    </div>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game state variables
+        let gameActive = false;
+        let score = 0;
+        let lives = 3;
+
+        // Screen and element dimensions
+        let vw, vh;
+        let paddleWidth, paddleHeight, ballRadius;
+        let player, ball;
+        let paddleSpeed = 8;
+        let ballSpeedX, ballSpeedY;
+
+        // Resize function to make the game responsive
+        function resizeCanvas() {
+            vw = window.innerWidth;
+            vh = window.innerHeight;
+            canvas.width = vw;
+            canvas.height = vh;
+
+            // Swapped paddle dimensions for a vertically flat, laterally long paddle
+            paddleWidth = canvas.width * 0.2; // 20% of screen width
+            paddleHeight = canvas.height * 0.01; // 1% of screen height
+            ballRadius = canvas.width * 0.03;
+
+            // Update positions based on new dimensions
+            player.x = (canvas.width - paddleWidth) / 2;
+            player.y = canvas.height - paddleHeight - (canvas.height * 0.02); // Position near the bottom
+            player.width = paddleWidth;
+            player.height = paddleHeight;
+
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.radius = ballRadius;
+        }
+
+        // Initialize game objects
+        function init() {
+            player = {
+                x: 0,
+                y: 0,
+                width: 0,
+                height: 0,
+                dx: 0 // Player's horizontal velocity
+            };
+
+            ball = {
+                x: 0,
+                y: 0,
+                radius: 0
+            };
+            
+            ballSpeedX = (Math.random() > 0.5 ? 1 : -1) * 4;
+            ballSpeedY = 4;
+
+            gameActive = true;
+            score = 0;
+            lives = 3;
+            resizeCanvas();
+            document.getElementById('overlayText').style.display = 'block';
+        }
+
+        // Handle ball reset after a score or life lost
+        function resetBall() {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ballSpeedX = (Math.random() > 0.5 ? 1 : -1) * 4;
+            ballSpeedY = 4;
+        }
+
+        // Draw elements on the canvas
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw player paddle
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+
+            // Draw ball
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#00ff00';
+            ctx.fill();
+            ctx.closePath();
+
+            // Draw scores and lives
+            ctx.font = `${canvas.height * 0.05}px Arial`;
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'left';
+            ctx.fillText(`Score: ${score}`, canvas.width * 0.02, canvas.height * 0.05);
+            ctx.textAlign = 'right';
+            ctx.fillText(`Lives: ${lives}`, canvas.width * 0.98, canvas.height * 0.05);
+        }
+
+        // Update game state
+        function update() {
+            if (!gameActive) {
+                // Display game over screen
+                ctx.font = `${canvas.height * 0.1}px Arial`;
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'center';
+                ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2);
+                ctx.font = `${canvas.height * 0.04}px Arial`;
+                ctx.fillText(`Final Score: ${score}`, canvas.width / 2, canvas.height / 2 + canvas.height * 0.1);
+                ctx.fillText('Press any key to restart', canvas.width / 2, canvas.height / 2 + canvas.height * 0.15);
+                return;
+            }
+
+            // Player paddle movement
+            player.x += player.dx;
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+            // Ball movement
+            ball.x += ballSpeedX;
+            ball.y += ballSpeedY;
+
+            // Ball collision with walls
+            if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
+                ballSpeedX *= -1;
+            }
+
+            // Ball collision with top wall
+            if (ball.y - ball.radius < 0) {
+                ballSpeedY *= -1;
+            }
+
+            // Ball collision with player paddle
+            if (ball.y + ball.radius > player.y &&
+                ball.x > player.x && ball.x < player.x + player.width) {
+                ballSpeedY *= -1.1; // Increase speed slightly
+                ballSpeedX = (ball.x - (player.x + player.width / 2)) * 0.05;
+                score++;
+                //document.getElementById('overlayText').style.display = 'none';
+            }
+
+            // Check if the ball is missed
+            if (ball.y + ball.radius > canvas.height) {
+                lives--;
+                if (lives > 0) {
+                    resetBall();
+                } else {
+                    gameActive = false;
+                }
+            }
+        }
+
+        // Main game loop
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Event listeners for player movement (keyboard)
+        window.addEventListener('keydown', (e) => {
+            if (!gameActive) {
+                init();
+                return;
+            }
+            if (e.key === 'ArrowLeft') {
+                player.dx = -paddleSpeed;
+            } else if (e.key === 'ArrowRight') {
+                player.dx = paddleSpeed;
+            }
+        });
+
+        window.addEventListener('keyup', () => {
+            player.dx = 0;
+        });
+
+        // Event listeners for player movement (mouse)
+        canvas.addEventListener('mousemove', (e) => {
+            if (!gameActive) return;
+            const mouseX = e.clientX;
+            // Position paddle center at mouse X
+            player.x = mouseX - player.width / 2;
+        });
+        
+        // Touch events for mobile responsiveness
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!gameActive) {
+                init();
+                return;
+            }
+            const touchX = e.touches[0].clientX;
+            player.x = touchX - player.width / 2;
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touchX = e.touches[0].clientX;
+            player.x = touchX - player.width / 2;
+        });
+
+        // Initial setup and start
+        window.addEventListener('resize', resizeCanvas);
+        init();
+        gameLoop();
+    </script>
+</body>
+</html>
