@@ -100,7 +100,7 @@ button:hover {
   top: 0;
   left: 0;
   width: 100vw!important;
-  height: 100vh!important;
+  height: 99vh!important;
   background-color:#10142C;
   z-index: 1000;
   display: flex;
@@ -111,6 +111,6 @@ button:hover {
 
 #loading-overlay iframe {
   width: 100%!important;
-  height: 100%!important; 
+  height: 90%!important; 
   border-radius: 20px;
 }
