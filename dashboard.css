@@ -1,11 +1,13 @@
-*{
-    margin:0;
-    padding:0;
+/* General Reset and Body */
+* {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
+
 body {
-    background-color: #10142C;
-    color: #F4F4F4;
+    background-color: #F8F8F8; /* Soft Off-White Background */
+    color: #333333; /* Soft Dark Gray Text */
     font-family: 'Poppins', sans-serif;
     padding: 0;
     margin: 0;
@@ -15,34 +17,38 @@ body {
     min-height: 100vh;
 }
 
+/* Dashboard Container */
 .full-screen-dashboard {
-    background-color: #10142C; /* Ensure the background is our main dark blue */
+    background-color: #FFFFFF; /* Clean White Background */
     width: 100%;
     height: 100vh;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* Aligns content to the top */
-    padding-top: 3vh; /* Adds some space from the top */
+    justify-content: flex-start;
+    padding-top: 5vh; /* Adjusted padding for better spacing */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Subtle shadow for depth */
 }
 
 /* Headings and Text */
 h2 {
-    color: #00BFFF;
+    color: #4A90E2; /* Classic blue accent for headings */
     text-align: center;
-    margin-bottom: 20px;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    margin-bottom: 10px;
+    font-family: 'Poppins', sans-serif; /* Consistent, clean font */
+    font-weight: 600; /* Medium-bold for a softer heading */
+    text-transform: none; /* No uppercase */
+    letter-spacing: 0;
+    font-size: 2em; /* Slightly larger heading for prominence */
 }
 
 p {
     font-family: 'Poppins', sans-serif;
     font-size: 1em;
-    color: #F4F4F4;
+    color: #555555; /* Slightly lighter gray for body text */
     text-align: center;
+    max-width: 800px;
 }
 
 /* Website Preview Section */
@@ -50,31 +56,32 @@ p {
     text-align: center;
     width: 90%;
     max-width: 900px;
-    margin-top: 10px;
+    margin-top: 20px;
 }
 
 .website-preview p {
-    font-size: 1.5em;
-    color: #00BFFF;
-    margin-bottom: 20px;
-    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2em; /* Softer sub-heading size */
+    color: #4A90E2; /* Accent color for the subheading */
+    margin-bottom: 15px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
 }
 
 .iframe-container {
     width: 100%;
     height: 60vh;
     margin: 0 auto;
-    border: 3px solid #00BFFF;
-    border-radius: 10px;
+    border: 1px solid #E0E0E0; /* Light, soft border */
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* A subtle shadow instead of a glow */
 }
 
 #website-preview-iframe {
     width: 100%;
     height: 100%;
     border: none;
-    background-color: #1a2034;
+    background-color: #F8F8F8; /* Matches the body for a clean look */
 }
 
 /* Buttons */
@@ -82,18 +89,19 @@ button {
     width: 100%;
     max-width: 400px;
     padding: 15px;
-    background-color: #00BFFF;
-    color: #10142C;
+    background-color: #4A90E2; /* Accent color */
+    color: #FFFFFF; /* White button text */
     border: none;
-    border-radius: 5px;
+    border-radius: 8px; /* Softer, rounder corners */
     font-size: 18px;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    transition: background-color 0.3s ease;
     margin-top: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 button:hover {
-    background-color: #00A3DD;
-    box-shadow: 0 0 15px rgba(0, 191, 255, 0.6);
+    background-color: #3B7CDA; /* A slightly darker shade on hover */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* A subtle lift on hover */
 }
