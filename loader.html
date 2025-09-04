@@ -2,253 +2,328 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Full Screen Pong</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Infinite Driving Game</title>
     <style>
         body {
             margin: 0;
-            overflow: hidden;
-            background-color: transparent;
+            padding: 0;
+            background-color: #2c3e50;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            font-family: Arial, sans-serif;
+            color: #ecf0f1;
+            overflow: hidden;
+        }
+
+        #game-container {
             position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 100%;
+            max-height: 800px;
+            background-color: #34495e;
+            border: 5px solid #2980b9;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         canvas {
-            background-color: #10142C;
-            border: 2px solid #fff;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            width: 100%;
+            height: 100%;
+            background-color: #7f8c8d;
+            display: block;
         }
 
-        #overlayText {
-            position: fixed;
-            top: 10%;
+        #game-ui {
+            position: absolute;
+            top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #fff;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 1.5vw;
             text-align: center;
-            text-shadow: 0 0 10px rgba(0, 255, 0, 0.8),
-                         0 0 20px rgba(0, 255, 0, 0.6),
-                         0 0 30px rgba(0, 255, 0, 0.4);
-            z-index: 10;
-            white-space: nowrap;
+            background-color: rgba(44, 62, 80, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        #score-display {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        #start-button {
+            padding: 15px 30px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ecf0f1;
+            background-color: #27ae60;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #start-button:hover {
+            background-color: #2ecc71;
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="overlayText">
-        Have Some Fun Time,<br>While Our AI Brings Your Business To Life
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        <div id="game-ui">
+            <h1 id="score-display">Score: 0</h1>
+            <h2>Play A Game While Our AI Builds Your Business</h2>
+            <button id="start-button">Start Game</button>
+        </div>
     </div>
-    <canvas id="gameCanvas"></canvas>
-
     <script>
-        const canvas = document.getElementById('gameCanvas');
+        // Game variables
+        const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
+        const startButton = document.getElementById('start-button');
+        const scoreDisplay = document.getElementById('score-display');
 
-        // Game state variables
-        let gameActive = false;
-        let score = 0;
-        let lives = 3;
-
-        // Screen and element dimensions
-        let vw, vh;
-        let paddleWidth, paddleHeight, ballRadius;
-        let player, ball;
-        let paddleSpeed = 8;
-        let ballSpeedX, ballSpeedY;
-
-        // Resize function to make the game responsive
+        // Adjust canvas dimensions for responsiveness
         function resizeCanvas() {
-            vw = window.innerWidth;
-            vh = window.innerHeight;
-            canvas.width = vw;
-            canvas.height = vh;
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
-            // Swapped paddle dimensions for a vertically flat, laterally long paddle
-            paddleWidth = canvas.width * 0.2; // 20% of screen width
-            paddleHeight = canvas.height * 0.01; // 1% of screen height
-            ballRadius = canvas.width * 0.03;
+        // Game state
+        let gameRunning = false;
+        let score = 0;
+        let lastTimestamp = 0;
+        let carSpeed = 6;
+        let obstacleSpeed = 5;
+        let lastObstacleLanes = []; // This variable was missing in your code
 
-            // Update positions based on new dimensions
-            player.x = (canvas.width - paddleWidth) / 2;
-            player.y = canvas.height - paddleHeight - (canvas.height * 0.02); // Position near the bottom
-            player.width = paddleWidth;
-            player.height = paddleHeight;
+        // Player car properties
+        let car = {
+            x: canvas.width / 2,
+            y: canvas.height - 100,
+            width: 40,
+            height: 70,
+            lane: 1, // 0: left, 1: center, 2: right
+        };
 
-            ball.x = canvas.width / 2;
-            ball.y = canvas.height / 2;
-            ball.radius = ballRadius;
+        // Road properties
+        const roadWidth = canvas.width * 0.7;
+        const laneWidth = roadWidth / 3;
+        const road = {
+            x: (canvas.width - roadWidth) / 2,
+            y: 0,
+            width: roadWidth,
+            height: canvas.height,
+        };
+
+        // Obstacle properties
+        let obstacles = [];
+        let lastObstacleTime = 0;
+        const obstacleInterval = 3000;
+        const minObstacleSpeed = 2;
+        const maxObstacleSpeed = 5;
+
+        // Touch controls
+        let touchStartX = 0;
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            if (!gameRunning) return;
+            touchStartX = e.touches[0].clientX;
         }
 
-        // Initialize game objects
-        function init() {
-            player = {
-                x: 0,
-                y: 0,
-                width: 0,
-                height: 0,
-                dx: 0 // Player's horizontal velocity
-            };
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!gameRunning) return;
+            const touchMoveX = e.touches[0].clientX;
+            const swipeDelta = touchMoveX - touchStartX;
 
-            ball = {
-                x: 0,
-                y: 0,
-                radius: 0
-            };
-            
-            ballSpeedX = (Math.random() > 0.5 ? 1 : -1) * 4;
-            ballSpeedY = 4;
-
-            gameActive = true;
-            score = 0;
-            lives = 3;
-            resizeCanvas();
-            document.getElementById('overlayText').style.display = 'block';
+            // Change lane based on swipe direction
+            if (swipeDelta > 50 && car.lane < 2) {
+                car.lane++;
+                touchStartX = touchMoveX;
+            } else if (swipeDelta < -50 && car.lane > 0) {
+                car.lane--;
+                touchStartX = touchMoveX;
+            }
         }
 
-        // Handle ball reset after a score or life lost
-        function resetBall() {
-            ball.x = canvas.width / 2;
-            ball.y = canvas.height / 2;
-            ballSpeedX = (Math.random() > 0.5 ? 1 : -1) * 4;
-            ballSpeedY = 4;
+        function updateCarPosition() {
+            const targetX = road.x + (car.lane * laneWidth) + (laneWidth / 2) - (car.width / 2);
+            // Smoothly move the car to the center of the current lane
+            car.x += (targetX - car.x) * 0.08;
         }
 
-        // Draw elements on the canvas
-        function draw() {
+        // Drawing functions
+        function drawRoad() {
+            ctx.fillStyle = '#6c7a89';
+            ctx.fillRect(road.x, road.y, road.width, road.height);
+
+            // Draw dashed lane lines
+            ctx.strokeStyle = '#ecf0f1';
+            ctx.lineWidth = 5;
+            ctx.setLineDash([20, 20]);
+
+            ctx.beginPath();
+            ctx.moveTo(road.x + laneWidth, 0);
+            ctx.lineTo(road.x + laneWidth, canvas.height);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(road.x + 2 * laneWidth, 0);
+            ctx.lineTo(road.x + 2 * laneWidth, canvas.height);
+            ctx.stroke();
+
+            ctx.setLineDash([]); // Reset line dash
+        }
+
+        function drawCar() {
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(car.x, car.y, car.width, car.height);
+            ctx.fillStyle = '#c0392b';
+            ctx.fillRect(car.x, car.y + car.height * 0.2, car.width, car.height * 0.6); // Hood and roof detail
+        }
+
+        // Renamed function to createObstacle() from drawObstacle()
+        function createObstacle() {
+            let availableLanes = [0, 1, 2];
+
+            // Filter out lanes blocked by the last two obstacles to ensure a clear path
+            if (lastObstacleLanes.length >= 2) {
+                let lastLane1 = lastObstacleLanes[0];
+                let lastLane2 = lastObstacleLanes[1];
+                availableLanes = availableLanes.filter(lane => lane !== lastLane1 && lane !== lastLane2);
+            }
+
+            let laneToSpawn;
+            if (availableLanes.length > 0) {
+                laneToSpawn = availableLanes[Math.floor(Math.random() * availableLanes.length)];
+            } else {
+                laneToSpawn = Math.floor(Math.random() * 3);
+            }
+
+            const x = road.x + (laneToSpawn * laneWidth) + (laneWidth / 2) - (car.width / 2);
+            const y = -100;
+            const speed = minObstacleSpeed + Math.random() * (maxObstacleSpeed - minObstacleSpeed);
+
+            obstacles.push({
+                x: x,
+                y: y,
+                width: 40,
+                height: 70,
+                speed: speed,
+            });
+
+            // Update the list of last obstacle lanes
+            lastObstacleLanes.push(laneToSpawn);
+            if (lastObstacleLanes.length > 2) {
+                lastObstacleLanes.shift(); // Keep the array to a maximum of 2 lanes
+            }
+        }
+        
+        // This function was missing from your update
+        function drawObstacles() {
+            ctx.fillStyle = '#f1c40f';
+            obstacles.forEach(obstacle => {
+                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            });
+        }
+
+        function updateGame(timestamp) {
+            if (!gameRunning) return;
+
+            const deltaTime = timestamp - lastTimestamp;
+            lastTimestamp = timestamp;
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw player paddle
-            ctx.fillStyle = '#00ff00';
-            ctx.fillRect(player.x, player.y, player.width, player.height);
+            // Update and draw road
+            drawRoad();
 
-            // Draw ball
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-            ctx.fillStyle = '#00ff00';
-            ctx.fill();
-            ctx.closePath();
+            // Update car position
+            updateCarPosition();
+            drawCar();
 
-            // Draw scores and lives
-            ctx.font = `${canvas.height * 0.05}px Arial`;
-            ctx.fillStyle = '#fff';
-            ctx.textAlign = 'left';
-            ctx.fillText(`Score: ${score}`, canvas.width * 0.02, canvas.height * 0.05);
-            ctx.textAlign = 'right';
-            ctx.fillText(`Lives: ${lives}`, canvas.width * 0.98, canvas.height * 0.05);
-        }
-
-        // Update game state
-        function update() {
-            if (!gameActive) {
-                // Display game over screen
-                ctx.font = `${canvas.height * 0.1}px Arial`;
-                ctx.fillStyle = '#fff';
-                ctx.textAlign = 'center';
-                ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2);
-                ctx.font = `${canvas.height * 0.04}px Arial`;
-                ctx.fillText(`Final Score: ${score}`, canvas.width / 2, canvas.height / 2 + canvas.height * 0.1);
-                ctx.fillText('Press any key to restart', canvas.width / 2, canvas.height / 2 + canvas.height * 0.15);
-                return;
+            // Spawn new obstacles
+            if (timestamp - lastObstacleTime > obstacleInterval / (carSpeed * 0.5)) {
+                createObstacle(); // Corrected function call
+                lastObstacleTime = timestamp;
             }
 
-            // Player paddle movement
-            player.x += player.dx;
-            if (player.x < 0) player.x = 0;
-            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+            // Update and draw obstacles
+            obstacles.forEach(obstacle => {
+                obstacle.y += obstacle.speed;
+            });
+            drawObstacles();
 
-            // Ball movement
-            ball.x += ballSpeedX;
-            ball.y += ballSpeedY;
-
-            // Ball collision with walls
-            if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
-                ballSpeedX *= -1;
-            }
-
-            // Ball collision with top wall
-            if (ball.y - ball.radius < 0) {
-                ballSpeedY *= -1;
-            }
-
-            // Ball collision with player paddle
-            if (ball.y + ball.radius > player.y &&
-                ball.x > player.x && ball.x < player.x + player.width) {
-                ballSpeedY *= -1.1; // Increase speed slightly
-                ballSpeedX = (ball.x - (player.x + player.width / 2)) * 0.05;
-                score++;
-                //document.getElementById('overlayText').style.display = 'none';
-            }
-
-            // Check if the ball is missed
-            if (ball.y + ball.radius > canvas.height) {
-                lives--;
-                if (lives > 0) {
-                    resetBall();
-                } else {
-                    gameActive = false;
+            // Check for collisions
+            obstacles.forEach(obstacle => {
+                if (
+                    car.x < obstacle.x + obstacle.width &&
+                    car.x + car.width > obstacle.x &&
+                    car.y < obstacle.y + obstacle.height &&
+                    car.y + car.height > obstacle.y
+                ) {
+                    endGame();
                 }
-            }
+            });
+
+            // Remove off-screen obstacles and update score
+            obstacles = obstacles.filter(obstacle => obstacle.y < canvas.height);
+            score += obstacles.length * 0.01;
+            scoreDisplay.textContent = `Score: ${Math.floor(score)}`;
+
+            // Increase speed over time
+            carSpeed += 0.001;
+            obstacleSpeed += 0.001;
+
+            requestAnimationFrame(updateGame);
         }
 
-        // Main game loop
-        function gameLoop() {
-            update();
-            draw();
-            requestAnimationFrame(gameLoop);
+        function startGame() {
+            gameRunning = true;
+            score = 0;
+            obstacles = [];
+            lastObstacleLanes = []; // Reset the lanes on a new game
+            carSpeed = 5;
+            obstacleSpeed = 10;
+            car.lane = 1;
+            car.x = (canvas.width / 2) - (car.width / 2);
+
+            startButton.style.display = 'none';
+            scoreDisplay.style.display = 'block';
+
+            // Add touch event listeners for mobile controls
+            canvas.addEventListener('touchstart', handleTouchStart, false);
+            canvas.addEventListener('touchmove', handleTouchMove, false);
+
+            requestAnimationFrame(updateGame);
         }
 
-        // Event listeners for player movement (keyboard)
-        window.addEventListener('keydown', (e) => {
-            if (!gameActive) {
-                init();
-                return;
-            }
-            if (e.key === 'ArrowLeft') {
-                player.dx = -paddleSpeed;
-            } else if (e.key === 'ArrowRight') {
-                player.dx = paddleSpeed;
-            }
-        });
+        function endGame() {
+            gameRunning = false;
+            startButton.textContent = 'Play Again';
+            startButton.style.display = 'block';
+            scoreDisplay.textContent = `Final Score: ${Math.floor(score)}`;
 
-        window.addEventListener('keyup', () => {
-            player.dx = 0;
-        });
+            // Remove touch event listeners
+            canvas.removeEventListener('touchstart', handleTouchStart);
+            canvas.removeEventListener('touchmove', handleTouchMove);
+        }
 
-        // Event listeners for player movement (mouse)
-        canvas.addEventListener('mousemove', (e) => {
-            if (!gameActive) return;
-            const mouseX = e.clientX;
-            // Position paddle center at mouse X
-            player.x = mouseX - player.width / 2;
-        });
-        
-        // Touch events for mobile responsiveness
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (!gameActive) {
-                init();
-                return;
-            }
-            const touchX = e.touches[0].clientX;
-            player.x = touchX - player.width / 2;
-        });
+        startButton.addEventListener('click', startGame);
 
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const touchX = e.touches[0].clientX;
-            player.x = touchX - player.width / 2;
-        });
-
-        // Initial setup and start
-        window.addEventListener('resize', resizeCanvas);
-        init();
-        gameLoop();
+        // Initial state
+        drawRoad();
+        drawCar();
     </script>
 </body>
 </html>
