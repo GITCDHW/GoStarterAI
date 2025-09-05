@@ -1,10 +1,10 @@
-document.getElementById('pay-button').addEventListener("click",()=>{
-  
-})
 auth.onAuthStateChanged(user => {
   if (user) {
     const urlparams = new URLSearchParams(window.location.search);
     const id = urlparams.get('id');
+   document.getElementById('pay-button').addEventListener("click",()=>{
+  window.location.href=`https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo&id=${id}`
+})
     const businessRef = db.ref(`users/${user.uid}/businesses/${id}`)
     businessRef.once("value").then(snapshot => {
       if (snapshot) {

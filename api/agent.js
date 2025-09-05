@@ -5,7 +5,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY);
 //code generation 
 async function generateCode(prompt,name) {
       // Select the model
-    const masterPrompt = `you are a professional frontend developer,your goal is to provide a clean,modern efficient and well formatted html code for a responsive landing page,for the given users request: ${prompt},with the business name:${name},make educated guesses,if user doesnt provides enough information,and strictly use material UI framework,dont write any custom css dont add any other text or code delimiters,just plain text,MAKE SURE THE ENTIRE CODE WORKS`
+    const masterPrompt = `you are a professional frontend developer,your goal is to provide a clean,modern efficient and well formatted html code for a **responsive** **mobile friendly** landing page,for the given users request: ${prompt},with the business name:${name},make educated guesses,if user doesnt provides enough information,and strictly use material UI framework,dont write any custom css dont add any other text or code delimiters,just plain text,MAKE SURE THE ENTIRE CODE WORKS`
     
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
     const result = await model.generateContent(masterPrompt);
@@ -18,7 +18,7 @@ async function generateMarketReport(prompt) {
       // Select the model
     const masterPrompt = `you are a professional business analyst in the GoStarterAI Team,which takes user input to generate business assets for them,assume our developers has provided the user a cool website for their business idea,your task is to check if the business is valid,if not try to assume the closest possible business idea and then generate a brief market analysis containing: a market report and swot analysis in about 500-600 words strictly,provided the user idea: ${prompt},make the text Professional,easy to read and accurate,DONT INCLUDE ANY OTHER TEXT,OR CODE DELIMITERS`
     
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
     const result = await model.generateContent(masterPrompt);
     const response = await result.response;
     const text = response.text();
