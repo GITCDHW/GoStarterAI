@@ -7,7 +7,7 @@ async function generateCode(prompt,name) {
       // Select the model
     const masterPrompt = `you are a professional frontend developer,your goal is to provide a clean,modern efficient and well formatted html code for a responsive landing page,for the given users request: ${prompt},with the business name:${name},make educated guesses,if user doesnt provides enough information,and strictly use material UI framework,dont write any custom css dont add any other text or code delimiters,just plain text,MAKE SURE THE ENTIRE CODE WORKS`
     
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
     const result = await model.generateContent(masterPrompt);
     const response = await result.response;
     const text = response.text();

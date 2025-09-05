@@ -1,3 +1,6 @@
+document.getElementById('pay-button').addEventListener("click",()=>{
+  
+})
 auth.onAuthStateChanged(user => {
   if (user) {
     const urlparams = new URLSearchParams(window.location.search);
