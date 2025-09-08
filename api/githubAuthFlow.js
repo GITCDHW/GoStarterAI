@@ -39,7 +39,7 @@ const createNewRepo = async (accessToken, repoName) => {
 };
 
 // Main handler for the Cloud Function.
-export default const handler = async (event) => {
+export default async function handler(event) {
     // Extract the authorization code and state from the query parameters.
     const tempCode = event.queryStringParameters?.code;
     const id = event.queryStringParameters?.id;
@@ -114,4 +114,4 @@ export default const handler = async (event) => {
             },
         };
     }
-};
+}
