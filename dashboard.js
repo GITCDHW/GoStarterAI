@@ -40,19 +40,35 @@ auth.onAuthStateChanged(user => {
   if (user) {
     const urlparams = new URLSearchParams(window.location.search);
     const id = urlparams.get('id');
-   document.getElementById('pay-button').addEventListener("click",()=>{
-  window.location.href=`https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo&id=${id}`
-})
-    const businessRef = db.ref(`users/${user.uid}/businesses/${id}`)
-    businessRef.once("value").then(snapshot => {
-      if (snapshot) {
-        const data = snapshot.val()
-        document.getElementById("website-preview-iframe").srcdoc = data.websiteCode
-        document.getElementById("business-name"). innerHTML=data.businessName
-      }
-    })
-  }else{
-    window.location.href='index.html'
 
+    // Check if the URL contains a 'repo' parameter, which indicates a successful redirect from the backend
+    const newRepoName = urlparams.get('repo');
+    if (newRepoName) {
+      // Logic for after successful repository creation
+      console.log(`Repository ${newRepoName} was successfully created.`);
+      // You can add UI updates here, like a success message.
+    }
+
+    // Attach event listener for the payment button.
+    document.getElementById('pay-button').addEventListener("click", () => {
+      // 1. Initiate the secure flow by calling your backend endpoint.
+      // Pass the 'id' along as a query parameter.
+      const backendAuthUrl = `https://your-cloud-function-url.com/initiate-github-auth?id=${id}`;
+
+      // 2. Redirect the user to the backend endpoint.
+      // The backend will then handle the full GitHub OAuth process.
+      window.location.href = backendAuthUrl;
+    });
+
+    const businessRef = db.ref(`users/${user.uid}/businesses/${id}`);
+    businessRef.once("value").then(snapshot => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        document.getElementById("website-preview-iframe").srcdoc = data.websiteCode;
+        document.getElementById("business-name").innerHTML = data.businessName;
+      }
+    });
+  } else {
+    window.location.href = 'index.html';
   }
-})
+});
