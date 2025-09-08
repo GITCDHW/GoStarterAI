@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { Response } from '@vercel/node'; // It's a good practice to import Response for clarity
-
+import pkg from '@vercel/node';
+const { Response } = pkg;
 /**
  * A utility function to make a request to GitHub to create a new repository.
  * @param {string} accessToken - The GitHub access token for the authenticated user.
