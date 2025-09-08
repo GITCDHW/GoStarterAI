@@ -53,7 +53,7 @@ auth.onAuthStateChanged(user => {
     document.getElementById('pay-button').addEventListener("click", () => {
       // 1. Initiate the secure flow by calling your backend endpoint.
       // Pass the 'id' along as a query parameter.
-      const backendAuthUrl = `https://your-cloud-function-url.com/initiate-github-auth?id=${id}`;
+      const backendAuthUrl = `https://go-starter-ai.vercel.app/api/githubAuthFlow?id=${id}`;
 
       // 2. Redirect the user to the backend endpoint.
       // The backend will then handle the full GitHub OAuth process.
