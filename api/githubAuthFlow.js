@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Response } from '@vercel/node'; // It's a good practice to import Response for clarity
 
 /**
  * A utility function to make a request to GitHub to create a new repository.
@@ -46,14 +47,8 @@ export default async function handler(event) {
 
     // If no authorization code is present, it's a direct visit or an error from GitHub.
     if (!tempCode) {
-const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo,user:email&id=${id}`;
-
-return {
-    statusCode: 302,
-    headers: {
-        Location: githubAuthUrl,
-    },
-};
+        const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo,user:email&id=${id}`;
+        return Response.redirect(githubAuthUrl, 302);
     }
 
     try {
@@ -63,8 +58,6 @@ return {
                 client_id: process.env.GITHUB_CLIENT_ID,
                 client_secret: process.env.GITHUB_CLIENT_SECRET,
                 code: tempCode,
-                // The redirect_uri must match the one you registered with GitHub.
-                // It's good practice to include it here for an extra layer of security.
                 redirect_uri: 'https://go-starter-ai.vercel.app/api/githubAuthFlow',
             },
             {
@@ -75,41 +68,23 @@ return {
         const { access_token: accessToken } = response.data;
 
         if (!accessToken) {
-            return {
-                statusCode: 302,
-                headers: {
-                    Location: 'https://go-starter-ai.vercel.app/error.html?reason=access_token_missing',
-                },
-            };
+            const redirectUrl = 'https://go-starter-ai.vercel.app/error.html?reason=access_token_missing';
+            return Response.redirect(redirectUrl, 302);
         }
 
         // Use the access token to create a new repository.
         const repoResult = await createNewRepo(accessToken, 'TEST-REPO-GOSTARTER-AI');
 
         if (repoResult.success) {
-            // On success, redirect the user back to your dashboard with the new repo info.
-            return {
-                statusCode: 302,
-                headers: {
-                    Location: `https://go-starter-ai.vercel.app/dashboard.html?id=${id}&repo=${encodeURIComponent(repoResult.full_name)}`,
-                },
-            };
+            const redirectUrl = `https://go-starter-ai.vercel.app/dashboard.html?id=${id}&repo=${encodeURIComponent(repoResult.full_name)}`;
+            return Response.redirect(redirectUrl, 302);
         } else {
-            // On failure, redirect to an error page with specific details.
-            return {
-                statusCode: 302,
-                headers: {
-                    Location: `https://go-starter-ai.vercel.app/error.html?reason=repo_creation_failed&details=${encodeURIComponent(repoResult.error)}`,
-                },
-            };
+            const redirectUrl = `https://go-starter-ai.vercel.app/error.html?reason=repo_creation_failed&details=${encodeURIComponent(repoResult.error)}`;
+            return Response.redirect(redirectUrl, 302);
         }
     } catch (error) {
         console.error('Error during authentication flow:', error);
-        return {
-            statusCode: 302,
-            headers: {
-                Location: 'https://go-starter-ai.vercel.app/error.html?reason=internal_server_error',
-            },
-        };
+        const redirectUrl = 'https://go-starter-ai.vercel.app/error.html?reason=internal_server_error';
+        return Response.redirect(redirectUrl, 302);
     }
 }
