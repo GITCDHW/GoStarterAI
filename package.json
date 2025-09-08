@@ -1,8 +1,9 @@
 {
   "name": "go-starter-ai",
   "version": "1.0.0",
-  "type":"module",
+  "type": "module",
   "dependencies": {
-    "@google/generative-ai":"^0.1.3"
+    "@google/generative-ai": "^0.1.3",
+    "axios": "^1.6.2"
   }
 }
