@@ -42,7 +42,7 @@ const createNewRepo = async (accessToken, repoName) => {
 export const handler = async (event) => {
     // Extract the authorization code and state from the query parameters.
     const tempCode = event.queryStringParameters?.code;
-    const id = event.queryStringParameters?.state;
+    const id = event.queryStringParameters?.id;
 
     // If no authorization code is present, it's a direct visit or an error from GitHub.
     if (!tempCode) {
