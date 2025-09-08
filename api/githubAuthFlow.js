@@ -1,10 +1,14 @@
 const axios = require('axios');
 
+/**
+ * A utility function to make a request to GitHub to create a new repository.
+ * @param {string} accessToken - The GitHub access token for the authenticated user.
+ * @param {string} repoName - The name of the new repository.
+ * @returns {Promise<object>} An object containing the success status and the new repo's URL or an error message.
+ */
 async function createNewRepo(accessToken, repoName) {
     try {
-        // Step 1: Define the API endpoint URL
         const apiUrl = 'https://api.github.com/user/repos';
-
         const requestBody = {
             name: repoName,
             private: false,
@@ -14,9 +18,9 @@ async function createNewRepo(accessToken, repoName) {
             'Authorization': `token ${accessToken}`,
             'Content-Type': 'application/json'
         };
+
         const response = await axios.post(apiUrl, requestBody, { headers: requestHeaders });
 
-        // Step 5: Check the response and return the new repository's URL
         if (response.status === 201) {
             console.log(`Repository '${repoName}' created successfully.`);
             return {
@@ -25,61 +29,90 @@ async function createNewRepo(accessToken, repoName) {
                 full_name: response.data.full_name
             };
         } else {
-            // Handle unexpected status codes
             console.error(`Error creating repository. Status code: ${response.status}`);
             return { success: false, error: 'Unexpected status code from GitHub API.' };
         }
-
     } catch (error) {
         console.error("Error creating new repository:", error.response?.data?.message || error.message);
         return { success: false, error: error.response?.data?.message || 'An unknown error occurred.' };
     }
 }
 
-
+// Main handler for the Cloud Function.
 exports.handler = async (event, context) => {
-    const tempCode = event.queryStringParameters.code;
+    // Extract the authorization code and state from the query parameters.
+    const tempCode = event.queryStringParameters?.code;
+    const id = event.queryStringParameters?.state; // Assuming you've used 'id' as the state parameter
 
+    // If no authorization code is present, it's a direct visit or an error from GitHub.
     if (!tempCode) {
         return {
-            statusCode: 400,
-            body: 'Error: Authorization code not found.'
+            statusCode: 302,
+            headers: {
+                Location: 'https://go-starter-ai.vercel.app/error.html?reason=auth_code_missing'
+            }
         };
     }
 
+    // You would typically validate the 'state' parameter here against what you stored
+    // to prevent CSRF attacks.
+
     try {
+        // Exchange the temporary code for a permanent access token.
         const response = await axios.post(
             'https://github.com/login/oauth/access_token',
             {
                 client_id: process.env.GITHUB_CLIENT_ID,
                 client_secret: process.env.GITHUB_CLIENT_SECRET,
-                code: tempCode
+                code: tempCode,
+                // The redirect_uri must match the one you registered with GitHub.
+                // It is good practice to include it here for an extra layer of security.
+                redirect_uri: `https://go-starter-ai.vercel.app/api/githubAuthFlow` 
             },
             {
-                // This header tells GitHub we want a JSON response
                 headers: { 'Accept': 'application/json' }
             }
         );
 
-        //Extract the permanent access token from the response
         const accessToken = response.data.access_token;
 
         if (!accessToken) {
             return {
-                statusCode: 400,
-                body: 'Error: Access token not found in response.'
+                statusCode: 302,
+                headers: {
+                    Location: 'https://go-starter-ai.vercel.app/error.html?reason=access_token_missing'
+                }
             };
         }
-        createNewRepo(accessToken,"TEST-REPO-GOSTARTER-AI")
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ message: "Successfully received access token!", accessToken: accessToken })
-        };
+
+        // Use the access token to create a new repository.
+        const repoResult = await createNewRepo(accessToken, "TEST-REPO-GOSTARTER-AI");
+
+        if (repoResult.success) {
+            // On success, redirect the user back to your dashboard with the new repo info.
+            return {
+                statusCode: 302,
+                headers: {
+                    Location: `https://go-starter-ai.vercel.app/dashboard.html?id=${id}&repo=${encodeURIComponent(repoResult.full_name)}`
+                }
+            };
+        } else {
+            // On failure, redirect to an error page with specific details.
+            return {
+                statusCode: 302,
+                headers: {
+                    Location: `https://go-starter-ai.vercel.app/error.html?reason=repo_creation_failed&details=${encodeURIComponent(repoResult.error)}`
+                }
+            };
+        }
+
     } catch (error) {
-        console.error("Error exchanging code for token:", error);
+        console.error("Error during authentication flow:", error);
         return {
-            statusCode: 500,
-            body: 'Internal Server Error'
+            statusCode: 302,
+            headers: {
+                Location: 'https://go-starter-ai.vercel.app/error.html?reason=internal_server_error'
+            }
         };
     }
 };
