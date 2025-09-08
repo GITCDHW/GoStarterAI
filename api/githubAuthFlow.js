@@ -54,11 +54,7 @@ export default async function handler(event) {
         };
     }
 
-    // You would typically validate the 'state' parameter here against what you stored
-    // to prevent CSRF attacks.
-
     try {
-        // Exchange the temporary code for a permanent access token.
         const response = await axios.post(
             'https://github.com/login/oauth/access_token',
             {

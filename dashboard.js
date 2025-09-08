@@ -41,14 +41,6 @@ auth.onAuthStateChanged(user => {
     const urlparams = new URLSearchParams(window.location.search);
     const id = urlparams.get('id');
 
-    // Check if the URL contains a 'repo' parameter, which indicates a successful redirect from the backend
-    const newRepoName = urlparams.get('repo');
-    if (newRepoName) {
-      // Logic for after successful repository creation
-      console.log(`Repository ${newRepoName} was successfully created.`);
-      // You can add UI updates here, like a success message.
-    }
-
     // Attach event listener for the payment button.
     document.getElementById('pay-button').addEventListener("click", () => {
       // 1. Initiate the secure flow by calling your backend endpoint.
