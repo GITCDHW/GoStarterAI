@@ -46,12 +46,14 @@ export default async function handler(event) {
 
     // If no authorization code is present, it's a direct visit or an error from GitHub.
     if (!tempCode) {
-        return {
-            statusCode: 302,
-            headers: {
-                Location: 'https://go-starter-ai.vercel.app/error.html?reason=auth_code_missing',
-            },
-        };
+const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo,user:email&id=${id}`;
+
+return {
+    statusCode: 302,
+    headers: {
+        Location: githubAuthUrl,
+    },
+};
     }
 
     try {
