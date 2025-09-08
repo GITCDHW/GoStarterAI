@@ -49,7 +49,7 @@ auth.onAuthStateChanged(user => {
 
       // 2. Redirect the user to the backend endpoint.
       // The backend will then handle the full GitHub OAuth process.
-      window.location.href = backendAuthUrl;
+      window.location.href = 'https://github.com/login/oauth/authorize?client_id=123&scope=repo';
     });
 
     const businessRef = db.ref(`users/${user.uid}/businesses/${id}`);
