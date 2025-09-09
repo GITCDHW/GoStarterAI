@@ -1,6 +1,4 @@
 import axios from 'axios';
-import pkg from '@vercel/node';
-const { Response } = pkg;
 /**
  * A utility function to make a request to GitHub to create a new repository.
  * @param {string} accessToken - The GitHub access token for the authenticated user.
@@ -40,7 +38,8 @@ const createNewRepo = async (accessToken, repoName) => {
 };
 
 // Main handler for the Cloud Function.
-export default async function handler(event) {
+// Main handler for the Cloud Function.
+export default async function handler(event, res) { // Note the added `res` parameter
     // Extract the authorization code and state from the query parameters.
     const tempCode = event.queryStringParameters?.code;
     const id = event.queryStringParameters?.id;
@@ -48,7 +47,10 @@ export default async function handler(event) {
     // If no authorization code is present, it's a direct visit or an error from GitHub.
     if (!tempCode) {
         const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo,user:email&id=${id}`;
-        return Response.redirect(githubAuthUrl, 302);
+        // Set the status code and Location header for the redirect.
+        res.writeHead(302, { Location: githubAuthUrl });
+        res.end();
+        return;
     }
 
     try {
@@ -69,7 +71,9 @@ export default async function handler(event) {
 
         if (!accessToken) {
             const redirectUrl = 'https://go-starter-ai.vercel.app/error.html?reason=access_token_missing';
-            return Response.redirect(redirectUrl, 302);
+            res.writeHead(302, { Location: redirectUrl });
+            res.end();
+            return;
         }
 
         // Use the access token to create a new repository.
@@ -77,14 +81,19 @@ export default async function handler(event) {
 
         if (repoResult.success) {
             const redirectUrl = `https://go-starter-ai.vercel.app/dashboard.html?id=${id}&repo=${encodeURIComponent(repoResult.full_name)}`;
-            return Response.redirect(redirectUrl, 302);
+            res.writeHead(302, { Location: redirectUrl });
+            res.end();
+            return;
         } else {
             const redirectUrl = `https://go-starter-ai.vercel.app/error.html?reason=repo_creation_failed&details=${encodeURIComponent(repoResult.error)}`;
-            return Response.redirect(redirectUrl, 302);
+            res.writeHead(302, { Location: redirectUrl });
+            res.end();
+            return;
         }
     } catch (error) {
         console.error('Error during authentication flow:', error);
         const redirectUrl = 'https://go-starter-ai.vercel.app/error.html?reason=internal_server_error';
-        return Response.redirect(redirectUrl, 302);
+        res.writeHead(302, { Location: redirectUrl });
+        res.end();
     }
 }
