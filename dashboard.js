@@ -43,13 +43,7 @@ auth.onAuthStateChanged(user => {
 
     // Attach event listener for the payment button.
     document.getElementById('pay-button').addEventListener("click", () => {
-      // 1. Initiate the secure flow by calling your backend endpoint.
-      // Pass the 'id' along as a query parameter.
-      const backendAuthUrl = `https://go-starter-ai.vercel.app/api/githubAuthFlow?id=${id}`;
-
-      // 2. Redirect the user to the backend endpoint.
-      // The backend will then handle the full GitHub OAuth process.
-      window.location.href = 'https://github.com/login/oauth/authorize?client_id=Ov23linWOyvfwx9QlrcC&scope=repo';
+      window.location.href = `https://github.com/login/oauth/authorize?client_id=Ov23linWOyvfwx9QlrcC&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo&id=${id}`;
     });
 
     const businessRef = db.ref(`users/${user.uid}/businesses/${id}`);
