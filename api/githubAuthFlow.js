@@ -76,21 +76,6 @@ export default async function handler(event, res) { // Note the added `res` para
             res.end();
             return;
         }
-
-        // Use the access token to create a new repository.
-        const repoResult = await createNewRepo(accessToken, 'TEST-REPO-GOSTARTER-AI');
-
-        if (repoResult.success) {
-            const redirectUrl = `https://go-starter-ai.vercel.app/dashboard.html?id=${id}&repo=${encodeURIComponent(repoResult.full_name)}`;
-            res.writeHead(302, { Location: redirectUrl });
-            res.end();
-            return;
-        } else {
-            const redirectUrl = `https://go-starter-ai.vercel.app/error.html?reason=repo_creation_failed&details=${encodeURIComponent(repoResult.error)}`;
-            res.writeHead(302, { Location: redirectUrl });
-            res.end();
-            return;
-        }
     } catch (error) {
         console.error('Error during authentication flow:', error);
         const redirectUrl = 'https://go-starter-ai.vercel.app/error.html?reason=internal_server_error';
