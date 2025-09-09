@@ -66,9 +66,10 @@ export default async function handler(event, res) { // Note the added `res` para
                 headers: { 'Accept': 'application/json' },
             },
         );
-
+        console.log('GitHub access token response:', response.data);
+        
         const { access_token: accessToken } = response.data;
-
+        console.log("access_token:",access_token)
         if (!accessToken) {
             const redirectUrl = 'https://go-starter-ai.vercel.app/error.html?reason=access_token_missing';
             res.writeHead(302, { Location: redirectUrl });
