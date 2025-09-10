@@ -38,55 +38,61 @@ const createNewRepo = async (accessToken, repoName) => {
 };
 
 // Main handler for the Cloud Function.
-export default async function handler(event, res) {
-    const tempCode = event.queryStringParameters?.code;
-    const id = event.queryStringParameters?.id;
-    try {
-        const tokenResponse = await axios.post(
-            'https://github.com/login/oauth/access_token',
-            {
-                client_id: process.env.GITHUB_CLIENT_ID,
-                client_secret: process.env.GITHUB_CLIENT_SECRET,
-                code: tempCode,
-                redirect_uri: 'https://go-starter-ai.vercel.app/api/githubAuthFlow',
-            },
-            {
-                headers: { 'Accept': 'application/json' },
-            },
-        );
+// pages/api/github-oauth.js
 
-        const { access_token: accessToken } = tokenResponse.data;
-        if (!accessToken) {
-            const redirectUrl = `https://go-starter-ai.vercel.app/error.html?reason=access_token_missing&id=${id}`;
-            res.writeHead(302, { Location: redirectUrl });
-            res.end();
-            return;
-        }
-        const repoName = 'go-starter-ai-website-test'+Date.now();
-        const repoResult = await createNewRepo(accessToken, repoName);
+export default async function handler(req, res) {
+  // Only allow POST requests for security
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
 
-        if (repoResult.success) {
-            const successUrl = `https://go-starter-ai.vercel.app/success.html?repo_url=${repoResult.html_url}&full_name=${repoResult.full_name}&id=${id}`;
-            res.writeHead(302, { Location: successUrl });
-            res.end();
-        } else {
-            const errorUrl = `https://go-starter-ai.vercel.app/error.html?reason=repo_creation_failed&message=${encodeURIComponent(repoResult.error)}&id=${id}`;
-            res.writeHead(302, { Location: errorUrl });
-            res.end();
-        }
+  // Get the temporary code from the request body
+  const { code } = req.body;
 
-    } catch (error) {
-        console.error('Error during authentication or repository creation:');
-    if (error.response) {
-        // Log the detailed error from GitHub
-        console.error('GitHub API Response Status:', error.response.status);
-        console.error('GitHub API Response Data:', error.response.data);
-    } else {
-        console.error('Network Error:', error.message);
+  // Basic validation to ensure the code exists
+  if (!code) {
+    return res.status(400).json({ error: 'Temporary code is missing.' });
+  }
+
+  // Retrieve environment variables for security
+  const CLIENT_ID = process.env.GITHUB_CLIENT_ID;
+  const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+  const GITHUB_TOKEN_ENDPOINT = 'https://github.com/login/oauth/access_token';
+
+  try {
+    const response = await fetch(GITHUB_TOKEN_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json', // This tells GitHub to return a JSON response
+      },
+      body: JSON.stringify({
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+        code: code,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('GitHub token exchange failed:', errorData);
+      return res.status(response.status).json(errorData);
     }
-        console.error('Error during authentication or repository creation:', error);
-        const redirectUrl = `https://go-starter-ai.vercel.app/error.html?reason=internal_server_error&id=${id}`;
-        res.writeHead(302, { Location: redirectUrl });
-        res.end();
+
+    const data = await response.json();
+
+    // The permanent token is in the 'access_token' field
+    const accessToken = data.access_token;
+    
+    if (!accessToken) {
+      return res.status(500).json({ error: 'Access token not found in response.' });
     }
+
+    // Return the access token to your client-side application
+    res.status(200).json({ accessToken: accessToken });
+
+  } catch (error) {
+    console.error('Error during GitHub OAuth token exchange:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 }
