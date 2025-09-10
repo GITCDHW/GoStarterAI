@@ -26,7 +26,7 @@ Make educated guesses and create relevant, well-structured content based on the 
 DO NOT USE ANY ADDITIONAL TEXT,CODE DELIMITERS OR ANYTHING OR ANY OTHER TEXT,JUST PLAIN CODE
 `
     
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const result = await model.generateContent(masterPrompt);
     const response = await result.response;
     const text = response.text();
@@ -58,7 +58,7 @@ The market analysis must contain two distinct sections:
 DO NOT USE ANY ADDITIONAL TEXT,CODE DELIMITERS OR ANYTHING OR ANY OTHER TEXT,JUST PASTE DIRECT MARKET REPORT CONTENT
 `
     
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const result = await model.generateContent(masterPrompt);
     const response = await result.response;
     const text = response.text();
