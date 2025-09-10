@@ -76,6 +76,14 @@ export default async function handler(event, res) {
         }
 
     } catch (error) {
+        console.error('Error during authentication or repository creation:');
+    if (error.response) {
+        // Log the detailed error from GitHub
+        console.error('GitHub API Response Status:', error.response.status);
+        console.error('GitHub API Response Data:', error.response.data);
+    } else {
+        console.error('Network Error:', error.message);
+    }
         console.error('Error during authentication or repository creation:', error);
         const redirectUrl = `https://go-starter-ai.vercel.app/error.html?reason=internal_server_error&id=${id}`;
         res.writeHead(302, { Location: redirectUrl });
