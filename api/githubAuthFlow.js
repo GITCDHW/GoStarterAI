@@ -62,7 +62,7 @@ export default async function handler(event, res) {
             res.end();
             return;
         }
-        const repoName = 'go-starter-ai-website-' + id;
+        const repoName = 'go-starter-ai-website-test'+Date.now();
         const repoResult = await createNewRepo(accessToken, repoName);
 
         if (repoResult.success) {
