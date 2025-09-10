@@ -4,7 +4,6 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY);
 //code generation 
 async function generateCode(prompt,name) {
-      // Select the model
     const masterPrompt = `You are an expert frontend developer specializing in clean, modern, and highly-efficient web design. Your goal is to create a fully responsive, mobile-friendly landing page in a single file. Use **plain HTML, CSS, and Javascript** and strictly adhere to the **Tailwind CSS** framework with a clean, utility-first approach. Do not write any custom CSS outside of the Tailwind classes.
 
 **IMPORTANT CONSTRAINT: Do not use any irrelevant images or visual assets,if you have to use then ONLY USE IMAGES THAT ARE RELEVANT TO THE TOPIC.Use color, typography, and spacing to create a visually appealing design.**
