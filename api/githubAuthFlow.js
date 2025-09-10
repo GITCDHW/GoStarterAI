@@ -56,7 +56,6 @@ export default async function handler(event, res) {
         );
 
         const { access_token: accessToken } = tokenResponse.data;
-        console.log("access token:"+access_token)
         if (!accessToken) {
             const redirectUrl = `https://go-starter-ai.vercel.app/error.html?reason=access_token_missing&id=${id}`;
             res.writeHead(302, { Location: redirectUrl });
