@@ -41,14 +41,6 @@ const createNewRepo = async (accessToken, repoName) => {
 export default async function handler(event, res) {
     const tempCode = event.queryStringParameters?.code;
     const id = event.queryStringParameters?.id;
-
-    if (!tempCode) {
-        const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo,user:email&id=${id}`;
-        res.writeHead(302, { Location: githubAuthUrl });
-        res.end();
-        return;
-    }
-
     try {
         const tokenResponse = await axios.post(
             'https://github.com/login/oauth/access_token',
@@ -70,10 +62,6 @@ export default async function handler(event, res) {
             res.end();
             return;
         }
-
-        // Successfully received access token. Now, you should use it.
-        // Assume you have a way to get the business name, for example, from a database using the 'id'.
-        // For this example, let's use a hardcoded name.
         const repoName = 'go-starter-ai-website-' + id;
         const repoResult = await createNewRepo(accessToken, repoName);
 
