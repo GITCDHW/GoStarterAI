@@ -38,23 +38,19 @@ const createNewRepo = async (accessToken, repoName) => {
 };
 
 // Main handler for the Cloud Function.
-// Main handler for the Cloud Function.
-export default async function handler(event, res) { // Note the added `res` parameter
-    // Extract the authorization code and state from the query parameters.
+export default async function handler(event, res) {
     const tempCode = event.queryStringParameters?.code;
     const id = event.queryStringParameters?.id;
 
-    // If no authorization code is present, it's a direct visit or an error from GitHub.
     if (!tempCode) {
         const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo,user:email&id=${id}`;
-        // Set the status code and Location header for the redirect.
         res.writeHead(302, { Location: githubAuthUrl });
         res.end();
         return;
     }
 
     try {
-        const response = await axios.post(
+        const tokenResponse = await axios.post(
             'https://github.com/login/oauth/access_token',
             {
                 client_id: process.env.GITHUB_CLIENT_ID,
@@ -66,19 +62,34 @@ export default async function handler(event, res) { // Note the added `res` para
                 headers: { 'Accept': 'application/json' },
             },
         );
-        console.log('GitHub access token response:', response.data);
-        
-        const { access_token: accessToken } = response.data;
-        console.log("access_token:",access_token)
+
+        const { access_token: accessToken } = tokenResponse.data;
         if (!accessToken) {
-            const redirectUrl = 'https://go-starter-ai.vercel.app/error.html?reason=access_token_missing';
+            const redirectUrl = `https://go-starter-ai.vercel.app/error.html?reason=access_token_missing&id=${id}`;
             res.writeHead(302, { Location: redirectUrl });
             res.end();
             return;
         }
+
+        // Successfully received access token. Now, you should use it.
+        // Assume you have a way to get the business name, for example, from a database using the 'id'.
+        // For this example, let's use a hardcoded name.
+        const repoName = 'go-starter-ai-website-' + id;
+        const repoResult = await createNewRepo(accessToken, repoName);
+
+        if (repoResult.success) {
+            const successUrl = `https://go-starter-ai.vercel.app/success.html?repo_url=${repoResult.html_url}&full_name=${repoResult.full_name}&id=${id}`;
+            res.writeHead(302, { Location: successUrl });
+            res.end();
+        } else {
+            const errorUrl = `https://go-starter-ai.vercel.app/error.html?reason=repo_creation_failed&message=${encodeURIComponent(repoResult.error)}&id=${id}`;
+            res.writeHead(302, { Location: errorUrl });
+            res.end();
+        }
+
     } catch (error) {
-        console.error('Error during authentication flow:', error);
-        const redirectUrl = 'https://go-starter-ai.vercel.app/error.html?reason=internal_server_error';
+        console.error('Error during authentication or repository creation:', error);
+        const redirectUrl = `https://go-starter-ai.vercel.app/error.html?reason=internal_server_error&id=${id}`;
         res.writeHead(302, { Location: redirectUrl });
         res.end();
     }
