@@ -43,16 +43,18 @@ auth.onAuthStateChanged(user => {
 
     // Attach event listener for the payment button.
     document.getElementById('pay-button').addEventListener("click", () => {
-      window.location.href = `https://github.com/login/oauth/authorize?client_id=Ov23linWOyvfwx9QlrcC&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo&id=${id}`;
+      window.location.href = `https://github.com/login/oauth/authorize?client_id=Ov23linWOyvfwx9QlrcC&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo&id=${id}&user=${user.uid}`;
     });
 
     const businessRef = db.ref(`users/${user.uid}/businesses/${id}`);
     businessRef.once("value").then(snapshot => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        document.getElementById("website-preview-iframe").srcdoc = data.websiteCode;
-        document.getElementById("business-name").innerHTML = data.businessName;
-      }
+        if (data.isHosted===false) {
+          document.getElementById("website-preview-iframe").srcdoc = data.websiteCode;
+document.getElementById("business-name").innerHTML = data.businessName;
+}
+        }
     });
   } else {
     window.location.href = 'index.html';

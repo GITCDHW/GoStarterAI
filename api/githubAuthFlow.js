@@ -1,4 +1,28 @@
+//import required modules
 import axios from 'axios';
+import admin from 'firebase-admin';
+
+const serviceAccount = {
+    "type": "service_account",
+    "project_id": "gostarterai",
+    "private_key": process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    "client_email": "firebase-adminsdk-fbsvc@gostarterai.iam.gserviceaccount.com",
+    "private_key_id": process.env.FIREBASE_PRIVATE_KEY_ID, 
+    "client_id": process.env.FIREBASE_CLIENT_ID,
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40gostarterai.iam.gserviceaccount.com",
+    "universe_domain": "googleapis.com"
+};
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: "https://gostarterai-default-rtdb.firebaseio.com",
+    });
+}
+
+const db = admin.database()
 /**
  * A utility function to make a request to GitHub to create a new repository.
  * @param {string} accessToken - The GitHub access token for the authenticated user.
@@ -47,8 +71,16 @@ export default async function handler(req, res) {
   }
 
   // Get the temporary code from the request body
-  const { code } = req.query;
-
+  const { code,id,user } = req.query;
+  const currentBusinessRef = db.ref(`users/${user}/businesses/${id}`)
+  const businessRef = db.ref(`users/${user}/businesses/${id}`);
+  
+    const businessSnapshot = await businessRef.once('value');
+    if (!businessSnapshot.exists()) {
+      return res.status(404).json({ error: 'Business not found.' });
+    }
+    const businessData = businessSnapshot.val();
+    const repoName = businessData.businessName.toLowerCase().replace(/\s+/g, '-');
   // Basic validation to ensure the code exists
   if (!code) {
     return res.status(400).json({ error: 'Temporary code is missing.' });
@@ -87,9 +119,20 @@ export default async function handler(req, res) {
     if (!accessToken) {
       return res.status(500).json({ error: 'Access token not found in response.' });
     }
+    const repoCreationResult = await createNewRepo(accessToken, repoName);
 
-    // Return the access token to your client-side application
-    res.status(200).json({ accessToken: accessToken });
+if (repoCreationResult.success) {
+    // Step 4: Update the business record in Firebase with hosting info
+    await businessRef.update({
+        isHosted: true,
+        hostedUrl: repoCreationResult.html_url,
+    });
+    // Step 5: Redirect the user to a success page
+    return res.redirect(`https://go-starter-ai.vercel.app/dashboard.html?id=${id}`);
+} else {
+    console.error('Failed to create repository:', repoCreationResult.error);
+    return res.status(500).json({ error: repoCreationResult.error });
+}
 
   } catch (error) {
     console.error('Error during GitHub OAuth token exchange:', error);
