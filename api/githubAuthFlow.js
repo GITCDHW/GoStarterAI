@@ -62,30 +62,40 @@ const createNewRepo = async (accessToken, repoName) => {
 };
 
 // Main handler for the Cloud Function.
-// pages/api/github-oauth.js
-
 export default async function handler(req, res) {
-  // Only allow POST requests for security
-  if (req.method !== "POST" && req.method !== "GET") {
+  // Only allow GET requests, as GitHub redirects with GET
+  if (req.method !== "GET") {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // Get the temporary code from the request body
-  const { code,id,user } = req.query;
-  const currentBusinessRef = db.ref(`users/${user}/businesses/${id}`)
-  const businessRef = db.ref(`users/${user}/businesses/${id}`);
+  // Get the temporary code and state from the request query
+  const { code, state } = req.query;
   
-    const businessSnapshot = await businessRef.once('value');
-    if (!businessSnapshot.exists()) {
-      return res.status(404).json({ error: 'Business not found.' });
-    }
-    const businessData = businessSnapshot.val();
-    const repoName = businessData.businessName.toLowerCase().replace(/\s+/g, '-');
-  // Basic validation to ensure the code exists
-  if (!code) {
-    return res.status(400).json({ error: 'Temporary code is missing.' });
+  // Basic validation to ensure both code and state exist
+  if (!code || !state) {
+    return res.status(400).json({ error: 'Temporary code or state is missing.' });
   }
 
+  // Retrieve the stored data using the state parameter
+  const stateRef = db.ref(`oauth_states/${state}`);
+  const stateSnapshot = await stateRef.once('value');
+  
+  if (!stateSnapshot.exists()) {
+    return res.status(400).json({ error: 'Invalid or expired state parameter.' });
+  }
+
+  // Get the user and business IDs from the stored state data
+  const { userId, businessId } = stateSnapshot.val();
+  await stateRef.remove();
+  const businessRef = db.ref(`users/${userId}/businesses/${businessId}`);
+  
+  const businessSnapshot = await businessRef.once('value');
+  if (!businessSnapshot.exists()) {
+    return res.status(404).json({ error: 'Business not found.' });
+  }
+  const businessData = businessSnapshot.val();
+  const repoName = businessData.businessName.toLowerCase().replace(/\s+/g, '-');
+  
   // Retrieve environment variables for security
   const CLIENT_ID = process.env.GITHUB_CLIENT_ID;
   const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
@@ -119,20 +129,20 @@ export default async function handler(req, res) {
     if (!accessToken) {
       return res.status(500).json({ error: 'Access token not found in response.' });
     }
+
     const repoCreationResult = await createNewRepo(accessToken, repoName);
 
-if (repoCreationResult.success) {
-    // Step 4: Update the business record in Firebase with hosting info
-    await businessRef.update({
+    if (repoCreationResult.success) {
+      await businessRef.update({
         isHosted: true,
         hostedUrl: repoCreationResult.html_url,
-    });
-    // Step 5: Redirect the user to a success page
-    return res.redirect(`https://go-starter-ai.vercel.app/dashboard.html?id=${id}`);
-} else {
-    console.error('Failed to create repository:', repoCreationResult.error);
-    return res.status(500).json({ error: repoCreationResult.error });
-}
+      });
+      // Redirect the user to a success page using the businessId retrieved from the state
+      return res.redirect(`https://go-starter-ai.vercel.app/dashboard.html?id=${businessId}`);
+    } else {
+      console.error('Failed to create repository:', repoCreationResult.error);
+      return res.status(500).json({ error: repoCreationResult.error });
+    }
 
   } catch (error) {
     console.error('Error during GitHub OAuth token exchange:', error);
