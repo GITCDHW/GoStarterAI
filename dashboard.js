@@ -34,8 +34,15 @@ auth.onAuthStateChanged(user => {
     const urlparams = new URLSearchParams(window.location.search);
     const id = urlparams.get('id');
 
-    // Attach event listener for the payment button.
-    document.getElementById('pay-button').addEventListener("click", async () => {
+    const businessRef = db.ref(`users/${user.uid}/businesses/${id}`);
+    businessRef.once("value").then(snapshot => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        if (data.isHosted === false) {
+          document.getElementById("website-preview-iframe").srcdoc = data.websiteCode;
+          document.getElementById("business-name").innerHTML = data.businessName;
+          
+              document.getElementById('pay-button').addEventListener("click", async () => {
       // 1. Generate a secure state parameter
       const state = generateSecureKey(32); 
 
@@ -57,13 +64,6 @@ auth.onAuthStateChanged(user => {
       }
     });
 
-    const businessRef = db.ref(`users/${user.uid}/businesses/${id}`);
-    businessRef.once("value").then(snapshot => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        if (data.isHosted === false) {
-          document.getElementById("website-preview-iframe").srcdoc = data.websiteCode;
-          document.getElementById("business-name").innerHTML = data.businessName;
         }
       }
     });
