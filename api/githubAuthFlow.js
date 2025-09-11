@@ -42,12 +42,12 @@ const createNewRepo = async (accessToken, repoName) => {
 
 export default async function handler(req, res) {
   // Only allow POST requests for security
-  if (req.method !== 'POST') {
+  if (req.method !== "POST" && req.method !== "GET") {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   // Get the temporary code from the request body
-  const { code } = req.body;
+  const { code } = req.query;
 
   // Basic validation to ensure the code exists
   if (!code) {
