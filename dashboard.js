@@ -53,7 +53,7 @@ auth.onAuthStateChanged(user => {
         await stateRef.set({
           userId: user.uid,
           businessId: id,
-          timestamp: admin.database.ServerValue.TIMESTAMP
+          timestamp: db.ServerValue.TIMESTAMP
         });
 
         // 3. Redirect the user to GitHub with the `state` parameter
