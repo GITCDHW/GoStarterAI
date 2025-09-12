@@ -42,7 +42,7 @@ auth.onAuthStateChanged(user => {
           document.getElementById("website-preview-iframe").srcdoc = data.websiteCode;
           document.getElementById("business-name").innerHTML = data.businessName;
           document.querySelector(".full-screen-dashboard").style.display="flex"
-          document.querySelector(".full-screen-dashboard").style.display="none"
+          document.querySelector(".loader").style.display="none"
           document.getElementById('pay-button').addEventListener("click", async () => {
             // 1. Generate a secure state parameter
             const state = generateSecureKey(32);
