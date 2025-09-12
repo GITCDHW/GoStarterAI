@@ -35,6 +35,27 @@ auth.onAuthStateChanged(user => {
     const id = urlparams.get('id');
     
     const businessRef = db.ref(`users/${user.uid}/businesses/${id}`);
+         document.getElementById('pay-button').addEventListener("click", async () => {
+       // 1. Generate a secure state parameter
+       const state = generateSecureKey(32);
+       
+       // 2. Store the state and associated data in Firebase
+       // This allows your backend to retrieve the user and business ID later
+       const stateRef = db.ref(`oauth_states/${state}`);
+       try {
+         await stateRef.set({
+           userId: user.uid,
+           businessId: id,
+         });
+         
+         // 3. Redirect the user to GitHub with the `state` parameter
+         window.location.href = `https://github.com/login/oauth/authorize?client_id=Ov23linWOyvfwx9QlrcC&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo&state=${state}`;
+       } catch (error) {
+         console.error("Failed to store state in database:", error);
+         alert("An error occurred. Please try again.");
+       }
+     });
+     
     businessRef.once("value").then(snapshot => {
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -43,27 +64,6 @@ auth.onAuthStateChanged(user => {
           document.getElementById("business-name").innerHTML = data.businessName;
           document.querySelector(".full-screen-dashboard").style.display="flex"
           document.querySelector(".loader").style.display="none"
-          document.getElementById('pay-button').addEventListener("click", async () => {
-            // 1. Generate a secure state parameter
-            const state = generateSecureKey(32);
-            
-            // 2. Store the state and associated data in Firebase
-            // This allows your backend to retrieve the user and business ID later
-            const stateRef = db.ref(`oauth_states/${state}`);
-            try {
-              await stateRef.set({
-                userId: user.uid,
-                businessId: id,
-              });
-              
-              // 3. Redirect the user to GitHub with the `state` parameter
-              window.location.href = `https://github.com/login/oauth/authorize?client_id=Ov23linWOyvfwx9QlrcC&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo&state=${state}`;
-            } catch (error) {
-              console.error("Failed to store state in database:", error);
-              alert("An error occurred. Please try again.");
-            }
-          });
-          
         }
       }
     });
