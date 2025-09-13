@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
         const state = generateSecureKey(32);
         
         // 2. Store the state and associated data in Firebase
+        
         const stateRef = db.ref(`oauth_states/${state}`);
         try {
           await stateRef.set({
