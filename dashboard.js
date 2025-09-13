@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
           });
           
           // 3. Redirect the user to GitHub with the `state` parameter
-          window.location.href = `https://github.com/login/oauth/authorize?client_id=Ov23linWOyvfwx9QlrcC&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo&state=${state}`;
+          window.location.href = `https://github.com/login/oauth/authorize?client_id=Ov23lizZuAlUUkJtG5sd&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo&state=${state}`;
         } catch (error) {
           console.error("Failed to store state in database:", error);
           alert("An error occurred. Please try again.");
