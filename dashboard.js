@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
         if (snapshot.exists()) {
           const data = snapshot.val();
           if (data.isHosted === false) {
-            document.querySelector(".full-screen-dashboard").style.display = "flex"
+            document.querySelector("#container").style.display = "flex"
             document.getElementById("website-preview-iframe").srcdoc = data.websiteCode;
             document.getElementById("business-name").innerHTML = data.businessName;          }
         }

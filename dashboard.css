@@ -18,6 +18,9 @@ body {
 }
 
 /* Dashboard Container */
+#container{
+    display:none!important;
+}
 .full-screen-dashboard {
     background-color: #FFFFFF; /* Clean White Background */
     width: 100%;
@@ -28,7 +31,7 @@ body {
     justify-content: flex-start;
     padding-top: 5vh; /* Adjusted padding for better spacing */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Subtle shadow for depth */
-    display:none;
+    display:flex;
 }
 
 /* Headings and Text */
