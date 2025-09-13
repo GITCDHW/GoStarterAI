@@ -43,7 +43,6 @@ document.addEventListener("DOMContentLoaded", (e) => {
         const state = generateSecureKey(32);
         
         // 2. Store the state and associated data in Firebase
-        // This allows your backend to retrieve the user and business ID later
         const stateRef = db.ref(`oauth_states/${state}`);
         try {
           await stateRef.set({
@@ -63,11 +62,9 @@ document.addEventListener("DOMContentLoaded", (e) => {
         if (snapshot.exists()) {
           const data = snapshot.val();
           if (data.isHosted === false) {
-            document.getElementById("website-preview-iframe").srcdoc = data.websiteCode;
-            document.getElementById("business-name").innerHTML = data.businessName;
             document.querySelector(".full-screen-dashboard").style.display = "flex"
-            document.querySelector(".loader").style.display = "none"
-          }
+            document.getElementById("website-preview-iframe").srcdoc = data.websiteCode;
+            document.getElementById("business-name").innerHTML = data.businessName;          }
         }
       });
     } else {
