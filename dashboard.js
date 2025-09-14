@@ -11,7 +11,6 @@ function getRandomValues(array) {
   }
 }
 
-
 // Function to convert a number to a 2-digit hex string
 function toHex(c) {
   const hex = c.toString(16);
@@ -29,47 +28,54 @@ function generateSecureKey(length) {
   return key;
 }
 
-document.querySelector(".full-screen-dashboard").style.display = "flex"
+document.querySelector(".full-screen-dashboard").style.display = "flex";
 document.addEventListener("DOMContentLoaded", (e) => {
-  e.preventDefault()
+  e.preventDefault();
   auth.onAuthStateChanged(user => {
     if (user) {
       const urlparams = new URLSearchParams(window.location.search);
       const id = urlparams.get('id');
-      
+
       const businessRef = db.ref(`users/${user.uid}/businesses/${id}`);
       document.getElementById('pay-button').addEventListener("click", async () => {
-        // 1. Generate a secure state parameter
-        const state = generateSecureKey(32);
-        
-        // 2. Store the state and associated data in Firebase
-        
-        const stateRef = db.ref(`oauth_states/${state}`);
         try {
+          // 1. Get the Firebase ID token for authentication
+          const idToken = await user.getIdToken();
+
+          // 2. Generate a secure state parameter
+          const state = generateSecureKey(32);
+
+          // 3. Store the state and associated data (including the ID token) in Firebase
+          const stateRef = db.ref(`oauth_states/${state}`);
           await stateRef.set({
             userId: user.uid,
             businessId: id,
+            idToken: idToken,
+            timestamp: new Date().getTime() // Optional: add timestamp for cleanup
           });
-          
-          // 3. Redirect the user to GitHub with the `state` parameter
-          window.location.href = `https://github.com/login/oauth/authorize?client_id=Ov23lizZuAlUUkJtG5sd&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo&state=${state}`;
+
+          // 4. Redirect the user to GitHub with the state parameter
+          const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=Ov23lizZuAlUUkJtG5sd&redirect_uri=https://go-starter-ai.vercel.app/api/githubAuthFlow&scope=repo&state=${state}`;
+          window.location.href = githubAuthUrl;
+
         } catch (error) {
-          console.error("Failed to store state in database:", error);
+          console.error("Failed to store state or get ID token:", error);
           alert("An error occurred. Please try again.");
         }
       });
-      
+
       businessRef.once("value").then(snapshot => {
         if (snapshot.exists()) {
           const data = snapshot.val();
           if (data.isHosted === false) {
-            document.querySelector("#container").style.display = "block"
+            document.querySelector("#container").style.display = "block";
             document.getElementById("website-preview-iframe").srcdoc = data.websiteCode;
-            document.getElementById("business-name").innerHTML = data.businessName;          }
+            document.getElementById("business-name").innerHTML = data.businessName;
+          }
         }
       });
     } else {
       window.location.href = 'index.html';
     }
   });
-})
+});
