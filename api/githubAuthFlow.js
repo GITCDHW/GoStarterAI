@@ -67,50 +67,6 @@ const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => 
     }
 };
 
-/**
- * Pushes HTML and GitHub Actions workflow files to a new repository.
- * @param {string} accessToken - The GitHub access token.
- * @param {string} repoOwner - The owner of the repository (e.g., the authenticated user's username).
- * @param {string} repoName - The name of the repository.
- * @param {string} websiteCode - The HTML content to be pushed.
- * @returns {Promise<object>} A success status or an error message.
- */
-const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => {
-    try {
-        const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
-        const headers = {
-            'Authorization': `token ${accessToken}`,
-            'Content-Type': 'application/json',
-        };
-
-        const commitMessage = 'Initial commit: Add website code and deploy workflow';
-
-        // 1. Create index.html file
-        const htmlPayload = {
-            message: commitMessage,
-            content: Buffer.from(websiteCode).toString('base64'),
-        };
-        await axios.put(apiUrl + 'index.html', htmlPayload, { headers });
-
-        // 2. Create GitHub Pages workflow file
-        const workflowContent = `name: Deploy to GitHub Pages\n\non:\n  push:\n    branches:\n      - main\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout\n        uses: actions/checkout@v4\n\n      - name: Setup Pages\n        id: pages\n        uses: actions/configure-pages@v3\n\n      - name: Upload artifact\n        uses: actions/upload-pages-artifact@v2\n        with:\n          path: './'\n\n      - name: Deploy to GitHub Pages\n        id: deployment\n        uses: actions/deploy-pages@v1`;
-        
-        const workflowPayload = {
-            message: commitMessage,
-            content: Buffer.from(workflowContent).toString('base64'),
-            branch: 'main'
-        };
-        await axios.put(apiUrl + '.github/workflows/deploy.yml', workflowPayload, { headers });
-
-        console.log("Code and workflow pushed successfully.");
-        return { success: true };
-    } catch (error) {
-        console.error('Error pushing code to repository:', error.response?.data?.message || error.message);
-        return { success: false, error: error.response?.data?.message || 'An unknown error occurred.' };
-    }
-};
-
-
 // Main handler for the Cloud Function.
 export default async function handler(req, res) {
   if (req.method !== "GET") {
