@@ -183,6 +183,7 @@ export default async function handler(req, res) {
   const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
   const GITHUB_TOKEN_ENDPOINT = 'https://github.com/login/oauth/access_token';
   
+  let accessToken;
   try {
     const response = await fetch(GITHUB_TOKEN_ENDPOINT, {
       method: 'POST',
@@ -204,40 +205,42 @@ export default async function handler(req, res) {
     }
     
     const data = await response.json();
-    const accessToken = data.access_token;
+    accessToken = data.access_token;
     
     if (!accessToken) {
       return res.status(500).json({ error: 'Access token not found in response.' });
     }
     
-    const repoCreationResult = await createNewRepo(accessToken, repoName);
-    
-    if (repoCreationResult.success) {
-      const owner = repoCreationResult.full_name.split("/")[0];
-      
-      // Wait for the push operation to complete and check its result
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      const pushResult = await pushCodeToRepo(accessToken, owner, repoName, businessData.websiteCode);
-      
-      if (pushResult.success) {
-        await businessRef.update({
-          isHosted: true,
-          hostedUrl: `https://${owner}.github.io/${repoName}`,
-        });
-        
-        return res.redirect(`https://go-starter-ai.vercel.app/dashboard.html?id=${businessId}`);
-      } else {
-        console.error('Failed to push code to repository:', pushResult.error);
-        return res.status(500).json({ error: `Repository created, but code push failed: ${pushResult.error}` });
-      }
-    } else {
-      console.error('Failed to create repository:', repoCreationResult.error);
-      return res.status(500).json({ error: repoCreationResult.error });
-    }
-    
   } catch (error) {
     console.error('Error during GitHub OAuth token exchange:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: 'Internal Server Error during token exchange.' });
+  }
+  
+  // Now that we have the access token, we can proceed with creating the repo.
+  const repoCreationResult = await createNewRepo(accessToken, repoName);
+  
+  if (repoCreationResult.success) {
+    const owner = repoCreationResult.full_name.split("/")[0];
+    
+    // Wait for the push operation to complete and check its result
+
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    const pushResult = await pushCodeToRepo(accessToken, owner, repoName, businessData.websiteCode);
+    
+    if (pushResult.success) {
+      await businessRef.update({
+        isHosted: true,
+        hostedUrl: `https://${owner}.github.io/${repoName}`,
+      });
+      
+      return res.redirect(`https://go-starter-ai.vercel.app/dashboard.html?id=${businessId}`);
+    } else {
+      console.error('Failed to push code to repository:', pushResult.error);
+      return res.status(500).json({ error: `Repository created, but code push failed: ${pushResult.error}` });
+    }
+  } else {
+    console.error('Failed to create repository:', repoCreationResult.error);
+    return res.status(500).json({ error: repoCreationResult.error });
   }
 }
