@@ -66,7 +66,7 @@ const createNewRepo = async (accessToken, repoName) => {
 
 
 /**
- * Pushes HTML and GitHub Actions workflow files to a new repository.
+ * Pushes HTML and GitHub Actions workflow files to a new repository in a single commit.
  * @param {string} accessToken - The GitHub access token.
  * @param {string} repoOwner - The owner of the repository.
  * @param {string} repoName - The name of the repository.
@@ -74,34 +74,57 @@ const createNewRepo = async (accessToken, repoName) => {
  * @returns {Promise<object>} A success status or an error message.
  */
 const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => {
+    const headers = {
+        'Authorization': `token ${accessToken}`,
+        'Accept': 'application/vnd.github.v3+json',
+    };
+    const commitMessage = 'Initial commit: Add website code and deploy workflow';
+    const baseUrl = `https://api.github.com/repos/${repoOwner}/${repoName}`;
+
     try {
-        const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
-        const headers = {
-            'Authorization': `token ${accessToken}`,
-            'Content-Type': 'application/json',
-        };
-        const commitMessage = 'Initial commit: Add website code and deploy workflow';
-
-        // 1. Create index.html file. This commit will automatically create the 'main' branch.
-        const htmlPayload = {
-            message: commitMessage,
-            content: Buffer.from(websiteCode).toString('base64'),
-        };
-        await axios.put(apiUrl + 'index.html', htmlPayload, { headers });
-        console.log("index.html pushed successfully.");
-
-        // 2. Create GitHub Pages workflow file.
+        // Define the workflow content
         const workflowContent = `name: Deploy to GitHub Pages\n\non:\n  push:\n    branches:\n      - main\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout\n        uses: actions/checkout@v4\n\n      - name: Setup Pages\n        id: pages\n        uses: actions/configure-pages@v3\n\n      - name: Upload artifact\n        uses: actions/upload-pages-artifact@v2\n        with:\n          path: './'\n\n      - name: Deploy to GitHub Pages\n        id: deployment\n        uses: actions/deploy-pages@v1`;
 
-        const workflowPayload = {
-            message: commitMessage,
-            content: Buffer.from(workflowContent).toString('base64'),
-            branch: 'main' // Explicitly specify the branch to prevent race conditions
-        };
-        await axios.put(apiUrl + '.github/workflows/deploy.yml', workflowPayload, { headers });
+        // Step 1: Create a "tree" object with the files to be added.
+        // A tree represents a directory structure in Git.
+        const treeResponse = await axios.post(`${baseUrl}/git/trees`, {
+            tree: [
+                {
+                    path: 'index.html',
+                    mode: '100644',
+                    type: 'blob',
+                    content: websiteCode,
+                },
+                {
+                    path: '.github/workflows/deploy.yml',
+                    mode: '100644',
+                    type: 'blob',
+                    content: workflowContent,
+                }
+            ],
+        }, { headers });
 
-        console.log("Code and workflow pushed successfully.");
+        const treeSha = treeResponse.data.sha;
+
+        // Step 2: Create the commit.
+        // Since this is the first commit, it has no parents.
+        const commitResponse = await axios.post(`${baseUrl}/git/commits`, {
+            message: commitMessage,
+            tree: treeSha,
+            parents: [], // No parents for the initial commit
+        }, { headers });
+
+        const commitSha = commitResponse.data.sha;
+
+        // Step 3: Create the 'main' branch and point it to the new commit.
+        await axios.post(`${baseUrl}/git/refs`, {
+            ref: 'refs/heads/main',
+            sha: commitSha,
+        }, { headers });
+
+        console.log("Code and workflow pushed successfully in a single commit.");
         return { success: true };
+
     } catch (error) {
         const errorMessage = error.response?.data?.message || error.message;
         console.error(`Error pushing code to repository: ${errorMessage}`, error.response?.data);
