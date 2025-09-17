@@ -81,7 +81,7 @@ const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => 
   const commitMessage = 'Initial commit: Add website code and deploy workflow';
   const baseUrl = `https://api.github.com/repos/${repoOwner}/${repoName}`;
   
-  for (var i; i < 6; i++) {
+  for (let i=0; i < 6; i++) {
     try {
       // Define the workflow content
       const workflowContent = `name: Deploy to GitHub Pages\n\non:\n  push:\n    branches:\n      - main\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout\n        uses: actions/checkout@v4\n\n      - name: Setup Pages\n        id: pages\n        uses: actions/configure-pages@v3\n\n      - name: Upload artifact\n        uses: actions/upload-pages-artifact@v2\n        with:\n          path: './'\n\n      - name: Deploy to GitHub Pages\n        id: deployment\n        uses: actions/deploy-pages@v1`;
