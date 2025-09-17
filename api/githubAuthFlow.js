@@ -3,24 +3,24 @@ import axios from 'axios';
 import admin from 'firebase-admin';
 
 const serviceAccount = {
-    "type": "service_account",
-    "project_id": "gostarterai",
-    "private_key": process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    "client_email": "firebase-adminsdk-fbsvc@gostarterai.iam.gserviceaccount.com",
-    "private_key_id": process.env.FIREBASE_PRIVATE_KEY_ID,
-    "client_id": process.env.FIREBASE_CLIENT_ID,
-    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-    "token_uri": "https://oauth2.googleapis.com/token",
-    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40gostarterai.iam.gserviceaccount.com",
-    "universe_domain": "googleapis.com"
+  "type": "service_account",
+  "project_id": "gostarterai",
+  "private_key": process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+  "client_email": "firebase-adminsdk-fbsvc@gostarterai.iam.gserviceaccount.com",
+  "private_key_id": process.env.FIREBASE_PRIVATE_KEY_ID,
+  "client_id": process.env.FIREBASE_CLIENT_ID,
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40gostarterai.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
 };
 
 if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        databaseURL: "https://gostarterai-default-rtdb.firebaseio.com",
-    });
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://gostarterai-default-rtdb.firebaseio.com",
+  });
 }
 
 const db = admin.database();
@@ -43,9 +43,9 @@ const createNewRepo = async (accessToken, repoName) => {
       'Authorization': `token ${accessToken}`,
       'Content-Type': 'application/json',
     };
-
+    
     const response = await axios.post(apiUrl, requestBody, { headers: requestHeaders });
-
+    
     if (response.status === 201) {
       console.log(`Repository '${repoName}' created successfully.`);
       return {
@@ -57,7 +57,7 @@ const createNewRepo = async (accessToken, repoName) => {
       console.error(`Error creating repository. Status code: ${response.status}`);
       return { success: false, error: 'Unexpected status code from GitHub API.' };
     }
-
+    
   } catch (error) {
     console.error('Error creating new repository:', error.response?.data?.message || error.message);
     return { success: false, error: error.response?.data?.message || 'An unknown error occurred.' };
@@ -74,86 +74,87 @@ const createNewRepo = async (accessToken, repoName) => {
  * @returns {Promise<object>} A success status or an error message.
  */
 const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => {
-    const headers = {
-        'Authorization': `token ${accessToken}`,
-        'Accept': 'application/vnd.github.v3+json',
-    };
-    const commitMessage = 'Initial commit: Add website code and deploy workflow';
-    const baseUrl = `https://api.github.com/repos/${repoOwner}/${repoName}`;
-
+  const headers = {
+    'Authorization': `token ${accessToken}`,
+    'Accept': 'application/vnd.github.v3+json',
+  };
+  const commitMessage = 'Initial commit: Add website code and deploy workflow';
+  const baseUrl = `https://api.github.com/repos/${repoOwner}/${repoName}`;
+  
+  for (var i; i < 6; i++) {
     try {
-        // Define the workflow content
-        const workflowContent = `name: Deploy to GitHub Pages\n\non:\n  push:\n    branches:\n      - main\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout\n        uses: actions/checkout@v4\n\n      - name: Setup Pages\n        id: pages\n        uses: actions/configure-pages@v3\n\n      - name: Upload artifact\n        uses: actions/upload-pages-artifact@v2\n        with:\n          path: './'\n\n      - name: Deploy to GitHub Pages\n        id: deployment\n        uses: actions/deploy-pages@v1`;
-
-        // Step 1: Create a "tree" object with the files to be added.
-        // A tree represents a directory structure in Git.
-        const treeResponse = await axios.post(`${baseUrl}/git/trees`, {
-            tree: [
-                {
-                    path: 'index.html',
-                    mode: '100644',
-                    type: 'blob',
-                    content: websiteCode,
-                },
-                {
-                    path: '.github/workflows/deploy.yml',
-                    mode: '100644',
-                    type: 'blob',
-                    content: workflowContent,
-                }
-            ],
-        }, { headers });
-
-        const treeSha = treeResponse.data.sha;
-
-        // Step 2: Create the commit.
-        // Since this is the first commit, it has no parents.
-        const commitResponse = await axios.post(`${baseUrl}/git/commits`, {
-            message: commitMessage,
-            tree: treeSha,
-            parents: [], // No parents for the initial commit
-        }, { headers });
-
-        const commitSha = commitResponse.data.sha;
-
-        // Step 3: Create the 'main' branch and point it to the new commit.
-        await axios.post(`${baseUrl}/git/refs`, {
-            ref: 'refs/heads/main',
-            sha: commitSha,
-        }, { headers });
-
-        console.log("Code and workflow pushed successfully in a single commit.");
-        return { success: true };
-
+      // Define the workflow content
+      const workflowContent = `name: Deploy to GitHub Pages\n\non:\n  push:\n    branches:\n      - main\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout\n        uses: actions/checkout@v4\n\n      - name: Setup Pages\n        id: pages\n        uses: actions/configure-pages@v3\n\n      - name: Upload artifact\n        uses: actions/upload-pages-artifact@v2\n        with:\n          path: './'\n\n      - name: Deploy to GitHub Pages\n        id: deployment\n        uses: actions/deploy-pages@v1`;
+      
+      // Step 1: Create a "tree" object with the files to be added.
+      // A tree represents a directory structure in Git.
+      const treeResponse = await axios.post(`${baseUrl}/git/trees`, {
+        tree: [
+        {
+          path: 'index.html',
+          mode: '100644',
+          type: 'blob',
+          content: websiteCode,
+        },
+        {
+          path: '.github/workflows/deploy.yml',
+          mode: '100644',
+          type: 'blob',
+          content: workflowContent,
+        }],
+      }, { headers });
+      
+      const treeSha = treeResponse.data.sha;
+      
+      // Step 2: Create the commit.
+      // Since this is the first commit, it has no parents.
+      const commitResponse = await axios.post(`${baseUrl}/git/commits`, {
+        message: commitMessage,
+        tree: treeSha,
+        parents: [], // No parents for the initial commit
+      }, { headers });
+      
+      const commitSha = commitResponse.data.sha;
+      
+      // Step 3: Create the 'main' branch and point it to the new commit.
+      await axios.post(`${baseUrl}/git/refs`, {
+        ref: 'refs/heads/main',
+        sha: commitSha,
+      }, { headers });
+      
+      console.log("Code and workflow pushed successfully in a single commit.");
+      return { success: true };
+      
     } catch (error) {
-        const errorMessage = error.response?.data?.message || error.message;
-        console.error(`Error pushing code to repository: ${errorMessage}`, error.response?.data);
-        return { success: false, error: errorMessage };
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error(`Error pushing code to repository: ${errorMessage}`, error.response?.data);
+      return { success: false, error: errorMessage };
     }
-};
+  }
+}
 
 // Main handler for the Cloud Function.
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
-
+  
   const { code, state } = req.query;
-
+  
   if (!code || !state) {
     return res.status(400).json({ error: 'Temporary code or state is missing.' });
   }
-
+  
   const stateRef = db.ref(`oauth_states/${state}`);
   const stateSnapshot = await stateRef.once('value');
-
+  
   if (!stateSnapshot.exists()) {
     return res.status(400).json({ error: 'Invalid or expired state parameter.' });
   }
-
+  
   const { userId, businessId, idToken } = stateSnapshot.val();
   await stateRef.remove();
-
+  
   let decodedToken;
   try {
     decodedToken = await admin.auth().verifyIdToken(idToken);
@@ -161,27 +162,27 @@ export default async function handler(req, res) {
     console.error('Error verifying Firebase ID token:', error);
     return res.status(401).json({ error: 'Unauthorized: Invalid Firebase ID token.' });
   }
-
+  
   const authenticatedUid = decodedToken.uid;
-
+  
   if (authenticatedUid !== userId) {
     return res.status(403).json({ error: 'Forbidden: Session user mismatch. Potential CSRF attack.' });
   }
-
+  
   const businessRef = db.ref(`users/${userId}/businesses/${businessId}`);
   const businessSnapshot = await businessRef.once('value');
-
+  
   if (!businessSnapshot.exists()) {
     return res.status(404).json({ error: 'Business not found.' });
   }
-
+  
   const businessData = businessSnapshot.val();
   const repoName = businessData.businessName.toLowerCase().replace(/\s+/g, '-');
-
+  
   const CLIENT_ID = process.env.GITHUB_CLIENT_ID;
   const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
   const GITHUB_TOKEN_ENDPOINT = 'https://github.com/login/oauth/access_token';
-
+  
   try {
     const response = await fetch(GITHUB_TOKEN_ENDPOINT, {
       method: 'POST',
@@ -195,44 +196,46 @@ export default async function handler(req, res) {
         code: code,
       }),
     });
-
+    
     if (!response.ok) {
       const errorData = await response.json();
       console.error('GitHub token exchange failed:', errorData);
       return res.status(response.status).json(errorData);
     }
-
+    
     const data = await response.json();
     const accessToken = data.access_token;
-
+    
     if (!accessToken) {
       return res.status(500).json({ error: 'Access token not found in response.' });
     }
-
+    
     const repoCreationResult = await createNewRepo(accessToken, repoName);
-
+    
     if (repoCreationResult.success) {
       const owner = repoCreationResult.full_name.split("/")[0];
-
+      
       // Wait for the push operation to complete and check its result
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
       const pushResult = await pushCodeToRepo(accessToken, owner, repoName, businessData.websiteCode);
-
+      
       if (pushResult.success) {
-          await businessRef.update({
-            isHosted: true,
-            hostedUrl: `https://${owner}.github.io/${repoName}`,
-          });
-
-          return res.redirect(`https://go-starter-ai.vercel.app/dashboard.html?id=${businessId}`);
+        await businessRef.update({
+          isHosted: true,
+          hostedUrl: `https://${owner}.github.io/${repoName}`,
+        });
+        
+        return res.redirect(`https://go-starter-ai.vercel.app/dashboard.html?id=${businessId}`);
       } else {
-          console.error('Failed to push code to repository:', pushResult.error);
-          return res.status(500).json({ error: `Repository created, but code push failed: ${pushResult.error}` });
+        console.error('Failed to push code to repository:', pushResult.error);
+        return res.status(500).json({ error: `Repository created, but code push failed: ${pushResult.error}` });
       }
     } else {
       console.error('Failed to create repository:', repoCreationResult.error);
       return res.status(500).json({ error: repoCreationResult.error });
     }
-
+    
   } catch (error) {
     console.error('Error during GitHub OAuth token exchange:', error);
     res.status(500).json({ error: 'Internal Server Error' });
