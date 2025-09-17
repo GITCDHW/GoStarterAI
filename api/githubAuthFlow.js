@@ -62,6 +62,7 @@ const createNewRepo = async (accessToken, repoName) => {
     console.error('Error creating new repository:', error.response?.data?.message || error.message);
     return { success: false, error: error.response?.data?.message || 'An unknown error occurred.' };
   }
+  return { success: false, error: 'Function exited without a clear result.' };
 }
 
 
@@ -229,7 +230,7 @@ export default async function handler(req, res) {
     
     // Wait for the push operation to complete and check its result
     
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise(resolve => setTimeout(resolve, 3500));
     
     const pushResult = await pushCodeToRepo(accessToken, owner, repoName, businessData.websiteCode);
     
