@@ -67,7 +67,8 @@ const createNewRepo = async (accessToken, repoName) => {
 
 
 /**
- * Pushes HTML and GitHub Actions workflow files to a new repository in a single commit.
+ * Pushes HTML and GitHub Actions workflow files to a new repository in a single commit,
+ * with retries to handle timing issues.
  * @param {string} accessToken - The GitHub access token.
  * @param {string} repoOwner - The owner of the repository.
  * @param {string} repoName - The name of the repository.
@@ -82,36 +83,39 @@ const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => 
   const commitMessage = 'Initial commit: Add website code and deploy workflow';
   const baseUrl = `https://api.github.com/repos/${repoOwner}/${repoName}`;
 
+  let attempts = 0;
+  const maxAttempts = 5;
+  
+  while (attempts < maxAttempts) {
     try {
       // Define the workflow content
       const workflowContent = `name: Deploy to GitHub Pages\n\non:\n  push:\n    branches:\n      - main\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout\n        uses: actions/checkout@v4\n\n      - name: Setup Pages\n        id: pages\n        uses: actions/configure-pages@v3\n\n      - name: Upload artifact\n        uses: actions/upload-pages-artifact@v2\n        with:\n          path: './'\n\n      - name: Deploy to GitHub Pages\n        id: deployment\n        uses: actions/deploy-pages@v1`;
       
       // Step 1: Create a "tree" object with the files to be added.
-      // A tree represents a directory structure in Git.
       const treeResponse = await axios.post(`${baseUrl}/git/trees`, {
         tree: [
-        {
-          path: 'index.html',
-          mode: '100644',
-          type: 'blob',
-          content: websiteCode,
-        },
-        {
-          path: '.github/workflows/deploy.yml',
-          mode: '100644',
-          type: 'blob',
-          content: workflowContent,
-        }],
+          {
+            path: 'index.html',
+            mode: '100644',
+            type: 'blob',
+            content: websiteCode,
+          },
+          {
+            path: '.github/workflows/deploy.yml',
+            mode: '100644',
+            type: 'blob',
+            content: workflowContent,
+          }
+        ],
       }, { headers });
       
       const treeSha = treeResponse.data.sha;
       
       // Step 2: Create the commit.
-      // Since this is the first commit, it has no parents.
       const commitResponse = await axios.post(`${baseUrl}/git/commits`, {
         message: commitMessage,
         tree: treeSha,
-        parents: [], // No parents for the initial commit
+        parents: [],
       }, { headers });
       
       const commitSha = commitResponse.data.sha;
@@ -127,11 +131,24 @@ const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => 
       
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message;
+      
+      // Check for 404 and retry
+      if (error.response?.status === 404 && attempts < maxAttempts - 1) {
+        attempts++;
+        const delay = Math.pow(2, attempts) * 1000; // Exponential backoff (2, 4, 8, etc., seconds)
+        console.warn(`Attempt ${attempts} failed. Retrying in ${delay / 1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue; // Retry the loop
+      }
+
+      // If not a 404 or max attempts reached, log and return the error.
       console.error(`Error pushing code to repository: ${errorMessage}`, error.response?.data);
       return { success: false, error: errorMessage };
     }
+  }
 
-}
+  return { success: false, error: 'Max retry attempts reached. Failed to push code.' };
+};
 
 // Main handler for the Cloud Function.
 export default async function handler(req, res) {
