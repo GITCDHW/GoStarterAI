@@ -150,6 +150,7 @@ const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => 
   return { success: false, error: 'Max retry attempts reached. Failed to push code.' };
 };
 
+
 // Main handler for the Cloud Function.
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -246,8 +247,8 @@ export default async function handler(req, res) {
     
     // Wait for the push operation to complete and check its result
     
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    console.log(accessToken,owner,repoName)
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
     const pushResult = await pushCodeToRepo(accessToken, owner, repoName, businessData.websiteCode);
     
     if (pushResult.success) {
