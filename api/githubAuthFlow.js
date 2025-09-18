@@ -229,8 +229,8 @@ export default async function handler(req, res) {
     
     // Wait for the push operation to complete and check its result
     
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    console.log(accessToken,owner,repoName)
     const pushResult = await pushCodeToRepo(accessToken, owner, repoName, businessData.websiteCode);
     
     if (pushResult.success) {
