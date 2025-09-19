@@ -20,6 +20,7 @@ body {
 /* Dashboard Container */
 #container{
     display:none!important;
+    flex-direction: column;
 }
 .full-screen-dashboard {
     background-color: #FFFFFF; /* Clean White Background */
