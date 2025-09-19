@@ -67,7 +67,7 @@ const createNewRepo = async (accessToken, repoName) => {
 
 /**
  * Pushes HTML and GitHub Actions workflow files to a new repository
- * using the Contents API.
+ * using the GitHub Git Data API.
  *
  * @param {string} accessToken - The GitHub access token.
  * @param {string} repoOwner - The owner of the repository.
@@ -78,25 +78,45 @@ const createNewRepo = async (accessToken, repoName) => {
 const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => {
   const headers = {
     'Authorization': `token ${accessToken}`,
-    'Accept': 'application/vnd.github.com+json', // Use this header for Contents API
+    'Accept': 'application/vnd.github.com+json',
   };
-  const baseUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
+  const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/git/`;
 
   const workflowContent = `name: Deploy to GitHub Pages\n\non:\n  push:\n    branches:\n      - main\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout\n        uses: actions/checkout@v4\n\n      - name: Setup Pages\n        id: pages\n        uses: actions/configure-pages@v3\n\n      - name: Upload artifact\n        uses: actions/upload-pages-artifact@v2\n        with:\n          path: './'\n\n      - name: Deploy to GitHub Pages\n        id: deployment\n        uses: actions/deploy-pages@v1`;
 
   try {
-    // 1. Push index.html - This will create a new commit.
-    const indexFileResponse = await axios.put(`${baseUrl}index.html`, {
-      message: 'Initial commit: Add website code',
-      content: Buffer.from(websiteCode).toString('base64'),
-      branch: 'main'
+    // 1. Get the SHA of the latest commit on the main branch
+    const { data: { object: { sha: latestCommitSha } } } = await axios.get(`${apiUrl}ref/heads/main`, { headers });
+    
+    // 2. Create a new tree with the two files
+    const { data: { sha: newTreeSha } } = await axios.post(`${apiUrl}trees`, {
+      base_tree: latestCommitSha,
+      tree: [
+        {
+          path: 'index.html',
+          mode: '100644', // File blob
+          type: 'blob',
+          content: websiteCode,
+        },
+        {
+          path: '.github/workflows/deploy.yml',
+          mode: '100644', // File blob
+          type: 'blob',
+          content: workflowContent,
+        }
+      ],
     }, { headers });
 
-    // 3. Push the GitHub Actions workflow file using the new commit SHA as the base.
-    const workflowFileResponse = await axios.put(`${baseUrl}.github/workflows/deploy.yml`, {
-      message: 'Initial commit: Add deploy workflow',
-      content: Buffer.from(workflowContent).toString('base64'),
-      branch: 'main',
+    // 3. Create a new commit referencing the new tree
+    const { data: { sha: newCommitSha } } = await axios.post(`${apiUrl}commits`, {
+      message: 'Initial commit: Add website code and deploy workflow',
+      tree: newTreeSha,
+      parents: [latestCommitSha],
+    }, { headers });
+    
+    // 4. Update the main branch to point to the new commit
+    await axios.patch(`${apiUrl}refs/heads/main`, {
+      sha: newCommitSha,
     }, { headers });
 
     console.log("Code and workflow pushed successfully.");
