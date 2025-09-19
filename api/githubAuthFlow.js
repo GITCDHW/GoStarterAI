@@ -42,6 +42,7 @@ const createNewRepo = async (accessToken, repoName) => {
     const requestHeaders = {
       'Authorization': `token ${accessToken}`,
       'Content-Type': 'application/json',
+      auto_init:true
     };
     
     const response = await axios.post(apiUrl, requestBody, { headers: requestHeaders });
