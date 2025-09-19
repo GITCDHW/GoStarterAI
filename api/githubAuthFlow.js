@@ -65,7 +65,6 @@ const createNewRepo = async (accessToken, repoName) => {
   }
 }
 
-
 /**
  * Pushes HTML and GitHub Actions workflow files to a new repository
  * using the GitHub Git Data API.
@@ -85,10 +84,40 @@ const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => 
 
   const workflowContent = `name: Deploy to GitHub Pages\n\non:\n  push:\n    branches:\n      - main\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout\n        uses: actions/checkout@v4\n\n      - name: Setup Pages\n        id: pages\n        uses: actions/configure-pages@v3\n\n      - name: Upload artifact\n        uses: actions/upload-pages-artifact@v2\n        with:\n          path: './'\n\n      - name: Deploy to GitHub Pages\n        id: deployment\n        uses: actions/deploy-pages@v1`;
 
+  let latestCommitSha;
+  let attempts = 0;
+  const maxAttempts = 10; // Increased attempts to be extra safe
+
+  // 1. Wait for the `main` branch to exist
+  while (attempts < maxAttempts) {
+    try {
+      const response = await axios.get(`${apiUrl}refs/heads/main`, { headers });
+      if (response.status === 200) {
+        latestCommitSha = response.data.object.sha;
+        console.log('Main branch found. Latest commit SHA:', latestCommitSha);
+        break; // Success, exit the loop
+      }
+    } catch (error) {
+      const isNotFound = error.response && error.response.status === 404;
+      if (isNotFound) {
+        attempts++;
+        const delay = Math.pow(2, attempts) * 1000;
+        console.warn(`Attempt ${attempts} of ${maxAttempts}: Main branch not found yet. Retrying in ${delay / 1000}s...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      } else {
+        // If it's a different error, stop retrying
+        console.error('An unexpected error occurred while checking for the main branch:', error.response?.data || error.message);
+        return { success: false, error: 'Failed to find initial commit due to an unexpected error.' };
+      }
+    }
+  }
+
+  if (!latestCommitSha) {
+    console.error('Could not find initial commit SHA after multiple retries.');
+    return { success: false, error: 'Could not find initial commit SHA after multiple retries.' };
+  }
+
   try {
-    // 1. Get the SHA of the latest commit on the main branch
-    const { data: { object: { sha: latestCommitSha } } } = await axios.get(`${apiUrl}ref/heads/main`, { headers });
-    
     // 2. Create a new tree with the two files
     const { data: { sha: newTreeSha } } = await axios.post(`${apiUrl}trees`, {
       base_tree: latestCommitSha,
@@ -129,6 +158,7 @@ const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => 
     return { success: false, error: errorMessage };
   }
 };
+
 // Main handler for the Cloud Function.
 export default async function handler(req, res) {
   if (req.method !== "GET") {
