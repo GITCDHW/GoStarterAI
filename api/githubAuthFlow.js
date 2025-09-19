@@ -84,79 +84,67 @@ const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => 
 
   const workflowContent = `name: Deploy to GitHub Pages\n\non:\n  push:\n    branches:\n      - main\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout\n        uses: actions/checkout@v4\n\n      - name: Setup Pages\n        id: pages\n        uses: actions/configure-pages@v3\n\n      - name: Upload artifact\n        uses: actions/upload-pages-artifact@v2\n        with:\n          path: './'\n\n      - name: Deploy to GitHub Pages\n        id: deployment\n        uses: actions/deploy-pages@v1`;
 
-  let latestCommitSha;
   let attempts = 0;
-  const maxAttempts = 10; // Increased attempts to be extra safe
+  const maxAttempts = 10;
+  let latestCommitSha;
 
-  // 1. Wait for the `main` branch to exist
   while (attempts < maxAttempts) {
     try {
-      const response = await axios.get(`${apiUrl}refs/heads/main`, { headers });
-      if (response.status === 200) {
-        latestCommitSha = response.data.object.sha;
-        console.log('Main branch found. Latest commit SHA:', latestCommitSha);
-        break; // Success, exit the loop
-      }
+      // 1. Get the latest commit SHA on each attempt
+      const { data: refData } = await axios.get(`${apiUrl}refs/heads/main`, { headers });
+      latestCommitSha = refData.object.sha;
+      console.log(`Main branch found. Latest commit SHA: ${latestCommitSha}`);
+
+      // 2. Create a new tree with the two files
+      const { data: treeData } = await axios.post(`${apiUrl}trees`, {
+        base_tree: latestCommitSha,
+        tree: [
+          {
+            path: 'index.html',
+            mode: '100644',
+            type: 'blob',
+            content: websiteCode,
+          },
+          {
+            path: '.github/workflows/deploy.yml',
+            mode: '100644',
+            type: 'blob',
+            content: workflowContent,
+          }
+        ],
+      }, { headers });
+
+      // 3. Create a new commit referencing the new tree
+      const { data: commitData } = await axios.post(`${apiUrl}commits`, {
+        message: 'Initial commit: Add website code and deploy workflow',
+        tree: treeData.sha,
+        parents: [latestCommitSha],
+      }, { headers });
+
+      // 4. Update the main branch to point to the new commit
+      await axios.patch(`${apiUrl}refs/heads/main`, {
+        sha: commitData.sha,
+      }, { headers });
+
+      console.log("Code and workflow pushed successfully.");
+      return { success: true };
+
     } catch (error) {
+      attempts++;
       const isNotFound = error.response && error.response.status === 404;
       if (isNotFound) {
-        attempts++;
         const delay = Math.pow(2, attempts) * 1000;
-        console.warn(`Attempt ${attempts} of ${maxAttempts}: Main branch not found yet. Retrying in ${delay / 1000}s...`);
+        console.warn(`Attempt ${attempts} of ${maxAttempts}: Main branch or base_tree not found yet. Retrying in ${delay / 1000}s...`);
         await new Promise(resolve => setTimeout(resolve, delay));
       } else {
-        // If it's a different error, stop retrying
-        console.error('An unexpected error occurred while checking for the main branch:', error.response?.data || error.message);
-        return { success: false, error: 'Failed to find initial commit due to an unexpected error.' };
+        const errorMessage = error.response?.data?.message || error.message;
+        console.error(`Error pushing code to repository: ${errorMessage}`, error.response?.data);
+        return { success: false, error: errorMessage };
       }
     }
   }
 
-  if (!latestCommitSha) {
-    console.error('Could not find initial commit SHA after multiple retries.');
-    return { success: false, error: 'Could not find initial commit SHA after multiple retries.' };
-  }
-
-  try {
-    // 2. Create a new tree with the two files
-    const { data: { sha: newTreeSha } } = await axios.post(`${apiUrl}trees`, {
-      base_tree: latestCommitSha,
-      tree: [
-        {
-          path: 'index.html',
-          mode: '100644', // File blob
-          type: 'blob',
-          content: websiteCode,
-        },
-        {
-          path: '.github/workflows/deploy.yml',
-          mode: '100644', // File blob
-          type: 'blob',
-          content: workflowContent,
-        }
-      ],
-    }, { headers });
-
-    // 3. Create a new commit referencing the new tree
-    const { data: { sha: newCommitSha } } = await axios.post(`${apiUrl}commits`, {
-      message: 'Initial commit: Add website code and deploy workflow',
-      tree: newTreeSha,
-      parents: [latestCommitSha],
-    }, { headers });
-    
-    // 4. Update the main branch to point to the new commit
-    await axios.patch(`${apiUrl}refs/heads/main`, {
-      sha: newCommitSha,
-    }, { headers });
-
-    console.log("Code and workflow pushed successfully.");
-    return { success: true };
-
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || error.message;
-    console.error(`Error pushing code to repository: ${errorMessage}`, error.response?.data);
-    return { success: false, error: errorMessage };
-  }
+  return { success: false, error: 'Failed to push code after multiple attempts.' };
 };
 
 // Main handler for the Cloud Function.
