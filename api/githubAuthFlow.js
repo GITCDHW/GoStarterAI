@@ -1,6 +1,7 @@
 //import required modules
 import axios from 'axios';
 import admin from 'firebase-admin';
+import { Buffer } from 'buffer';
 
 const serviceAccount = {
   "type": "service_account",
@@ -35,7 +36,7 @@ const createNewRepo = async (accessToken, repoName) => {
   };
 
   try {
-    // 1. Create repo
+    // 1. Create repo (default is master if auto_init: true)
     const response = await axios.post(
       `https://api.github.com/user/repos`,
       {
@@ -50,8 +51,27 @@ const createNewRepo = async (accessToken, repoName) => {
     const { owner, name, default_branch } = response.data;
     console.log(`Repository '${repoName}' created with default branch ${default_branch}`);
 
-    // 2. Switch default branch to main if not already
+    // 2. If default branch is master, create main branch from it
     if (default_branch !== 'main') {
+      // Get master branch commit SHA
+      const masterBranch = await axios.get(
+        `https://api.github.com/repos/${owner.login}/${name}/git/ref/heads/${default_branch}`,
+        { headers }
+      );
+      const sha = masterBranch.data.object.sha;
+
+      // Create main branch from master
+      await axios.post(
+        `https://api.github.com/repos/${owner.login}/${name}/git/refs`,
+        {
+          ref: 'refs/heads/main',
+          sha,
+        },
+        { headers }
+      );
+      console.log(`Main branch created from ${default_branch} (${sha})`);
+
+      // Switch default branch to main
       await axios.patch(
         `https://api.github.com/repos/${owner.login}/${name}`,
         { default_branch: 'main' },
@@ -73,7 +93,6 @@ const createNewRepo = async (accessToken, repoName) => {
     return { success: false, error: message };
   }
 };
-
 /**
  * Helper: Create or update a file in repo on main
  */
