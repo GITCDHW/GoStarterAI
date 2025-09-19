@@ -100,7 +100,7 @@ const pushFile = async (accessToken, repoOwner, repoName, filePath, fileContent,
  */
 const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => {
   try {
-    // index.html
+    // 1. Push index.html
     await pushFile(
       accessToken,
       repoOwner,
@@ -110,7 +110,25 @@ const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => 
       'Add or update index.html'
     );
 
-    // workflow
+    // 2. Ensure `.github/workflows/` exists by creating a dummy file
+    await pushFile(
+      accessToken,
+      repoOwner,
+      repoName,
+      '.github/.gitkeep',
+      'placeholder',
+      'Ensure .github folder exists'
+    );
+    await pushFile(
+      accessToken,
+      repoOwner,
+      repoName,
+      '.github/workflows/.gitkeep',
+      'placeholder',
+      'Ensure .github/workflows folder exists'
+    );
+
+    // 3. Push actual workflow
     const workflowPath = '.github/workflows/deploy.yml';
     const workflowContent = `name: Deploy to GitHub Pages
 
