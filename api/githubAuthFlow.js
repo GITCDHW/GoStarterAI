@@ -175,15 +175,35 @@ jobs:
       - uses: actions/deploy-pages@v1
         id: deployment`;
 
-    await pushFile(
-      accessToken,
-      repoOwner,
-      repoName,
-      workflowPath,
-      workflowContent,
-      'Add or update GitHub Actions workflow'
-    );
+// ensure .github exists
+await pushFile(
+  accessToken,
+  repoOwner,
+  repoName,
+  '.github/.gitkeep',
+  '',
+  'Create .github directory'
+);
 
+// ensure .github/workflows exists
+await pushFile(
+  accessToken,
+  repoOwner,
+  repoName,
+  '.github/workflows/.gitkeep',
+  '',
+  'Create .github/workflows directory'
+);
+
+// now push actual workflow
+await pushFile(
+  accessToken,
+  repoOwner,
+  repoName,
+  '.github/workflows/deploy.yml',
+  workflowContent,
+  'Add or update GitHub Actions workflow'
+);
     console.log('✅ All files pushed.');
     return { success: true };
 
