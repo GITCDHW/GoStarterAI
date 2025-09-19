@@ -92,15 +92,11 @@ const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => 
       branch: 'main'
     }, { headers });
 
-    // 2. Get the SHA of the new index.html file to prove the commit happened.
-    const newFileSha = indexFileResponse.data.commit.sha;
-
     // 3. Push the GitHub Actions workflow file using the new commit SHA as the base.
     const workflowFileResponse = await axios.put(`${baseUrl}.github/workflows/deploy.yml`, {
       message: 'Initial commit: Add deploy workflow',
       content: Buffer.from(workflowContent).toString('base64'),
       branch: 'main',
-      sha: newFileSha 
     }, { headers });
 
     console.log("Code and workflow pushed successfully.");
