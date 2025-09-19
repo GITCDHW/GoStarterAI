@@ -130,7 +130,7 @@ const pushFile = async (accessToken, repoOwner, repoName, filePath, fileContent,
 };
 
 /**
- * Push project files (index.html + workflow)
+ * Push project files (index.html + README only)
  */
 const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => {
   try {
@@ -154,57 +154,7 @@ const pushCodeToRepo = async (accessToken, repoOwner, repoName, websiteCode) => 
       'Add README.md'
     );
 
-    // workflow
-    const workflowPath = '.github/workflows/deploy.yml';
-    const workflowContent = `name: Deploy to GitHub Pages
-
-on:
-  push:
-    branches: [ main ]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v3
-        id: pages
-      - uses: actions/upload-pages-artifact@v2
-        with:
-          path: './'
-      - uses: actions/deploy-pages@v1
-        id: deployment`;
-
-// ensure .github exists
-await pushFile(
-  accessToken,
-  repoOwner,
-  repoName,
-  '.github/.gitkeep',
-  '',
-  'Create .github directory'
-);
-
-// ensure .github/workflows exists
-await pushFile(
-  accessToken,
-  repoOwner,
-  repoName,
-  '.github/workflows/.gitkeep',
-  '',
-  'Create .github/workflows directory'
-);
-
-// now push actual workflow
-await pushFile(
-  accessToken,
-  repoOwner,
-  repoName,
-  '.github/workflows/deploy.yml',
-  workflowContent,
-  'Add or update GitHub Actions workflow'
-);
-    console.log('✅ All files pushed.');
+    console.log('✅ Repo initialized with index.html + README.md');
     return { success: true };
 
   } catch (error) {
@@ -213,7 +163,6 @@ await pushFile(
     return { success: false, error: message };
   }
 };
-
 // Main handler for the Cloud Function
 export default async function handler(req, res) {
   if (req.method !== "GET") {
