@@ -94,8 +94,8 @@ auth.onAuthStateChanged(user => {
             businessName: nameData.name,
             websiteCode: mainApiData.websiteCode,
             marketReport: mainApiData.marketReport,
-            isPaid:false,
-            isHosted:false
+            isHosted:false,
+            hostedRepoLink:null
           }
           const newBusinessRef = userBusinessesRef.push(finalData);
           const newBusinessKey=newBusinessRef.key;

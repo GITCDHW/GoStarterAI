@@ -257,7 +257,7 @@ export default async function handler(req, res) {
 
   await businessRef.update({
     isHosted: true,
-    hostedUrl: `https://${owner}.github.io/${repoName}`,
+    hostedRepoLink: repoResult.html_url,
   });
 
   return res.redirect(`https://go-starter-ai.vercel.app/dashboard.html?id=${businessId}`);
