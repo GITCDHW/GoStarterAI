@@ -104,8 +104,8 @@ document.addEventListener("DOMContentLoaded", (e) => {
             // Show the repo link container and set the link
             repoLinkContainer.style.display = 'block';
             const repoLinkAnchorElement = document.getElementById('repo-link');
-            repoLinkAnchorElement.href = data.githubRepoUrl;
-            repoLinkAnchorElement.textContent = data.githubRepoUrl;
+            repoLinkAnchorElement.href = data.hostedRepoLink;
+            repoLinkAnchorElement.textContent = data.hostedRepoLink;
 
             // Display the hosted website in the iframe
             document.getElementById("website-preview-iframe").src = data.websiteCode;
