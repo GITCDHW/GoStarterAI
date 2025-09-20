@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
             repoLinkAnchorElement.textContent = data.githubRepoUrl;
 
             // Display the hosted website in the iframe
-            document.getElementById("website-preview-iframe").src = data.websiteUrl;
+            document.getElementById("website-preview-iframe").src = data.websiteCode;
           }
         }
       });
