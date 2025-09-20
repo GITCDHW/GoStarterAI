@@ -5,7 +5,8 @@ document.addEventListener("DOMContentLoaded", (e) => {
       const urlparams = new URLSearchParams(window.location.search);
       const id = urlparams.get('id');
       const businessRef = db.ref(`users/${user.uid}/businesses/${id}`);
-
+      console.log(user)
+      console.log(db)
       // Add a reference to the GitHub repo link container
       const repoLinkContainer = document.createElement('div');
       repoLinkContainer.className = 'repo-link-container';
@@ -38,6 +39,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
       document.getElementById('pay-button').addEventListener("click", async () => {
         try {
           const idToken = await user.getIdToken();
+          console.log(idToken)
           const state = generateSecureKey(32);
           const stateRef = db.ref(`oauth_states/${state}`);
           await stateRef.set({
