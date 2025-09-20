@@ -1,3 +1,33 @@
+// Function to generate a random array of 32-bit unsigned integers
+function getRandomValues(array) {
+  if (window.crypto && window.crypto.getRandomValues) {
+    return window.crypto.getRandomValues(array);
+  } else {
+    console.warn("Web Crypto API not available. Falling back to less secure Math.random()");
+    for (let i = 0; i < array.length; i++) {
+      array[i] = Math.floor(Math.random() * 4294967296);
+    }
+    return array;
+  }
+}
+
+// Function to convert a number to a 2-digit hex string
+function toHex(c) {
+  const hex = c.toString(16);
+  return hex.length === 1 ? "0" + hex : hex;
+}
+
+// Function to generate a random hex string of a specified length
+function generateSecureKey(length) {
+  const buffer = new Uint8Array(length);
+  window.crypto.getRandomValues(buffer);
+  let key = '';
+  for (const byte of buffer) {
+    key += toHex(byte);
+  }
+  return key;
+}
+
 document.addEventListener("DOMContentLoaded", (e) => {
   e.preventDefault();
   auth.onAuthStateChanged(user => {
