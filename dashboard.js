@@ -99,8 +99,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
           } else { // isHosted === true
             // Hide the launch button and the original preview paragraph
             document.getElementById('pay-button').style.display = 'none';
-            document.querySelector('.website-preview p').style.display = 'none';
-
+            document.getElementById("website-preview-iframe").srcdoc = data.websiteCode;
             // Show the repo link container and set the link
             repoLinkContainer.style.display = 'block';
             const repoLinkAnchorElement = document.getElementById('repo-link');
