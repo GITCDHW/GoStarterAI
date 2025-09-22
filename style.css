@@ -114,3 +114,85 @@ button:hover {
   height: 90%!important;
   border-radius: 20px;
 }
+
+.business-card {
+    background-color: #FFFFFF;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    padding: 25px;
+    position: relative;
+    overflow: hidden;
+}
+
+.business-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.card-icon {
+    font-size: 2em;
+    color: #4A90E2;
+}
+
+.status-badge {
+    font-size: 0.8em;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+}
+
+.status-live {
+    background-color: #E6F6EC;
+    color: #28A745;
+}
+
+.status-draft {
+    background-color: #FFF2E6;
+    color: #FF9900;
+}
+
+.card-content h3 {
+    color: #333333;
+    font-size: 1.5em;
+    margin-bottom: 5px;
+}
+
+.card-content p {
+    color: #777777;
+    font-size: 0.9em;
+    margin: 0;
+}
+
+.card-actions {
+    margin-top: 20px;
+}
+
+.card-link {
+    display: inline-block;
+    padding: 8px 15px;
+    border-radius: 20px;
+    background-color: #F0F8FF;
+    color: #4A90E2;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.card-link:hover {
+    background-color: #E6F0F8;
+}

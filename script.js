@@ -8,20 +8,38 @@ function renderBusinesses(businesses) {
             const business = businesses[key];
             const card = document.createElement("div");
             card.className = "business-card";
+
+            // Determine the status and icon
+            const statusText = business.isHosted ? 'Live' : 'Draft';
+            const statusClass = business.isHosted ? 'status-live' : 'status-draft';
+            const iconClass = business.isHosted ? 'fa-rocket' : 'fa-pencil-alt'; // Using Font Awesome for icons
+
             card.innerHTML = `
-                <h3>${business.businessName}</h3>
-                <p>${business.isHosted ? 'Live' : 'Draft'}</p>
+                <div class="card-header">
+                    <i class="fas ${iconClass} card-icon"></i>
+                    <span class="status-badge ${statusClass}">${statusText}</span>
+                </div>
+                <div class="card-content">
+                    <h3>${business.businessName}</h3>
+                    <p>Click to manage your business</p>
+                </div>
+                <div class="card-actions">
+                    <a href="dashboard.html?id=${key}" class="card-link">View Dashboard</a>
+                </div>
             `;
+            
+            // Add a click listener to the entire card for navigation
             card.addEventListener('click', () => {
-                // Navigate to the dashboard page for the selected business
                 window.location.href = `dashboard.html?id=${key}`;
             });
+
             businessGrid.appendChild(card);
         });
     } else {
         businessGrid.innerHTML = '<p style="text-align:center; color:#777;">No businesses found. Click "Add New Business" to get started!</p>';
     }
 }
+
 
 // Global variable for API calls (assuming you have them defined elsewhere)
 async function makeApiCall(userPrompt, businessName) {
