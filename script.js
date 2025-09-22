@@ -34,7 +34,8 @@ async function makeNameApiCall(userPrompt) {
 document.addEventListener("DOMContentLoaded", () => {
     // Hide the loader initially, as per your original request
     document.getElementById("loading-overlay").style.display = "none";
-
+    const promptModal = document.getElementById("prompt-modal");
+    promptModal.style.display='none'
     // Set up the Firebase UI for unauthenticated users
     const ui = new firebaseui.auth.AuthUI(firebase.auth());
     const uiConfig = {
@@ -65,7 +66,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             // --- POPUP LOGIC ---
-            const promptModal = document.getElementById("prompt-modal");
             const addBusinessBtn = document.getElementById("add-business-btn");
             const closeButton = document.querySelector(".close-button");
 
