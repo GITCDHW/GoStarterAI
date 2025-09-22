@@ -1,52 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>GoStarterAI Prompt</title>
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-	
-	<link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.8.0/firebase-ui-auth.css" />
-	<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoStarterAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.8.0/firebase-ui-auth.css" />
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-	<div class="main-container">
-		<div id="success-message" style="display:none;" class="form-container">
-			<h2>Your Business is Ready!</h2>
-			<p>We've created a complete set of assets for you. Click the button below to view your business dashboard.</p>
-			<button id="view-business-button">View My Business</button>
-		</div>
-		<div id="loading-overlay">
-			<iframe src="loader.html" frameborder="0" scrolling="no"></iframe>
-		</div>
-		<div class="form-container" id="prompt_container">
-			<h2>What Are You Launching Today?</h2>
-			<form id="prompt_form">
-				<div class="form-group">
-					<label for="name">Your Business Name (Optional)</label>
-					<input type="text" id="name" name="name">
-				</div>
-				<div class="form-group">
-					<label for="prompt">Describe Your Vision...</label>
-					<textarea id="prompt" name="prompt" rows="6" required></textarea>
-				</div>
-				<button type="submit">Generate My Business</button>
-			</form>
-		</div>
-	</div>
-	
-	<div id="firebase-ui">
-		
-	</div>
-	<script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
-	<script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-auth-compat.js"></script>
-	<script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-database-compat.js"></script>
-	<script src="config.js"></script>
-	<script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
-	<script src="script.js" type="text/javascript" charset="utf-8"></script>
+
+    <div class="main-container" style="display:none;">
+        <div class="header">
+            <h1 class="dashboard-title">Your Businesses</h1>
+            <button id="add-business-btn" class="add-button">
+                + Add New Business
+            </button>
+        </div>
+        
+        <div id="business-list" class="business-grid">
+            </div>
+    </div>
+
+    <div id="prompt-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <div id="prompt_container">
+                <h2>What Are You Launching Today?</h2>
+                <form id="prompt_form">
+                    <div class="form-group">
+                        <label for="name">Your Business Name (Optional)</label>
+                        <input type="text" id="name" name="name" placeholder="E.g., GoStarterAI">
+                    </div>
+                    <div class="form-group">
+                        <label for="prompt">Describe Your Vision...</label>
+                        <textarea id="prompt" name="prompt" rows="6" required placeholder="Describe your business idea in detail."></textarea>
+                    </div>
+                    <button type="submit">Generate My Business</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading-overlay" style="display:none;">
+        <iframe src="loader.html" frameborder="0" scrolling="no"></iframe>
+    </div>
+
+    <div id="firebase-ui"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-database-compat.js"></script>
+    <script src="config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
+    <script src="script.js" type="text/javascript" charset="utf-8"></script>
 </body>
 </html>

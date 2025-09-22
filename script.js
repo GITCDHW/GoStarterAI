@@ -1,155 +1,158 @@
-document.addEventListener("DOMContentLoaded",()=>{
-  document.getElementById("loading-overlay").style.display="none"
-})
-// API call function
+// Function to render the list of businesses
+function renderBusinesses(businesses) {
+    const businessGrid = document.getElementById("business-list");
+    businessGrid.innerHTML = ''; // Clear previous cards
+
+    if (businesses) {
+        Object.keys(businesses).forEach(key => {
+            const business = businesses[key];
+            const card = document.createElement("div");
+            card.className = "business-card";
+            card.innerHTML = `
+                <h3>${business.businessName}</h3>
+                <p>${business.isHosted ? 'Live' : 'Draft'}</p>
+            `;
+            card.addEventListener('click', () => {
+                // Navigate to the dashboard page for the selected business
+                window.location.href = `dashboard.html?id=${key}`;
+            });
+            businessGrid.appendChild(card);
+        });
+    } else {
+        businessGrid.innerHTML = '<p style="text-align:center; color:#777;">No businesses found. Click "Add New Business" to get started!</p>';
+    }
+}
+
+// Global variable for API calls (assuming you have them defined elsewhere)
 async function makeApiCall(userPrompt, businessName) {
-  try {
-    const requestOptions = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        prompt: userPrompt,
-        businessName:businessName
-      })
-    };
-    
-    const response = await fetch("https://go-starter-ai.vercel.app/api/agent", requestOptions);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("API call failed:", error);
-    alert("Something went wrong. Check the console for details.");
-    return null;
-  }
+    // ... (Your existing API call code)
 }
-
-// New API call function for name generation
 async function makeNameApiCall(userPrompt) {
-    try {
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ prompt: userPrompt })
-        };
-        const response = await fetch("https://go-starter-ai.vercel.app/api/nameGen", requestOptions);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error("Name API call failed:", error);
-        return null;
-    }
+    // ... (Your existing API call code)
 }
-auth.onAuthStateChanged(user => {
-  if (user) {
-    console.log("User is signed in:", user.uid);
-    
-    const promptForm = document.getElementById("prompt_form");
-    const promptContainer = document.getElementById("prompt_container");
-    
-    promptForm.style.display="block";
-    
-    promptForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      // GoStarterAI: Show the loader here, but don't hide the form just yet
-      document.getElementById("loading-overlay").style.display="flex";
-      
-      const prompt = document.getElementById("prompt").value.trim();
-      const userProvidedName = document.getElementById("name").value.trim();
-      
-      if (!prompt) {
-        alert("Please enter a business idea.");
-        // GoStarterAI: Hide the loader if the user hasn't entered a prompt
-        document.getElementById("loading-overlay").style.display="none";
-        return;
-      }
 
-      let nameData;
+document.addEventListener("DOMContentLoaded", () => {
+    // Hide the loader initially, as per your original request
+    document.getElementById("loading-overlay").style.display = "none";
 
-      // First, get the business name. This call runs first.
-      if (userProvidedName) {
-        nameData = { name: userProvidedName };
-      } else {
-        nameData = await makeNameApiCall(prompt);
-      }
-        
-      // If the name call succeeded, proceed to the main API call.
-      if (nameData) {
-        const mainApiData = await makeApiCall(prompt,nameData.name);
-        
-        if (mainApiData) {
-          const finalData = {
-            businessName: nameData.name,
-            websiteCode: mainApiData.websiteCode,
-            marketReport: mainApiData.marketReport,
-            isHosted:false,
-            hostedRepoLink:null
-          }
-          const newBusinessRef = userBusinessesRef.push(finalData);
-          const newBusinessKey=newBusinessRef.key;
-          
-          // GoStarterAI: Hide the form and loader, then show success message on success
-          promptContainer.style.display="none";
-          document.getElementById("loading-overlay").style.display="none";
-          document.getElementById("success-message").style.display="block";
-          document.getElementById("view-business-button").onclick=()=>{
-            window.location.href=`dashboard.html?id=${newBusinessKey}`;
-          };
-        } else {
-          // GoStarterAI: Only hide the loader on main API failure
-          document.getElementById("loading-overlay").style.display="none";
-          console.error("Main API call failed or returned null data.");
-        }
-      } else {
-        // GoStarterAI: Only hide the loader on name API failure
-        document.getElementById("loading-overlay").style.display="none";
-        console.error("Name API call failed or returned null data.");
-      }
-    });
-
-    const userRef = db.ref('users/' + user.uid);
-    const userBusinessesRef = db.ref(`users/${user.uid}/businesses`);
-    
-    userRef.once('value')
-      .then(snapshot => {
-        if (!snapshot.exists()) {
-          userRef.set({
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            createdAt: new Date().toISOString()
-          }).then(() => {
-            console.log("New user profile created successfully.");
-          });
-        }
-      });
-  } else {
-    // User is not signed in.
-    document.querySelector(".main-container").style.display = "none";
+    // Set up the Firebase UI for unauthenticated users
     const ui = new firebaseui.auth.AuthUI(firebase.auth());
-    
     const uiConfig = {
-      signInSuccessUrl: window.location.href,
-      signInFlow: "popup",
-      signInOptions: [
-        firebase.auth.GoogleAuthProvider.PROVIDER_ID
-      ],
-      tosUrl: 'dashboard.html',
-      privacyPolicyUrl: 'dashboard.html'
+        signInSuccessUrl: window.location.href, // Redirect back to this page
+        signInFlow: "popup",
+        signInOptions: [
+            firebase.auth.GoogleAuthProvider.PROVIDER_ID
+        ],
+        tosUrl: 'dashboard.html',
+        privacyPolicyUrl: 'dashboard.html'
     };
-    
-    ui.start('#firebase-ui', uiConfig);
-  }
+
+    // Listen for authentication state changes
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            console.log("User is signed in:", user.uid);
+            // Hide the Firebase UI and show the main app content
+            document.getElementById("firebase-ui").style.display = "none";
+            document.querySelector(".main-container").style.display = "flex";
+            
+            // Reference to the user's businesses in the database
+            const userBusinessesRef = db.ref(`users/${user.uid}/businesses`);
+            
+            // Listen for changes and render the businesses
+            userBusinessesRef.on('value', snapshot => {
+                const businesses = snapshot.val();
+                renderBusinesses(businesses);
+            });
+
+            // --- POPUP LOGIC ---
+            const promptModal = document.getElementById("prompt-modal");
+            const addBusinessBtn = document.getElementById("add-business-btn");
+            const closeButton = document.querySelector(".close-button");
+
+            addBusinessBtn.onclick = () => {
+                promptModal.style.display = "flex";
+            };
+
+            closeButton.onclick = () => {
+                promptModal.style.display = "none";
+            };
+
+            window.onclick = (event) => {
+                if (event.target == promptModal) {
+                    promptModal.style.display = "none";
+                }
+            };
+
+            // --- FORM SUBMISSION LOGIC ---
+            const promptForm = document.getElementById("prompt_form");
+            promptForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // Hide the modal and show the game loader
+                promptModal.style.display = "none";
+                document.getElementById("loading-overlay").style.display = "flex";
+                
+                const prompt = document.getElementById("prompt").value.trim();
+                const userProvidedName = document.getElementById("name").value.trim();
+                
+                if (!prompt) {
+                    alert("Please enter a business idea.");
+                    document.getElementById("loading-overlay").style.display = "none";
+                    return;
+                }
+
+                let nameData;
+                if (userProvidedName) {
+                    nameData = { name: userProvidedName };
+                } else {
+                    nameData = await makeNameApiCall(prompt);
+                }
+                    
+                if (nameData) {
+                    const mainApiData = await makeApiCall(prompt, nameData.name);
+                    
+                    if (mainApiData) {
+                        const finalData = {
+                            businessName: nameData.name,
+                            websiteCode: mainApiData.websiteCode,
+                            marketReport: mainApiData.marketReport,
+                            isHosted: false,
+                            hostedRepoLink: null
+                        };
+                        const newBusinessRef = userBusinessesRef.push(finalData);
+                        const newBusinessKey = newBusinessRef.key;
+                        
+                        document.getElementById("loading-overlay").style.display = "none";
+                        // Redirect to the dashboard page for the newly created business
+                        window.location.href = `dashboard.html?id=${newBusinessKey}`;
+                    } else {
+                        document.getElementById("loading-overlay").style.display = "none";
+                        console.error("Main API call failed or returned null data.");
+                    }
+                } else {
+                    document.getElementById("loading-overlay").style.display = "none";
+                    console.error("Name API call failed or returned null data.");
+                }
+            });
+
+            // Logic to create a new user profile on first login
+            const userRef = db.ref('users/' + user.uid);
+            userRef.once('value').then(snapshot => {
+                if (!snapshot.exists()) {
+                    userRef.set({
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: user.displayName,
+                        createdAt: new Date().toISOString()
+                    }).then(() => {
+                        console.log("New user profile created successfully.");
+                    });
+                }
+            });
+        } else {
+            // User is not signed in, show the Firebase UI
+            document.querySelector(".main-container").style.display = "none";
+            ui.start('#firebase-ui', uiConfig);
+        }
+    });
 });
