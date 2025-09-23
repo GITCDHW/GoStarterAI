@@ -35,8 +35,6 @@ document.addEventListener("DOMContentLoaded", (e) => {
       const urlparams = new URLSearchParams(window.location.search);
       const id = urlparams.get('id');
       const businessRef = db.ref(`users/${user.uid}/businesses/${id}`);
-      console.log(user)
-      console.log(db)
       // Add a reference to the GitHub repo link container
       const repoLinkContainer = document.createElement('div');
       repoLinkContainer.className = 'repo-link-container';
@@ -92,10 +90,33 @@ document.addEventListener("DOMContentLoaded", (e) => {
           document.querySelector("#container").style.display = "block";
           document.getElementById("business-name").innerHTML = data.businessName;
 
+          // Dynamically create and append the download button
+          const downloadButton = document.createElement('button');
+          downloadButton.id = 'download-report-btn';
+          downloadButton.textContent = 'Download Market Report';
+          downloadButton.style.cssText = `
+            margin: 20px auto;
+            display: block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+          `;
+          downloadButton.onmouseover = () => downloadButton.style.backgroundColor = '#45a049';
+          downloadButton.onmouseout = () => downloadButton.style.backgroundColor = '#4CAF50';
+          
+          const websitePreviewSection = document.querySelector('.website-preview');
+          websitePreviewSection.insertBefore(downloadButton, websitePreviewSection.querySelector('.iframe-container'));
+
           if (data.isHosted === false) {
             document.getElementById("website-preview-iframe").srcdoc = data.websiteCode;
             document.getElementById('pay-button').style.display = 'block';
-            repoLinkContainer.style.display = 'none'; // Ensure repo link is hidden
+            repoLinkContainer.style.display = 'none';
+            downloadButton.style.display = 'none';
           } else { // isHosted === true
             // Hide the launch button and the original preview paragraph
             document.getElementById('pay-button').style.display = 'none';
@@ -107,7 +128,30 @@ document.addEventListener("DOMContentLoaded", (e) => {
             repoLinkAnchorElement.textContent = data.hostedRepoLink;
 
             // Display the hosted website in the iframe
-            document.getElementById("website-preview-iframe").src = data.websiteCode;
+            document.getElementById("website-preview-iframe").src = data.hostedRepoLink;
+
+            downloadButton.style.display = 'block'; // Show the download button
+            
+            // Add the onclick logic to the dynamically created button
+            downloadButton.addEventListener('click', () => {
+              if (data.marketReport) {
+                const doc = new window.jspdf.jsPDF();
+                const margin = 10;
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const text = data.marketReport;
+
+                doc.setFontSize(22);
+                doc.text(`Market Report for ${data.businessName}`, pageWidth / 2, 20, { align: 'center' });
+
+                doc.setFontSize(12);
+                const splitText = doc.splitTextToSize(text, pageWidth - 2 * margin);
+                doc.text(splitText, margin, 40);
+                
+                doc.save(`${data.businessName.replace(/\s/g, '-')}-market-report.pdf`);
+              } else {
+                alert("Market report is not available.");
+              }
+            });
           }
         }
       });
