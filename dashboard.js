@@ -41,13 +41,13 @@ document.addEventListener("DOMContentLoaded", (e) => {
       repoLinkContainer.style.display = 'none'; // Initially hidden
       repoLinkContainer.style.textAlign = 'center';
       repoLinkContainer.style.marginTop = '20px';
-
+      
       const repoLinkParagraph = document.createElement('p');
       repoLinkParagraph.innerHTML = 'Your website is live!';
       repoLinkParagraph.style.fontSize = '1.2em';
       repoLinkParagraph.style.color = '#4A90E2';
       repoLinkParagraph.style.marginBottom = '10px';
-
+      
       const repoLinkAnchor = document.createElement('a');
       repoLinkAnchor.id = 'repo-link';
       repoLinkAnchor.style.fontSize = '1.1em';
@@ -55,14 +55,14 @@ document.addEventListener("DOMContentLoaded", (e) => {
       repoLinkAnchor.style.textDecoration = 'underline';
       repoLinkAnchor.style.wordBreak = 'break-all'; // Ensures long links wrap
       repoLinkAnchor.target = '_blank'; // Opens in a new tab
-
+      
       repoLinkContainer.appendChild(repoLinkParagraph);
       repoLinkContainer.appendChild(repoLinkAnchor);
-
+      
       // Insert the new container before the existing website preview
       const websitePreviewSection = document.querySelector('.website-preview');
       websitePreviewSection.insertBefore(repoLinkContainer, websitePreviewSection.querySelector('.iframe-container'));
-
+      
       // Listener for the pay button
       document.getElementById('pay-button').addEventListener("click", async () => {
         try {
@@ -83,13 +83,13 @@ document.addEventListener("DOMContentLoaded", (e) => {
           alert("An error occurred. Please try again.");
         }
       });
-
+      
       businessRef.once("value").then(snapshot => {
         if (snapshot.exists()) {
           const data = snapshot.val();
           document.querySelector("#container").style.display = "block";
           document.getElementById("business-name").innerHTML = data.businessName;
-
+          
           // Dynamically create and append the download button
           const downloadButton = document.createElement('button');
           downloadButton.id = 'download-report-btn';
@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
           
           const websitePreviewSection = document.querySelector('.website-preview');
           websitePreviewSection.insertBefore(downloadButton, websitePreviewSection.querySelector('.iframe-container'));
-
+          
           if (data.isHosted === false) {
             document.getElementById("website-preview-iframe").srcdoc = data.websiteCode;
             document.getElementById('pay-button').style.display = 'block';
@@ -126,10 +126,10 @@ document.addEventListener("DOMContentLoaded", (e) => {
             const repoLinkAnchorElement = document.getElementById('repo-link');
             repoLinkAnchorElement.href = data.hostedRepoLink;
             repoLinkAnchorElement.textContent = data.hostedRepoLink;
-
+            
             // Display the hosted website in the iframe
             document.getElementById("website-preview-iframe").src = data.hostedRepoLink;
-
+            
             downloadButton.style.display = 'block'; // Show the download button
             
             // Add the onclick logic to the dynamically created button
@@ -138,20 +138,35 @@ document.addEventListener("DOMContentLoaded", (e) => {
                 const doc = new window.jspdf.jsPDF();
                 const margin = 10;
                 const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                let y = 40; // Initial y position
+                const lineHeight = 10; // Line height for the text
                 const text = data.marketReport;
-
+                
+                // Title
                 doc.setFontSize(22);
                 doc.text(`Market Report for ${data.businessName}`, pageWidth / 2, 20, { align: 'center' });
-
+                
+                // Content
                 doc.setFontSize(12);
                 const splitText = doc.splitTextToSize(text, pageWidth - 2 * margin);
-                doc.text(splitText, margin, 40);
+                
+                for (let i = 0; i < splitText.length; i++) {
+                  // Check if adding the next line will exceed the page height
+                  if (y + lineHeight > pageHeight - margin) {
+                    doc.addPage(); // Add a new page
+                    y = margin; // Reset y position to the top margin of the new page
+                  }
+                  doc.text(splitText[i], margin, y);
+                  y += lineHeight; // Increment y position for the next line
+                }
                 
                 doc.save(`${data.businessName.replace(/\s/g, '-')}-market-report.pdf`);
               } else {
                 alert("Market report is not available.");
               }
             });
+            
           }
         }
       });
