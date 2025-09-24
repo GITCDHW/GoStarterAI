@@ -3,40 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Business Dashboard</title>
+    <title>Start Up Sprint</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
     
 <div id="container">
-    <div class="full-screen-dashboard">
-        <div class="header-section">
-            <img src="https://via.placeholder.com/50" alt="Start Up Sprint Logo" class="logo">
-            <div class="header-links">
-                <a href="https://github.com/user/repo" target="_blank" class="github-link">
-                    <img src="https://img.icons8.com/material-outlined/24/000000/github.png" alt="GitHub Logo" class="icon">
-                    <span>https://github.com/user/repo</span>
-                </a>
-                <a href="https://user.github.io/repo" target="_blank" class="github-link">
-                    <img src="https://img.icons8.com/material-outlined/24/000000/website.png" alt="Website Icon" class="icon">
-                    <span>https://user.github.io/repo</span>
-                </a>
+    <div class="dashboard-container">
+        
+        <div class="left-pane">
+            <div class="header-section">
+                <div class="logo">
+                    <img src="logo.png" alt="Start Up Sprint Logo"> <span class="logo-text">Start Up Sprint</span>
+                </div>
+                <div class="links">
+                    <a href="#" id="github-link"><i class="fab fa-github"></i> <span id="github-user-repo">https://github.com/user/repo</span></a>
+                    <a href="#" id="live-site-link"><i class="fas fa-globe"></i> <span id="live-site-url">https://user.github.io/repo</span></a>
+                </div>
             </div>
-            <h2 id="business-name">Loading...</h2>
+            
+            <button id="download-report-btn" class="report-button">DOWNLOAD MARKET REPORT</button>
+            
+            <div class="graphs-section">
+                </div>
         </div>
         
-        <button id="download-report-btn">DOWNLOAD MARKET REPORT</button>
-        
-        <div class="main-content">
+        <div class="right-pane">
             <div class="website-preview">
-                <h3>WEBSITE PREVIEW (iframe)</h3>
+                <div class="website-header">
+                    <div class="website-icon-container">
+                        <div class="icon"></div>
+                        <div class="icon"></div>
+                        <div class="icon"></div>
+                    </div>
+                    <div class="website-title-section">
+                        <div class="title-bar"></div>
+                        <div class="address-bar">
+                            <span class="address-text"></span>
+                            <div class="search-icon"></div>
+                            <div class="world-icon"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h2 class="preview-heading">WEBSITE PREVIEW<br>(iframe)</h2>
+                
                 <div id="website-iframe-container" class="iframe-container">
                     <iframe id="website-preview-iframe" src="about:blank" frameborder="0"></iframe>
                 </div>
-                <button id="pay-button">LAUNCH!</button>
+                <button id="pay-button" class="launch-button">LAUNCH!</button>
             </div>
         </div>
     </div>
@@ -45,11 +63,10 @@
     <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <script src="config.js"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
     <script src="dashboard.js"></script>
+
 </body>
 </html>
