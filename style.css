@@ -1,13 +1,13 @@
 /* Body and General Layout */
 body {
-    background-color: #F8F8F8; /* Soft Off-White Background */
-    color: #333333; /* Soft Dark Gray Text */
+    background-color: #F8F8F8;
+    color: #333333;
     font-family: 'Poppins', sans-serif;
     padding: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh; /* Use min-height to allow content to expand */
     margin: 0;
 }
 
@@ -15,104 +15,45 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     width: 100%;
-    height: 100%;
-}
-
-.form-container {
-    background-color: #FFFFFF; /* Clean White Background */
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* A subtle, modern shadow */
-    width: 100%!important;
-    max-width: 600px;
+    max-width: 1200px;
+    padding: 20px;
     box-sizing: border-box;
-    border: 1px solid #E0E0E0; /* Light border for definition */
 }
 
-h2 {
-    color: #4A90E2; /* A classic, elegant blue accent */
+.logo-and-tagline {
     text-align: center;
-    margin-bottom: 20px;
-    font-family: 'Poppins', sans-serif; /* Keep a consistent, clean font */
-    font-weight: 600; /* Medium-bold for a softer heading */
-    text-transform: none; /* No uppercase for a softer look */
-    letter-spacing: 0;
+    margin-bottom: 40px;
 }
 
-/* Form Groups and Labels */
-.form-group {
-    margin-bottom: 20px;
+.logo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
 }
 
-label {
-    display: block;
-    margin-bottom: 8px;
-    color: #555555; /* Slightly lighter gray for labels */
-    font-weight: 500;
+.tagline {
+    font-size: 1.2em;
+    color: #777777;
+    font-weight: 400;
+    margin: 0;
 }
 
-/* Input and Textarea Styling */
-textarea,
-input[type="text"] {
+.dashboard-title {
+    font-size: 2.5em;
+    font-weight: 700;
+    color: #333333;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+/* Business Card Grid */
+.business-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
     width: 100%;
-    padding: 14px; /* Slightly larger padding for a softer look */
-    border: 1px solid #CCCCCC; /* Light gray border */
-    border-radius: 8px; /* Softer, rounder corners */
-    box-sizing: border-box;
-    font-size: 16px;
-    color: #333333; /* Dark text inside input */
-    background-color: #FDFDFD; /* Almost-white background for input */
-    resize: vertical;
-    transition: all 0.2s ease-in-out;
-}
-
-/* Focus state */
-textarea:focus,
-input[type="text"]:focus {
-    outline: none;
-    border-color: #4A90E2; /* Accent color on focus */
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2); /* Soft focus ring */
-}
-
-/* Button Styling */
-button {
-    width: 100%;
-    padding: 15px;
-    background-color: #4A90E2; /* Main accent color */
-    color: #FFFFFF; /* White button text for contrast */
-    border: none;
-    border-radius: 8px;
-    font-size: 18px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #3B7CDA; /* A slightly darker shade on hover */
-}
-
-/* GoStarterAI: Loader Styles */
-#loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%!important;
-  height: 600px!important;
-  background-color: #F8F8F8; /* Use the new body color */
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-#loading-overlay iframe {
-  width: 100%!important;
-  height: 90%!important;
-  border-radius: 20px;
+    margin-bottom: 40px;
 }
 
 .business-card {
@@ -127,7 +68,6 @@ button:hover {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     padding: 25px;
     position: relative;
-    overflow: hidden;
 }
 
 .business-card:hover {
@@ -135,20 +75,10 @@ button:hover {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-.card-header {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.card-icon {
-    font-size: 2em;
-    color: #4A90E2;
-}
-
 .status-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
     font-size: 0.8em;
     font-weight: 600;
     padding: 5px 12px;
@@ -159,11 +89,6 @@ button:hover {
 .status-live {
     background-color: #E6F6EC;
     color: #28A745;
-}
-
-.status-draft {
-    background-color: #FFF2E6;
-    color: #FF9900;
 }
 
 .card-content h3 {
@@ -184,8 +109,8 @@ button:hover {
 
 .card-link {
     display: inline-block;
-    padding: 8px 15px;
-    border-radius: 20px;
+    padding: 12px 24px;
+    border-radius: 8px;
     background-color: #F0F8FF;
     color: #4A90E2;
     text-decoration: none;
@@ -196,3 +121,206 @@ button:hover {
 .card-link:hover {
     background-color: #E6F0F8;
 }
+
+/* New Launch Button Style */
+.launch-button {
+    width: 400px;
+    padding: 20px;
+    background-color: #F0F8FF;
+    color: #4A90E2;
+    border: 1px solid #4A90E2;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.launch-button:hover {
+    background-color: #4A90E2;
+    color: #FFFFFF;
+}
+
+/* Modal and Loading Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #FFFFFF;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+    box-sizing: border-box; /* Ensures padding doesn't cause overflow */
+}
+
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    font-size: 2em;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#prompt_container h2 {
+    color: #4A90E2;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 500;
+}
+
+textarea,
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 16px;
+    color: #333;
+    background-color: #FDFDFD;
+    resize: vertical;
+    transition: all 0.2s ease-in-out;
+}
+
+textarea:focus,
+input[type="text"]:focus {
+    outline: none;
+    border-color: #4A90E2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+}
+
+#prompt_form button {
+    width: 100%;
+    padding: 15px;
+    background-color: #4A90E2;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#prompt_form button:hover {
+    background-color: #3B7CDA;
+}
+
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #F8F8F8;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#loading-overlay iframe {
+    width: 100%;
+    height: 90%;
+    border-radius: 20px;
+    max-width: 800px;
+}
+
+/* --- RESPONSIVE MEDIA QUERIES --- */
+
+/* Small devices (mobile phones, 600px and down) */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    .dashboard-title {
+        font-size: 2em;
+        margin-bottom: 20px;
+    }
+
+    .tagline {
+        font-size: 1em;
+    }
+
+    .business-grid {
+        grid-template-columns: 1fr; /* Stack cards on top of each other */
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .business-card {
+        padding: 20px;
+    }
+    
+    .launch-button {
+        width: 100%; /* Full width button on small screens */
+        font-size: 1em;
+        padding: 15px;
+    }
+
+    .modal-content {
+        padding: 20px;
+    }
+
+    .close-button {
+        font-size: 1.5em;
+        right: 15px;
+    }
+
+    #prompt_form button {
+        font-size: 16px;
+    }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 601px) and (max-width: 992px) {
+    .dashboard-title {
+        font-size: 2.2em;
+    }
+
+    .business-grid {
+        grid-template-columns: repeat(2, 1fr); /* Two columns for tablets */
+        gap: 25px;
+    }
+
+    .launch-button {
+        width: 300px;
+    }
+}
+
+/* Large devices (desktops, 993px and up) - already handled by default styles */

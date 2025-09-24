@@ -2,25 +2,21 @@
 function renderBusinesses(businesses) {
     const businessGrid = document.getElementById("business-list");
     businessGrid.innerHTML = ''; // Clear previous cards
-
+    
     if (businesses) {
         Object.keys(businesses).forEach(key => {
             const business = businesses[key];
             const card = document.createElement("div");
             card.className = "business-card";
-
-            // Determine the status and icon
-            const statusText = business.isHosted ? 'Live' : 'Draft';
-            const statusClass = business.isHosted ? 'status-live' : 'status-draft';
-            const iconClass = business.isHosted ? 'fa-rocket' : 'fa-pencil-alt'; // Using Font Awesome for icons
-
+            
+            // Determine the status
+            const statusText = 'LIVE'; // The design only shows "LIVE"
+            const statusClass = 'status-live';
+            
             card.innerHTML = `
-                <div class="card-header">
-                    <i class="fas ${iconClass} card-icon"></i>
-                    <span class="status-badge ${statusClass}">${statusText}</span>
-                </div>
+                <span class="status-badge ${statusClass}">${statusText}</span>
                 <div class="card-content">
-                    <h3>${business.businessName}</h3>
+                    <h3>Startup Sprint</h3>
                     <p>Click to manage your business</p>
                 </div>
                 <div class="card-actions">
@@ -32,21 +28,63 @@ function renderBusinesses(businesses) {
             card.addEventListener('click', () => {
                 window.location.href = `dashboard.html?id=${key}`;
             });
-
+            
             businessGrid.appendChild(card);
         });
     } else {
-        businessGrid.innerHTML = '<p style="text-align:center; color:#777;">No businesses found. Click "Add New Business" to get started!</p>';
+        // Updated message for no businesses
+        businessGrid.innerHTML = '<p style="text-align:center; color:#777;">No businesses found. Click "Launch New Business" to get started!</p>';
     }
 }
 
-
-// Global variable for API calls (assuming you have them defined elsewhere)
 async function makeApiCall(userPrompt, businessName) {
-    // ... (Your existing API call code)
+  try {
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt: userPrompt,
+        businessName:businessName
+      })
+    };
+    
+    const response = await fetch("https://go-starter-ai.vercel.app/api/agent", requestOptions);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("API call failed:", error);
+    alert("Something went wrong. Check the console for details.");
+    return null;
+  }
 }
+
+// New API call function for name generation
 async function makeNameApiCall(userPrompt) {
-    // ... (Your existing API call code)
+    try {
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ prompt: userPrompt })
+        };
+        const response = await fetch("https://go-starter-ai.vercel.app/api/nameGen", requestOptions);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Name API call failed:", error);
+        return null;
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
