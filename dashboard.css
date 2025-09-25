@@ -19,7 +19,7 @@ body {
     display: flex;
     justify-content: center; 
 align-items: center;
-    width: 90%;
+    width: 100%;
     max-width: 1400px;
     height: 80vh;
     border-radius: 15px;
@@ -228,7 +228,7 @@ align-items: center;
     .dashboard-container {
         flex-direction: column;
         height: auto;
-        width: 95%;
+        width: 100%;
     }
     .left-pane, .right-pane {
         width: 100%;
