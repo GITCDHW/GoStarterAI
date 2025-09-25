@@ -16,7 +16,7 @@ function renderBusinesses(businesses) {
             card.innerHTML = `
                 <span class="status-badge ${statusClass}">${statusText}</span>
                 <div class="card-content">
-                    <h3>Startup Sprint</h3>
+                    <h3>${business.businessName}</h3>
                     <p>Click to manage your business</p>
                 </div>
                 <div class="card-actions">
