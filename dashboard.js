@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
               }
             }
             if (websiteIframe) {
-                websiteIframe.src = data.hostedRepoLink;
+                websiteIframe.src = data.websiteCode;
             }
             if (downloadButton) {
               downloadButton.style.display = 'block';
