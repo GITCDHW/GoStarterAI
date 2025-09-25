@@ -11,6 +11,7 @@
     <style>
         /* Basic styling for the new elements */
         .repo-link-container {
+            /* Kept for JS logic, but will be styled by dashboard.css */
             display: none;
             text-align: center;
             margin-top: 20px;
@@ -45,8 +46,7 @@
 <div id="container">
     <div class="dashboard-container">
         
-        <div class="left-pane">
-            <div class="header-section">
+        <div class="card-pane"> <div class="header-section">
                 <div class="logo">
                     <img src="logo.png" alt="Start Up Sprint Logo">
                     <span class="logo-text">GoStarterAI</span>
@@ -60,15 +60,16 @@
                     <button id="download-report-btn" class="download-report-btn">Download Market Report</button>
                 </div>
             </div>
-        </div>
-        
-        <div class="right-pane">
-         <div id="website-iframe-container" class="iframe-container">
+            
+            <div class="website-preview-card">
+                <h2 class="preview-heading">Website Preview</h2>
+                <div id="website-iframe-container" class="iframe-container">
                     <iframe id="website-preview-iframe" src="about:blank" frameborder="0"></iframe>
                 </div>
                 <button id="pay-button" class="launch-button">LAUNCH!</button>
             </div>
-        </div>
+            </div>
+        
     </div>
 </div>
 

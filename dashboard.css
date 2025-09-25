@@ -8,53 +8,49 @@ body {
     font-family: 'Poppins', sans-serif;
     color: #333;
     margin: 0;
-    padding: 0;
+    padding: 20px; /* Add some padding for smaller screens */
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Align to the top of the viewport */
     min-height: 100vh;
 }
 
 .dashboard-container {
-    display: flex;
-    justify-content: center; 
-align-items: center;
+    /* Removed flex properties and set a max width for the single card */
+    display: block; 
     width: 100%;
-    max-width: 1400px;
-    height: 80vh;
+    max-width: 700px; /* Set a reasonable width for a card layout */
+    height: auto;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     background-color: #fff;
+    margin-top: 5vh; /* Center vertically better for a card */
 }
 
-.left-pane {
-    width: 45%;
+/* Renamed and restyled for the single card */
+.card-pane { 
+    width: 100%; /* Takes full width of the container */
     background-color: #ffffff;
     padding: 40px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap: 30px; /* Space between main sections */
 }
 
-.right-pane {
-    width: 55%;
-    background-color: #4A90E2;
-    padding: 40px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
+/* Removed right-pane styles */
+/* .right-pane is removed from HTML and CSS */
 
 .header-section {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    margin-bottom: 20px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid #eee; /* Separator */
 }
 
 .logo {
+    /* ... existing styles ... */
     display: flex;
     align-items: center;
     gap: 15px;
@@ -68,36 +64,51 @@ align-items: center;
     height: auto;
 }
 
-.links {
+#business-info{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+/* * NEW: Styles for the Website Preview as a separate section/card 
+*/
+.website-preview-card {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 20px;
 }
 
-.links a {
+.preview-heading {
+    /* Styled for a heading within the white card */
+    font-size: 24px;
+    font-weight: 600;
     color: #4A90E2;
-    text-decoration: none;
-    font-size: 16px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    word-break: break-all;
+    text-align: center;
+    line-height: 1.2;
+    margin: 0;
 }
 
-.links i {
-    font-size: 20px;
+.iframe-container {
+    width: 100%;
+    height: 400px; /* Give the preview a fixed height */
+    background-color: #f7f7f7; /* Light background for the preview area */
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    /* This will be shown by JS now */
+    display: block !important; 
 }
 
-.repo-link-container a {
-    /* Existing styles */
-    word-break: break-all;
-    overflow-wrap: break-word; /* Add this line */
-    max-width: 100%; /* Add this line to constrain the link to its container */
-    display: inline-block; /* Helps with word wrapping */
+#website-preview-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: #fff;
 }
 
-.report-button {
+.launch-button {
+    /* Default style for the button */
     background-color: #4A90E2;
     color: white;
     border: none;
@@ -110,137 +121,38 @@ align-items: center;
     text-transform: uppercase;
     letter-spacing: 1px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    width: 100%;
-    margin-top: 40px;
+    width: 80%; /* Make it narrower */
+    max-width: 300px;
+    margin: 10px auto; /* Center the button */
 }
 
-#business-info{
-    display:flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+/* The rest of the styles are largely unchanged but ensure the removal of the right-pane background styling */
+
+.report-button {
+    /* ... existing styles ... */
 }
 
-.report-button:hover {
+.launch-button:hover {
     background-color: #3B7CDA;
     transform: translateY(-2px);
 }
 
-.graphs-section {
-    display: flex;
-    justify-content: space-between;
-    margin-top: auto;
-    gap: 20px;
-}
-
-.graph {
-    width: 48%;
-    background-color: #f7f7f7;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
-}
-
-.graph-title {
-    font-size: 16px;
-    font-weight: 600;
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-.graph img {
-    width: 100%;
-    height: auto;
-}
-
-.website-preview {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    padding-top: 80px;
-}
-
-.preview-heading {
-    font-size: 40px;
-    font-weight: 700;
-    color: white;
-    text-align: center;
-    line-height: 1.2;
-    margin: 0;
-    z-index: 10;
-}
-
-.website-header {
-    display: none; /* The image design doesn't show this, so we'll hide it. */
-}
-
-.iframe-container {
-    width: 100%;
-    height: 100%;
-    background-color: transparent;
-    border: none;
-    display: none; /* Hidden by default, JS will manage visibility */
-    overflow: hidden;
-}
-
-#website-preview-iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
-
-.launch-button {
-    display: none; /* Hidden by default, JS will manage visibility */
-}
-
-/* Abstract shapes for the background design */
+/* Remove abstract shapes as they were on the blue right pane */
 .right-pane::before, .right-pane::after {
-    content: '';
-    position: absolute;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    transform: rotate(45deg);
-    z-index: 1;
+    content: none;
 }
 
-.right-pane::before {
-    width: 150px;
-    height: 150px;
-    top: 50px;
-    left: 20px;
-}
-
-.right-pane::after {
-    width: 200px;
-    height: 200px;
-    bottom: 50px;
-    right: 20px;
-}
-
-@media (max-width: 992px) {
+@media (max-width: 768px) {
     .dashboard-container {
-        flex-direction: column;
-        height: auto;
-        width: 100%;
+        margin-top: 0;
+        border-radius: 0;
+        box-shadow: none;
+        min-height: 100vh;
     }
-    .left-pane, .right-pane {
-        width: 100%;
+    .card-pane {
         padding: 20px;
     }
-    .graphs-section {
-        flex-direction: column;
-    }
-    .graph {
-        width: 100%;
+    .iframe-container {
+        height: 300px;
     }
 }
-
-/* Icon for github and globe */
-@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css");
