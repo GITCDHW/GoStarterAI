@@ -12,6 +12,8 @@ body {
 
 .dashboard-container {
     display: flex;
+    justify-content: center; 
+align-items: center;
     width: 90%;
     max-width: 1400px;
     height: 80vh;
@@ -80,6 +82,14 @@ body {
 
 .links i {
     font-size: 20px;
+}
+
+.repo-link-container a {
+    /* Existing styles */
+    word-break: break-all;
+    overflow-wrap: break-word; /* Add this line */
+    max-width: 100%; /* Add this line to constrain the link to its container */
+    display: inline-block; /* Helps with word wrapping */
 }
 
 .report-button {
