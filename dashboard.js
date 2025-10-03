@@ -1,3 +1,5 @@
+//oac_RU6DeJT0jXHfF3sgQWX2nlZ2
+
 // Function to generate a random array of 32-bit unsigned integers
 function getRandomValues(array) {
   if (window.crypto && window.crypto.getRandomValues) {
@@ -85,6 +87,37 @@ document.addEventListener("DOMContentLoaded", (e) => {
           } else { // isHosted === true
           if (hostButton) {
             hostButton.style.display = 'block'
+               hostButton.addEventListener("click", async () => {
+     try {
+       const idToken = await user.getIdToken();
+       // 1. Generate a new secure state
+       const state = generateSecureKey(32);
+       const stateRef = db.ref(`vercel_oauth_states/${state}`);
+       
+       // 2. Save the state and user info to the database
+       await stateRef.set({
+         userId: user.uid,
+         businessId: id,
+         idToken: idToken, // Pass token for backend use if needed
+         timestamp: new Date().getTime()
+       });
+       
+       // 3. Construct the Vercel OAuth URL
+       const vercelClientId = 'oac_RU6DeJT0jXHfF3sgQWX2nlZ2'; 
+       
+       const vercelRedirectUri = 'https://go-starter-ai.vercel.app/api/vercelAuthFlow'; 
+       
+       const vercelScope = 'deployments'; 
+       
+       const vercelAuthUrl = `https://vercel.com/integrations/oauth/authorize?client_id=${vercelClientId}&scope=${vercelScope}&state=${state}&redirect_uri=${vercelRedirectUri}`;
+       
+       window.location.href = vercelAuthUrl;
+       
+     } catch (error) {
+       console.error("Failed to store state or get ID token for Vercel:", error);
+       alert("An error occurred during the Vercel authorization process. Please try again.");
+     }
+   });
           }
             if (payButton) payButton.style.display = 'none';
             if (repoLinkContainer) {
