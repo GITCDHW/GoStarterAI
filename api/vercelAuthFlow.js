@@ -46,5 +46,49 @@ if (!stateSnapshot.exists()) {
 const { userId, businessId, idToken } = stateSnapshot.val();
 await stateRef.remove();
 
+try{
+  const vercelClientId = 'oac_RU6DeJT0jXHfF3sgQWX2nlZ2'; // Vercel Client ID from the client-side code
+const vercelClientSecret = process.env.VERCEL_CLIENT_SECRET; // MUST be stored securely as an environment variable
+const vercelRedirectUri = 'https://go-starter-ai.vercel.app/api/vercelAuthFlow'; // Matches the one saved earlier
+
+if (!vercelClientSecret) {
+  // Good practice: handle missing secret
+  console.error("VERCEL_CLIENT_SECRET is missing.");
+  return res.status(500).json({ error: 'Server configuration error.' });
+}
+
+// 5. Exchange Temporary Code for Access Token
+  const tokenResponse = await axios.post('https://api.vercel.com/v2/oauth/access_token', null, {
+    params: {
+      client_id: vercelClientId,
+      client_secret: vercelClientSecret,
+      code: code,
+      redirect_uri: vercelRedirectUri,
+    },
+    // Vercel token exchange uses query parameters, not a JSON body
+  });
+
+  const { access_token, user_id, team_id } = tokenResponse.data;
+
+  // 6. Save the Access Token
+  // This token is needed for making future deployments/API calls to Vercel on the user's behalf.
+  const vercelTokenRef = db.ref(`users/${userId}/vercel_token`); 
+  await vercelTokenRef.set({
+    accessToken: access_token,
+    vercelUserId: user_id, // Vercel User ID
+    vercelTeamId: team_id || null, // Vercel Team ID (if applicable)
+    // Optional: save the businessId if you need to know which business this token relates to specifically
+  });
+
+  // 7. Success Response and Redirect
+  // Once the token is saved, you should redirect the user back to the application's dashboard or relevant page.
+  // Using a redirect is standard practice after a successful server-side OAuth step.
+  return res.redirect(`/business-details.html?id=${businessId}&success=vercel_auth`);
+
+} catch (error) {
+  console.error("Vercel token exchange failed:", error.response ? error.response.data : error.message);
+  // Redirect to an error page or back to the app with an error message
+  return res.redirect(`/error.html?message=Vercel+Authorization+Failed`);
+}
 
 }
