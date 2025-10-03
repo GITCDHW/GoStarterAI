@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
       // Get references to the existing elements
       const payButton = document.getElementById('pay-button');
       const downloadButton = document.getElementById('download-report-btn');
+      const hostButton = document.getElementById('host-repo');
       const businessNameElement = document.getElementById('business-name');
       const repoLinkContainer = document.getElementById('repo-link-container');
       const repoLinkAnchorElement = document.getElementById('repo-link');
@@ -74,7 +75,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
               businessNameElement.innerHTML = data.businessName;
           }
           
-          if (data.isHosted === false) {
+          if (data.isHosted === false && data.isDeployed===null) {
             if (websiteIframe) {
               websiteIframe.srcdoc = data.websiteCode;
             }
@@ -82,6 +83,9 @@ document.addEventListener("DOMContentLoaded", (e) => {
             if (repoLinkContainer) repoLinkContainer.style.display = 'none';
             if (downloadButton) downloadButton.style.display = 'none';
           } else { // isHosted === true
+          if (hostButton) {
+            hostButton.style.display = 'block'
+          }
             if (payButton) payButton.style.display = 'none';
             if (repoLinkContainer) {
               repoLinkContainer.style.display = 'block';
