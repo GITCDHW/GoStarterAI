@@ -26,6 +26,27 @@ if (!admin.apps.length) {
 }
 
 const db = admin.database();
+
+const deployToVercel = async (accessToken, repoUrl, projectName) => {
+  await axios.post(
+    'https://api.vercel.com/v13/deployments',
+    {
+      name: projectName,
+      gitSource: {
+        type: 'github',
+        repoId: extractRepoId(repoUrl),
+        ref: 'main',
+      },
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+};
+
 export default async function handler(req,res) {
   
   if (req.method !== "GET") {
@@ -44,7 +65,7 @@ if (!stateSnapshot.exists()) {
   return res.status(400).json({ error: 'Invalid or expired state parameter.' });
 }
 
-const { userId, businessId, idToken } = stateSnapshot.val();
+const {repoUrl,businessName} = stateSnapshot.val();
 await stateRef.remove();
 
 try{
@@ -72,12 +93,12 @@ if (!vercelClientSecret) {
 );
 
   const { access_token, user_id, team_id } = tokenResponse.data;
-
-  const vercelTokenRef = db.ref(`users/${userId}/vercel_token`); 
+deployToVercel(access_token,repoUrl,businessName)
+/**  const vercelTokenRef = db.ref(`users/${userId}/vercel_token`); 
   await vercelTokenRef.set({
     accessToken: access_token,
     vercelUserId: user_id, // Vercel User ID
-    vercelTeamId: team_id || null,   });
+    vercelTeamId: team_id || null,   }); **/
 
   return res.redirect(`/dashboard.html?id=${businessId}&success=vercel_auth`);
 

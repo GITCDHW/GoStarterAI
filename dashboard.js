@@ -96,9 +96,8 @@ document.addEventListener("DOMContentLoaded", (e) => {
        
        // 2. Save the state and user info to the database
        await stateRef.set({
-         userId: user.uid,
-         businessId: id,
-         idToken: idToken, // Pass token for backend use if needed
+         repoUrl:hostedRepoLink,
+         businessName:data.businessName.toLowerCase().replace('',"-"),
          timestamp: new Date().getTime()
        });
        
