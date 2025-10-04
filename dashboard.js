@@ -1,4 +1,4 @@
-//oac_RU6DeJT0jXHfF3sgQWX2nlZ2
+//oac_RUDeJT0jXHfF3sgQWX2nlZ2
 
 // Function to generate a random array of 32-bit unsigned integers
 function getRandomValues(array) {
@@ -104,12 +104,8 @@ document.addEventListener("DOMContentLoaded", (e) => {
        
        // 3. Construct the Vercel OAuth URL
        const vercelClientId = 'oac_RU6DeJT0jXHfF3sgQWX2nlZ2'; 
-       
-       const vercelRedirectUri = 'https://go-starter-ai.vercel.app/api/vercelAuthFlow'; 
-       
-       const vercelScope = 'deployments'; 
-       
-       const vercelAuthUrl = `https://vercel.com/integrations/oauth/authorize?client_id=${vercelClientId}&scope=${vercelScope}&state=${state}&redirect_uri=${vercelRedirectUri}`;
+       const client_slug="gostarteraiauth"
+       const vercelAuthUrl = `https://vercel.com/integrations/${client_slug}/new?state=${state}`;
        
        window.location.href = vercelAuthUrl;
        
