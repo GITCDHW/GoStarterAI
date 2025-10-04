@@ -2,6 +2,7 @@
 import axios from 'axios';
 import admin from 'firebase-admin';
 import { Buffer } from 'buffer';
+import qs from 'qs'
 
 const serviceAccount = {
   "type": "service_account",
@@ -57,14 +58,18 @@ if (!vercelClientSecret) {
 }
 
 // 5. Exchange Temporary Code for Access Token
-  const tokenResponse = await axios.post('https://api.vercel.com/v2/oauth/access_token', null, {
-    params: {
-      client_id: vercelClientId,
-      client_secret: vercelClientSecret,
-      code: code,
-      redirect_uri: vercelRedirectUri,
-    },
-  });
+  const tokenResponse = await axios.post(
+  'https://api.vercel.com/v2/oauth/access_token',
+  qs.stringify({
+    client_id: vercelClientId,
+    client_secret: vercelClientSecret,
+    code,
+    redirect_uri: vercelRedirectUri,
+  }),
+  {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  }
+);
 
   const { access_token, user_id, team_id } = tokenResponse.data;
 
