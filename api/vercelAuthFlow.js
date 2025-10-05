@@ -29,32 +29,6 @@ if (!admin.apps.length) {
 
 const db = admin.database();
 
-// ------------------- UTILITY FUNCTIONS -------------------
-const extractRepoId = (repoUrl) => {
-  try {
-    if (!repoUrl) throw new Error("Repo URL is missing");
-
-    let repoId = null;
-
-    if (repoUrl.startsWith("git@")) {
-      const match = repoUrl.match(/github\.com:(.+?)(\.git)?$/);
-      repoId = match ? match[1] : null;
-    } else {
-      const url = new URL(repoUrl);
-      const parts = url.pathname.replace(/^\/|\.git$/g, '').split('/');
-      if (parts.length >= 2) {
-        repoId = `${parts[0]}/${parts[1]}`;
-      }
-    }
-
-    if (!repoId) throw new Error("Invalid GitHub repo URL format");
-    return repoId;
-  } catch (error) {
-    console.error(`[GoStarterAI][extractRepoId] ${error.message}`);
-    return null;
-  }
-};
-
 // ------------------- DEPLOYMENT FUNCTION -------------------
 const deployToVercel = async (accessToken, repoUrl, projectName) => {
   try {
@@ -64,7 +38,7 @@ const deployToVercel = async (accessToken, repoUrl, projectName) => {
         name: projectName,
         gitSource: {
           type: 'github',
-          repoId: extractRepoId(repoUrl),
+          repo:repoUrl,
           ref: 'main',
         },
       },
