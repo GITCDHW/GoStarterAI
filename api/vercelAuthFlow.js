@@ -29,6 +29,42 @@ if (!admin.apps.length) {
 
 const db = admin.database();
 
+/**
+ * Extracts the 'owner/repo-name' ID from a GitHub repository URL.
+ * * @param {string} url - The GitHub repository URL.
+ * @returns {string|null} The repo ID (e.g., 'facebook/react') or null if invalid.
+ */
+const extractRepoIdFromUrl = (url) => {
+  try {
+    // 1. Create a URL object to easily access the pathname
+    const urlObject = new URL(url);
+
+    // 2. The pathname will be something like '/owner/repo-name' (or more)
+    let pathname = urlObject.pathname;
+
+    // 3. Remove leading/trailing slashes
+    pathname = pathname.startsWith('/') ? pathname.substring(1) : pathname;
+    pathname = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+
+    // 4. Split the path by '/'
+    const pathSegments = pathname.split('/');
+
+    // 5. A valid repo URL should have at least 2 segments (owner and repo name)
+    if (pathSegments.length >= 2) {
+      // Return the first two segments joined by '/'
+      // This handles URLs like 'https://github.com/owner/repo-name/blob/main/...'
+      return `${pathSegments[0]}/${pathSegments[1]}`;
+    }
+
+    return null; // Path is too short
+  } catch (error) {
+    // Handle cases where the input is not a valid URL
+    console.error("Invalid URL provided:", error.message);
+    return null;
+  }
+};
+
+
 // ------------------- DEPLOYMENT FUNCTION -------------------
 const deployToVercel = async (accessToken, repoUrl, projectName) => {
   try {
