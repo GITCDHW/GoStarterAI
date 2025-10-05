@@ -27,6 +27,33 @@ if (!admin.apps.length) {
 
 const db = admin.database();
 
+const extractRepoId = (repoUrl) => {
+  try {
+    if (!repoUrl) throw new Error("Repo URL is missing");
+
+    let repoId = null;
+
+    if (repoUrl.startsWith("git@")) {
+      // SSH format: git@github.com:username/repo.git
+      const match = repoUrl.match(/github\.com:(.+?)(\.git)?$/);
+      repoId = match ? match[1] : null;
+    } else {
+      // HTTPS format: https://github.com/username/repo or .git
+      const url = new URL(repoUrl);
+      const parts = url.pathname.replace(/^\/|\.git$/g, '').split('/');
+      if (parts.length >= 2) {
+        repoId = `${parts[0]}/${parts[1]}`;
+      }
+    }
+
+    if (!repoId) throw new Error("Invalid GitHub repo URL format");
+    return repoId;
+  } catch (error) {
+    console.error(`extractRepoId failed: ${error.message}`);
+    return null;
+  }
+};
+
 const deployToVercel = async (accessToken, repoUrl, projectName) => {
   await axios.post(
     'https://api.vercel.com/v13/deployments',
@@ -99,7 +126,6 @@ deployToVercel(access_token,repoUrl,businessName)
     accessToken: access_token,
     vercelUserId: user_id, // Vercel User ID
     vercelTeamId: team_id || null,   }); **/
-
   return res.redirect(`/dashboard.html?id=${businessId}&success=vercel_auth`);
 
 } catch (error) {
