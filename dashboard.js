@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
        
        // 2. Save the state and user info to the database
        await stateRef.set({
-         repoUrl:hostedRepoLink,
+         repoUrl:data.hostedRepoLink,
          businessName:data.businessName.toLowerCase().replace('',"-"),
          timestamp: new Date().getTime()
        });
