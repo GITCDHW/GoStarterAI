@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
       const repoLinkContainer = document.getElementById('repo-link-container');
       const repoLinkAnchorElement = document.getElementById('repo-link');
       const websiteIframe = document.getElementById('website-preview-iframe');
-
+      
       // Add a listener for the pay button
       if (payButton) {
         payButton.addEventListener("click", async () => {
@@ -74,10 +74,10 @@ document.addEventListener("DOMContentLoaded", (e) => {
           const data = snapshot.val();
           document.querySelector("#container").style.display = "block";
           if (businessNameElement) {
-              businessNameElement.innerHTML = data.businessName;
+            businessNameElement.innerHTML = data.businessName;
           }
           
-          if (data.isHosted === false && data.isDeployed===null) {
+          if (data.isHosted === false && data.isDeployed === null) {
             if (websiteIframe) {
               websiteIframe.srcdoc = data.websiteCode;
             }
@@ -85,36 +85,41 @@ document.addEventListener("DOMContentLoaded", (e) => {
             if (repoLinkContainer) repoLinkContainer.style.display = 'none';
             if (downloadButton) downloadButton.style.display = 'none';
           } else { // isHosted === true
-          if (hostButton) {
-            hostButton.style.display = 'block'
-               hostButton.addEventListener("click", async () => {
-     try {
-       const idToken = await user.getIdToken();
-       // 1. Generate a new secure state
-       const state = generateSecureKey(32);
-       const stateRef = db.ref(`vercel_oauth_states/${state}`);
-       
-       // 2. Save the state and user info to the database
-       await stateRef.set({
-         repoUrl:data.hostedRepoLink,
-         businessName:data.businessName.toLowerCase().replace('',"-"),
-         businessId:id,
-         timestamp: new Date().getTime()
-       });
-       
-       // 3. Construct the Vercel OAuth URL
-       const vercelClientId = 'oac_RU6DeJT0jXHfF3sgQWX2nlZ2'; 
-       const client_slug="gostarteraiauth"
-       const vercelAuthUrl = `https://vercel.com/integrations/${client_slug}/new?state=${state}`;
-       
-       window.location.href = vercelAuthUrl;
-       
-     } catch (error) {
-       console.error("Failed to store state or get ID token for Vercel:", error);
-       alert("An error occurred during the Vercel authorization process. Please try again.");
-     }
-   });
-          }
+            if (hostButton) {
+              hostButton.style.display = 'block'
+              hostButton.addEventListener("click", async () => {
+                try {
+                  const idToken = await user.getIdToken();
+                  // 1. Generate a new secure state
+                  const state = generateSecureKey(32);
+                  const stateRef = db.ref(`vercel_oauth_states/${state}`);
+                  
+                  // 2. Save the state and user info to the database
+                  await stateRef.set({
+                    repoUrl: data.hostedRepoLink,
+                    businessName: data.businessName
+                      .toLowerCase()
+                      .replace(/\s+/g, '-')
+                      .replace(/[^a-z0-9._-]/g, '')
+                      .replace(/---+/g, '-')
+                      .slice(0, 100),
+                    businessId: id,
+                    timestamp: new Date().getTime()
+                  });
+                  
+                  // 3. Construct the Vercel OAuth URL
+                  const vercelClientId = 'oac_RU6DeJT0jXHfF3sgQWX2nlZ2';
+                  const client_slug = "gostarteraiauth"
+                  const vercelAuthUrl = `https://vercel.com/integrations/${client_slug}/new?state=${state}`;
+                  
+                  window.location.href = vercelAuthUrl;
+                  
+                } catch (error) {
+                  console.error("Failed to store state or get ID token for Vercel:", error);
+                  alert("An error occurred during the Vercel authorization process. Please try again.");
+                }
+              });
+            }
             if (payButton) payButton.style.display = 'none';
             if (repoLinkContainer) {
               repoLinkContainer.style.display = 'block';
@@ -124,7 +129,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
               }
             }
             if (websiteIframe) {
-                websiteIframe.srcdoc = data.websiteCode;
+              websiteIframe.srcdoc = data.websiteCode;
             }
             if (downloadButton) {
               downloadButton.style.display = 'block';
