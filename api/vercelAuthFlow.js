@@ -92,7 +92,7 @@ if (!stateSnapshot.exists()) {
   return res.status(400).json({ error: 'Invalid or expired state parameter.' });
 }
 
-const {repoUrl,businessName} = stateSnapshot.val();
+const {repoUrl,businessName,businessId} = stateSnapshot.val();
 await stateRef.remove();
 
 try{

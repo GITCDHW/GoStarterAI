@@ -98,6 +98,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
        await stateRef.set({
          repoUrl:data.hostedRepoLink,
          businessName:data.businessName.toLowerCase().replace('',"-"),
+         businessId:id,
          timestamp: new Date().getTime()
        });
        
