@@ -67,18 +67,26 @@ const extractRepoIdFromUrl = (url) => {
 // ------------------- DEPLOYMENT FUNCTION -------------------
 const deployToVercel = async (accessToken, repoUrl, projectName) => {
   try {
-    console.log(repoUrl)
-    console.log(extractRepoIdFromUrl(repoUrl))
-    const response = await axios.post(
-      'https://api.vercel.com/v13/deployments',
-      {
-        name: projectName,
-        gitSource: {
-          type: 'github',
-          repoId:extractRepoIdFromUrl(repoUrl),
-          ref: 'main',
-        },
+    const repoId = extractRepoIdFromUrl(repoUrl); // e.g. 'username/reponame'
+    if (!repoId) throw new Error("Invalid repository URL");
+
+    const payload = {
+      name: projectName.toLowerCase().replace(/\s+/g, '-'),
+      gitRepository: {
+        type: 'github',
+        repo: repoId,
       },
+      publicSource: true,
+      framework: null,
+      environmentVariables: [],
+      buildCommand: null,
+      installCommand:null,
+      outputDirectory: "public",
+    };
+
+    const response = await axios.post(
+      'https://api.vercel.com/v11/projects',
+      payload,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -87,8 +95,8 @@ const deployToVercel = async (accessToken, repoUrl, projectName) => {
       }
     );
 
-    console.log(`[GoStarterAI][VercelDeploy] Success: ${response.data.url}`);
-    return response.data; // returns deployment info
+    console.log(`[GoStarterAI][VercelDeploy] Success: ${response.data.link?.url || 'No URL'}`);
+    return response.data;
   } catch (e) {
     console.error('[GoStarterAI][VercelDeploy] Failed:', e.response ? e.response.data : e.message);
     throw e;
