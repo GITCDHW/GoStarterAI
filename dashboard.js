@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
               repoLinkContainer.style.display = 'block';
               if (repoLinkAnchorElement) {
                 repoLinkAnchorElement.href = data.hostedRepoLink;
-                repoLinkAnchorElement.textContent = `Your GitHub Repo Link:data.hostedRepoLink`;
+                repoLinkAnchorElement.textContent = `Your GitHub Repo Link:${data.hostedRepoLink}`;
               }
             }
             if (websiteIframe) {
