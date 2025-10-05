@@ -67,24 +67,18 @@ const extractRepoIdFromUrl = (url) => {
 // ------------------- DEPLOYMENT FUNCTION -------------------
 const deployToVercel = async (accessToken, repoUrl, projectName) => {
   try {
-    const repoId = extractRepoIdFromUrl(repoUrl); // e.g. 'username/reponame'
+    const repoId = extractRepoIdFromUrl(repoUrl);
     if (!repoId) throw new Error("Invalid repository URL");
-
+    
     const payload = {
       name: projectName.toLowerCase().replace(/\s+/g, '-'),
-      gitRepository: {
-        type: 'github',
-        repo: repoId,
-      },
+      gitRepository: { type: 'github', repo: repoId },
       publicSource: true,
-      framework: null,
-      environmentVariables: [],
-      buildCommand: null,
-      installCommand:null,
       outputDirectory: "public",
     };
-
-    const response = await axios.post(
+    
+    // 1️⃣ Create project
+    const projectResponse = await axios.post(
       'https://api.vercel.com/v11/projects',
       payload,
       {
@@ -94,9 +88,30 @@ const deployToVercel = async (accessToken, repoUrl, projectName) => {
         },
       }
     );
-
-    console.log(`[GoStarterAI][VercelDeploy] Success: ${response.data.link?.url || 'No URL'}`);
-    return response.data;
+    
+    console.log(`[GoStarterAI][VercelDeploy] Project created: ${projectResponse.data.name}`);
+    
+    // 2️⃣ Trigger deployment
+    const deployResponse = await axios.post(
+      'https://api.vercel.com/v13/deployments',
+      {
+        name: payload.name,
+        gitSource: {
+          type: 'github',
+          repoId: repoId
+        }
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+      }
+    );
+    
+    console.log(`[GoStarterAI][VercelDeploy] Deployment started: ${deployResponse.data.url}`);
+    return deployResponse.data;
+    
   } catch (e) {
     console.error('[GoStarterAI][VercelDeploy] Failed:', e.response ? e.response.data : e.message);
     throw e;
@@ -157,9 +172,7 @@ export default async function handler(req, res) {
 
     // ------------------- UPDATE FIREBASE -------------------
     const vercelUrl = deployResult?.url ? `https://${deployResult.url}` : null;
-    const businessRef = db.ref(`users`).orderByChild(`businesses/${businessId}/businessName`);
-
-    await db.ref(`businesses/${businessId}`).update({
+    await db.ref(`users/businesses/${businessId}`).update({
       isDeployed: true,
       vercelUrl: vercelUrl || null,
       deploymentTimestamp: Date.now(),
