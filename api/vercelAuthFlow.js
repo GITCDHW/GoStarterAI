@@ -29,58 +29,26 @@ if (!admin.apps.length) {
 
 const db = admin.database();
 
-/**
- * Extracts the 'owner/repo-name' ID from a GitHub repository URL.
- * * @param {string} url - The GitHub repository URL.
- * @returns {string|null} The repo ID (e.g., 'facebook/react') or null if invalid.
- */
-const extractRepoIdFromUrl = (url) => {
-  try {
-    // 1. Create a URL object to easily access the pathname
-    const urlObject = new URL(url);
-
-    // 2. The pathname will be something like '/owner/repo-name' (or more)
-    let pathname = urlObject.pathname;
-
-    // 3. Remove leading/trailing slashes
-    pathname = pathname.startsWith('/') ? pathname.substring(1) : pathname;
-    pathname = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
-
-    // 4. Split the path by '/'
-    const pathSegments = pathname.split('/');
-
-    // 5. A valid repo URL should have at least 2 segments (owner and repo name)
-    if (pathSegments.length >= 2) {
-      // Return the first two segments joined by '/'
-      // This handles URLs like 'https://github.com/owner/repo-name/blob/main/...'
-      return `${pathSegments[0]}/${pathSegments[1]}`;
-    }
-
-    return null; // Path is too short
-  } catch (error) {
-    // Handle cases where the input is not a valid URL
-    console.error("Invalid URL provided:", error.message);
-    return null;
-  }
-};
-
 // ------------------- DEPLOYMENT FUNCTION -------------------
 const deployToVercel = async (accessToken, repoUrl, projectName) => {
   try {
-    const repoId = extractRepoIdFromUrl(repoUrl);
-    if (!repoId) throw new Error("Invalid repository URL");
+    const repoSlug = extractRepoIdFromUrl(repoUrl); // Renamed to slug for clarity
+    if (!repoSlug) throw new Error("Invalid repository URL");
     
-    const payload = {
+    const projectPayload = {
       name: projectName.toLowerCase().replace(/\s+/g, '-'),
-      gitRepository: { type: 'github', repo: repoId },
+      gitRepository: { type: 'github', repo: repoSlug }, // GitHub slug (owner/repo)
       publicSource: true,
       outputDirectory: "public",
+      // Include optional framework preset for better setup, e.g.:
+      // framework: "nextjs"
     };
     
     // 1️⃣ Create project
+    // Note: Using /v9/projects is recommended over /v11 for project creation
     const projectResponse = await axios.post(
-      'https://api.vercel.com/v11/projects',
-      payload,
+      'https://api.vercel.com/v9/projects',
+      projectPayload,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -89,18 +57,27 @@ const deployToVercel = async (accessToken, repoUrl, projectName) => {
       }
     );
     
-    console.log(`[GoStarterAI][VercelDeploy] Project created: ${projectResponse.data.name}`);
+    const vercelProjectId = projectResponse.data.id;
+    // The Vercel API response for creating a project contains the GitHub numeric ID in the 'link' object.
+    const githubRepoId = projectResponse.data.link.repoId; 
+    
+    console.log(`[GoStarterAI][VercelDeploy] Project created: ${projectResponse.data.name} (Vercel ID: ${vercelProjectId})`);
+    
     
     // 2️⃣ Trigger deployment
-    const deployResponse = await axios.post(
-      'https://api.vercel.com/v13/deployments',
-      {
-        name: payload.name,
+    const deploymentPayload = {
+        name: projectPayload.name,
+        project: vercelProjectId,
         gitSource: {
           type: 'github',
-          repoId: repoId
-        }
-      },
+          repoId: githubRepoId,
+          ref: 'main'
+        },
+    };
+
+    const deployResponse = await axios.post(
+      'https://api.vercel.com/v13/deployments',
+      deploymentPayload,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -110,14 +87,17 @@ const deployToVercel = async (accessToken, repoUrl, projectName) => {
     );
     
     console.log(`[GoStarterAI][VercelDeploy] Deployment started: ${deployResponse.data.url}`);
+    
+    // The deployment URL is often returned as the domain, e.g., my-project-xxxx.vercel.app
     return deployResponse.data;
     
   } catch (e) {
-    console.error('[GoStarterAI][VercelDeploy] Failed:', e.response ? e.response.data : e.message);
+    // Better error logging for Vercel API responses
+    const errorDetails = e.response ? JSON.stringify(e.response.data) : e.message;
+    console.error('[GoStarterAI][VercelDeploy] Failed:', errorDetails);
     throw e;
   }
 };
-
 // ------------------- MAIN HANDLER -------------------
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -137,7 +117,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid or expired state parameter.' });
   }
 
-  const { repoUrl, businessName, businessId } = stateSnapshot.val();
+  const { repoUrl, businessName, businessId,userId } = stateSnapshot.val();
   await stateRef.remove();
 
   try {
@@ -172,7 +152,7 @@ export default async function handler(req, res) {
 
     // ------------------- UPDATE FIREBASE -------------------
     const vercelUrl = deployResult?.url ? `https://${deployResult.url}` : null;
-    await db.ref(`users/businesses/${businessId}`).update({
+    await db.ref(`users/${userId}/businesses/${businessId}`).update({
       isDeployed: true,
       vercelUrl: vercelUrl || null,
       deploymentTimestamp: Date.now(),

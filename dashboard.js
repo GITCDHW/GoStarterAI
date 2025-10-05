@@ -103,6 +103,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
                       .replace(/[^a-z0-9._-]/g, '')
                       .replace(/---+/g, '-')
                       .slice(0, 100),
+                      userId:user.uid,
                     businessId: id,
                     timestamp: new Date().getTime()
                   });
