@@ -1,41 +1,48 @@
-*{
+* {
     margin: 0;
     padding: 0;
-    box-sizing:border-box;
+    box-sizing: border-box;
 }
+
 body {
     background-color: #f0f2f5;
     font-family: 'Poppins', sans-serif;
     color: #333;
     margin: 0;
-    padding: 20px; /* Add some padding for smaller screens */
+    padding: 20px;
+    /* Add some padding for smaller screens */
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Align to the top of the viewport */
+    align-items: flex-start;
+    /* Align to the top of the viewport */
     min-height: 100vh;
 }
 
 .dashboard-container {
     /* Removed flex properties and set a max width for the single card */
-    display: block; 
+    display: block;
     width: 100%;
-    max-width: 700px; /* Set a reasonable width for a card layout */
+    max-width: 700px;
+    /* Set a reasonable width for a card layout */
     height: auto;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     background-color: #fff;
-    margin-top: 5vh; /* Center vertically better for a card */
+    margin-top: 5vh;
+    /* Center vertically better for a card */
 }
 
 /* Renamed and restyled for the single card */
-.card-pane { 
-    width: 100%; /* Takes full width of the container */
+.card-pane {
+    width: 100%;
+    /* Takes full width of the container */
     background-color: #ffffff;
     padding: 40px;
     display: flex;
     flex-direction: column;
-    gap: 30px; /* Space between main sections */
+    gap: 30px;
+    /* Space between main sections */
 }
 
 /* Removed right-pane styles */
@@ -46,7 +53,8 @@ body {
     flex-direction: column;
     gap: 20px;
     padding-bottom: 30px;
-    border-bottom: 1px solid #eee; /* Separator */
+    border-bottom: 1px solid #eee;
+    /* Separator */
 }
 
 .logo {
@@ -64,8 +72,8 @@ body {
     height: auto;
 }
 
-#business-info{
-    display:flex;
+#business-info {
+    display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
@@ -91,13 +99,15 @@ body {
 
 .iframe-container {
     width: 100%;
-    height: 400px; /* Give the preview a fixed height */
-    background-color: #f7f7f7; /* Light background for the preview area */
+    height: 400px;
+    /* Give the preview a fixed height */
+    background-color: #f7f7f7;
+    /* Light background for the preview area */
     border: 1px solid #ddd;
     border-radius: 10px;
     overflow: hidden;
     /* This will be shown by JS now */
-    display: block !important; 
+    display: block !important;
 }
 
 #website-preview-iframe {
@@ -106,12 +116,23 @@ body {
     border: none;
     background-color: #fff;
 }
-.vercel{
-    background: #fff!important;
-    border:1px solid black;
-    color:black!important;
-    display:none!important;
+
+.vercel {
+    margin: 20px auto;
+    display: block;
+    padding: 10px 20px;
+    background-color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    
+    border: 1px solid black;
+    color: black !important;
+    display: none !important;
 }
+
 .launch-button {
     /* Default style for the button */
     background-color: #4A90E2;
@@ -126,9 +147,11 @@ body {
     text-transform: uppercase;
     letter-spacing: 1px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    width: 80%; /* Make it narrower */
+    width: 80%;
+    /* Make it narrower */
     max-width: 300px;
-    margin: 10px auto; /* Center the button */
+    margin: 10px auto;
+    /* Center the button */
 }
 
 /* The rest of the styles are largely unchanged but ensure the removal of the right-pane background styling */
@@ -143,7 +166,8 @@ body {
 }
 
 /* Remove abstract shapes as they were on the blue right pane */
-.right-pane::before, .right-pane::after {
+.right-pane::before,
+.right-pane::after {
     content: none;
 }
 
@@ -154,9 +178,11 @@ body {
         box-shadow: none;
         min-height: 100vh;
     }
+    
     .card-pane {
         padding: 20px;
     }
+    
     .iframe-container {
         height: 300px;
     }
