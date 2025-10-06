@@ -84,6 +84,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
             if (payButton) payButton.style.display = 'block';
             if (repoLinkContainer) repoLinkContainer.style.display = 'none';
             if (downloadButton) downloadButton.style.display = 'none';
+            if (hostButton) hostButton.style.display = 'none'
           } else { // isHosted === true
             if (hostButton) {
               hostButton.style.display = 'block'
