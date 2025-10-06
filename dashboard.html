@@ -11,21 +11,27 @@
     <style>
         /* Basic styling for the new elements */
         .repo-link-container {
-            /* Kept for JS logic, but will be styled by dashboard.css */
             display: none;
             text-align: center;
             margin-top: 20px;
-        }
-        .repo-link-container p {
-            font-size: 1.2em;
-            color: #4A90E2;
-            margin-bottom: 10px;
         }
         .repo-link-container a {
             font-size: 1.1em;
             color: #3B7CDA;
             text-decoration: underline;
             word-break: break-all;
+            display: inline-block;
+            margin: 5px 0;
+        }
+        .copy-btn {
+            margin-left: 8px;
+            padding: 2px 6px;
+            font-size: 12px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
         }
         .download-report-btn {
             margin: 20px auto;
@@ -45,8 +51,8 @@
     
 <div id="container">
     <div class="dashboard-container">
-        
-        <div class="card-pane"> <div class="header-section">
+        <div class="card-pane"> 
+            <div class="header-section">
                 <div class="logo">
                     <img src="logo.png" alt="Start Up Sprint Logo">
                     <span class="logo-text">GoStarterAI</span>
@@ -54,8 +60,7 @@
                 <div id="business-info">
                     <h1 id="business-name"></h1>
                     <div id="repo-link-container" class="repo-link-container">
-                        <p>Your business is live!</p>
-                        <a id="repo-link"></a>
+                        <!-- Links will be injected dynamically -->
                     </div>
                     <button id="download-report-btn" class="download-report-btn">Download Market Report</button>
                     <button id="host-repo" class="vercel">Host Your Landing Page</button>
@@ -69,18 +74,17 @@
                 </div>
                 <button id="pay-button" class="launch-button">LAUNCH!</button>
             </div>
-            </div>
-        
+        </div>
     </div>
 </div>
 
-    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-database-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
-    <script src="config.js"></script>
-    <script src="dashboard.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="config.js"></script>
+<script src="dashboard.js"></script>
 
 </body>
 </html>
