@@ -68,7 +68,7 @@ const extractRepoIdFromUrl = (url) => {
 // ------------------- DEPLOYMENT FUNCTION -------------------
 const deployToVercel = async (accessToken, repoUrl, projectName) => {
   try {
-    const repoSlug = extractRepoIdFromUrl(repoUrl); // Renamed to slug for clarity
+    const repoSlug = extractRepoIdFromUrl(repoUrl);
     if (!repoSlug) throw new Error("Invalid repository URL");
     
     const projectPayload = {

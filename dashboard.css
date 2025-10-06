@@ -106,7 +106,12 @@ body {
     border: none;
     background-color: #fff;
 }
-
+.vercel{
+    background: #fff;
+    border:1px solid black;
+    color:black;
+    display:none;
+}
 .launch-button {
     /* Default style for the button */
     background-color: #4A90E2;
