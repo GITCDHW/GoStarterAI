@@ -1,5 +1,3 @@
-//oac_RUDeJT0jXHfF3sgQWX2nlZ2
-
 // Function to generate a random array of 32-bit unsigned integers
 function getRandomValues(array) {
   if (window.crypto && window.crypto.getRandomValues) {
@@ -47,7 +45,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
       const repoLinkAnchorElement = document.getElementById('repo-link');
       const websiteIframe = document.getElementById('website-preview-iframe');
       
-      // Add a listener for the pay button
+      // Add a listener for the pay button (GitHub OAuth)
       if (payButton) {
         payButton.addEventListener("click", async () => {
           try {
@@ -77,17 +75,61 @@ document.addEventListener("DOMContentLoaded", (e) => {
             businessNameElement.innerHTML = data.businessName;
           }
           
-          if (data.isHosted === false && data.isDeployed === null) {
-            if (websiteIframe) {
-              websiteIframe.srcdoc = data.websiteCode;
+          // --- BEGIN MODIFIED LOGIC ---
+          
+          if (data.isDeployed) {
+            // Case 1: Deployed to Vercel
+            if (hostButton) hostButton.style.display = 'none'; // Hide Vercel button if deployed
+            if (payButton) payButton.style.display = 'none';
+            
+            if (repoLinkContainer && repoLinkAnchorElement) {
+              repoLinkContainer.style.display = 'block';
+              // Use the Vercel URL from the database
+              repoLinkAnchorElement.href = data.vercelUrl || '#'; // Assume 'vercelUrl' is where the link is stored
+              repoLinkAnchorElement.textContent = `Your Landing Page Link: ${data.vercelUrl || 'N/A'}`; // Updated text
             }
-            if (payButton) payButton.style.display = 'block';
-            if (repoLinkContainer) repoLinkContainer.style.display = 'none';
-            if (downloadButton) downloadButton.style.display = 'none';
-            if (hostButton) hostButton.style.display = 'none'
-          } else { // isHosted === true
+            if (websiteIframe) {
+              websiteIframe.srcdoc = data.websiteCode; // Still show the code preview
+            }
+            if (downloadButton) {
+              downloadButton.style.display = 'block';
+              // Add download listener... (rest of your download logic is here)
+              downloadButton.addEventListener('click', () => {
+                if (data.marketReport) {
+                  const doc = new window.jspdf.jsPDF();
+                  const margin = 10;
+                  const pageWidth = doc.internal.pageSize.getWidth();
+                  const pageHeight = doc.internal.pageSize.getHeight();
+                  let y = 40;
+                  const lineHeight = 10;
+                  const text = data.marketReport;
+                  
+                  doc.setFontSize(22);
+                  doc.text(`Market Report for ${data.businessName}`, pageWidth / 2, 20, { align: 'center' });
+                  
+                  doc.setFontSize(12);
+                  const splitText = doc.splitTextToSize(text, pageWidth - 2 * margin);
+                  
+                  for (let i = 0; i < splitText.length; i++) {
+                    if (y + lineHeight > pageHeight - margin) {
+                      doc.addPage();
+                      y = margin;
+                    }
+                    doc.text(splitText[i], margin, y);
+                    y += lineHeight;
+                  }
+                  
+                  doc.save(`${data.businessName.replace(/\s/g, '-')}-market-report.pdf`);
+                } else {
+                  alert("Market report is not available.");
+                }
+              });
+            }
+            
+          } else if (data.isHosted === true) { 
+            // Case 2: Hosted on GitHub, ready for Vercel
             if (hostButton) {
-              hostButton.style.display = 'block'
+              hostButton.style.display = 'block'; // Show the Vercel host button
               hostButton.addEventListener("click", async () => {
                 try {
                   const idToken = await user.getIdToken();
@@ -123,18 +165,19 @@ document.addEventListener("DOMContentLoaded", (e) => {
               });
             }
             if (payButton) payButton.style.display = 'none';
-            if (repoLinkContainer) {
+            if (repoLinkContainer && repoLinkAnchorElement) {
               repoLinkContainer.style.display = 'block';
-              if (repoLinkAnchorElement) {
-                repoLinkAnchorElement.href = data.hostedRepoLink;
-                repoLinkAnchorElement.textContent = `Your GitHub Repo Link:${data.hostedRepoLink}`;
-              }
+              // Still show GitHub repo link as it's the current asset
+              repoLinkAnchorElement.href = data.hostedRepoLink;
+              repoLinkAnchorElement.textContent = `Your GitHub Repo Link: ${data.hostedRepoLink}`;
             }
             if (websiteIframe) {
               websiteIframe.srcdoc = data.websiteCode;
             }
             if (downloadButton) {
               downloadButton.style.display = 'block';
+              // Add download listener... (rest of your download logic is here)
+              // (Keep the existing download listener logic here)
               downloadButton.addEventListener('click', () => {
                 if (data.marketReport) {
                   const doc = new window.jspdf.jsPDF();
@@ -166,7 +209,18 @@ document.addEventListener("DOMContentLoaded", (e) => {
                 }
               });
             }
+            
+          } else { // data.isHosted === false (or initial state)
+            // Case 3: Initial state, show LAUNCH! button
+            if (websiteIframe) {
+              websiteIframe.srcdoc = data.websiteCode;
+            }
+            if (payButton) payButton.style.display = 'block';
+            if (repoLinkContainer) repoLinkContainer.style.display = 'none';
+            if (downloadButton) downloadButton.style.display = 'none';
+            if (hostButton) hostButton.style.display = 'none';
           }
+          
         }
       });
     } else {
