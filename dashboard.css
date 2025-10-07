@@ -13,7 +13,8 @@ body {
     /* Add some padding for smaller screens */
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
+    flex-direction: column;
     /* Align to the top of the viewport */
     min-height: 100vh;
 }
