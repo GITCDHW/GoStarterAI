@@ -6,10 +6,10 @@
             <p style="font-weight:500; color:#777777; margin:0;">GoStarterAI — Turn ideas into reality.</p>
         </div>
         <div style="font-size:0.9em; color:#555555;">
-            <a href="privacy.html" style="margin:0 8px; color:#4A90E2; text-decoration:none;">Privacy</a> ·
-            <a href="terms.html" style="margin:0 8px; color:#4A90E2; text-decoration:none;">Terms</a> ·
-            <a href="cookies.html" style="margin:0 8px; color:#4A90E2; text-decoration:none;">Cookies</a> ·
-            <a href="disclaimer.html" style="margin:0 8px; color:#4A90E2; text-decoration:none;">Disclaimer</a>
+            <a href="legal/privacy.html" style="margin:0 8px; color:#4A90E2; text-decoration:none;">Privacy</a> ·
+            <a href="legal/terms.html" style="margin:0 8px; color:#4A90E2; text-decoration:none;">Terms</a> ·
+            <a href="legal/cookies.html" style="margin:0 8px; color:#4A90E2; text-decoration:none;">Cookies</a> ·
+            <a href="legal/disclaimer.html" style="margin:0 8px; color:#4A90E2; text-decoration:none;">Disclaimer</a>
         </div>
     </footer>
     `;
