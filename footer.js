@@ -1,6 +1,6 @@
 (function() {
     const footerHTML = `
-    <footer style="background-color:#F8F8F8; padding:30px 20px; text-align:center; box-shadow:0 -2px 10px rgba(0,0,0,0.05); font-family:'Poppins',sans-serif; width:100vw; margin-top:10px; position:relative; left:0; margin:0;">
+    <footer style="background-color:#F8F8F8; padding:30px 20px; text-align:center; box-shadow:0 -2px 10px rgba(0,0,0,0.05); font-family:'Poppins',sans-serif; width:100vw; margin-top:10px; position:relative; right:0; bottom:0; margin:0;">
         <div style="margin-bottom:15px;">
             <img src="logo.png" alt="GoStarterAI Logo" style="width:50px; height:50px; display:block; margin:0 auto 10px;">
             <p style="font-weight:500; color:#777777; margin:0;">GoStarterAI — Turn ideas into reality.</p>
