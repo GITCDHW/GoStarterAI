@@ -225,6 +225,8 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     accessToken = data.access_token;
+    const tokenRef = db.ref(`users/${userId}/gitHubAccessToken`)
+    await tokenRef.set(accessToken)
     if (!accessToken) {
       return res.status(500).json({ error: 'Access token not found.' });
     }
