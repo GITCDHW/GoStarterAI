@@ -71,273 +71,323 @@
   </div>
 
   <script>
-  (function(){
-    const canvas = document.getElementById('game-canvas');
-    const ctx = canvas.getContext('2d');
-    const startButton = document.getElementById('start-button');
-    const scoreDisplay = document.getElementById('score-display');
-    const gameContainer = document.getElementById('game-container');
+// DOM Elements
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+const startButton = document.getElementById('start-button');
+const scoreDisplay = document.getElementById('score-display');
+const gameContainer = document.getElementById('game-container');
 
-    // Responsive canvas sizing using parent bounding rect
-    function resizeCanvas(){
-      const rect = gameContainer.getBoundingClientRect();
-      // protect against zero sizes
-      const w = Math.max(320, Math.floor(rect.width));
-      const h = Math.max(320, Math.floor(rect.height));
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
-        updateLayoutParams();
-      }
-    }
-    window.addEventListener('resize', resizeCanvas);
-    // initial resize
-    resizeCanvas();
+// Game State Variables
+let gameRunning = false;
+let lastTimestamp = 0;
+let score = 0;
+let carSpeed = 5;
+let obstacleBaseSpeed = 3;
+let lastObstacleTime = 0;
+let obstacles = [];
+let lastObstacleLanes = [];
+let car = null;
+let road = null;
+let laneWidth = 0;
+const obstacleInterval = 1200; // spawn roughly every 1.2s at baseline
+const scoreTimeFactor = 0.01; // score per millisecond multiplier
 
-    // Game state
-    let gameRunning = false;
-    let lastTimestamp = 0;
-    let score = 0;
-    let carSpeed = 5;
-    let obstacleBaseSpeed = 3;
-    let lastObstacleTime = 0;
-    let obstacles = [];
-    let lastObstacleLanes = [];
-    let car = null;
-    let road = null;
-    let laneWidth = 0;
-    let obstacleInterval = 1200; // spawn roughly every 1.2s at baseline
-    let scoreTimeFactor = 0.01; // score per millisecond multiplier
+// --- Setup and Layout ---
 
-    function updateLayoutParams(){
-      // called when canvas resizes
-      const roadWidth = canvas.width * 0.7;
-      laneWidth = roadWidth / 3;
-      road = {
-        x: (canvas.width - roadWidth) / 2,
-        y: 0,
-        width: roadWidth,
-        height: canvas.height,
-      };
-      car = {
-        x: road.x + laneWidth + (laneWidth / 2) - 20,
-        y: canvas.height - 120,
-        width: 40,
-        height: 70,
-        lane: 1
-      };
-    }
+// Utility: Draw a rounded rectangle
+function roundRect(context, x, y, w, h, r, fill, stroke){
+  if (w < 2 * r) r = w / 2;
+  if (h < 2 * r) r = h / 2;
+  context.beginPath();
+  context.moveTo(x + r, y);
+  context.arcTo(x + w, y, x + w, y + h, r);
+  context.arcTo(x + w, y + h, x, y + h, r);
+  context.arcTo(x, y + h, x, y, r);
+  context.arcTo(x, y, x + w, y, r);
+  context.closePath();
+  if (fill) context.fill();
+  if (stroke) context.stroke();
+}
 
+// Update game element dimensions based on canvas size
+function updateLayoutParams(){
+  const roadWidth = canvas.width * 0.7;
+  laneWidth = roadWidth / 3;
+  road = {
+    x: (canvas.width - roadWidth) / 2,
+    y: 0,
+    width: roadWidth,
+    height: canvas.height,
+  };
+  // Initialize or re-position car
+  car = car || {};
+  car = {
+    ...car,
+    width: 40,
+    height: 70,
+    lane: car.lane === undefined ? 1 : car.lane, // preserve lane on resize
+    y: canvas.height - 120
+  };
+  // Set car's x based on its lane
+  const targetX = road.x + (car.lane * laneWidth) + (laneWidth / 2) - (car.width / 2);
+  car.x = targetX;
+}
+
+// Responsive canvas sizing
+function resizeCanvas(){
+  const rect = gameContainer.getBoundingClientRect();
+  const w = Math.max(320, Math.floor(rect.width));
+  const h = Math.max(320, Math.floor(rect.height));
+  if (canvas.width !== w || canvas.height !== h) {
+    canvas.width = w;
+    canvas.height = h;
     updateLayoutParams();
+    drawInitial(); // Redraw static elements
+  }
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas(); // Initial resize
 
-    // Touch controls
-    let touchStartX = null;
-    function handleTouchStart(e){
-      if (!gameRunning) return;
-      touchStartX = e.touches ? e.touches[0].clientX : e.clientX;
+// --- Drawing Functions ---
+
+function drawRoad(){
+  ctx.fillStyle = '#6c7a89';
+  ctx.fillRect(road.x, road.y, road.width, road.height);
+  ctx.strokeStyle = '#ecf0f1';
+  ctx.lineWidth = 4;
+  ctx.setLineDash([18, 18]);
+  // Lane 1 divider
+  ctx.beginPath();
+  ctx.moveTo(road.x + laneWidth, 0);
+  ctx.lineTo(road.x + laneWidth, canvas.height);
+  ctx.stroke();
+  // Lane 2 divider
+  ctx.beginPath();
+  ctx.moveTo(road.x + 2 * laneWidth, 0);
+  ctx.lineTo(road.x + 2 * laneWidth, canvas.height);
+  ctx.stroke();
+  ctx.setLineDash([]); // Reset line dash
+}
+
+function drawCar(){
+  // Calculate target x position for the current lane
+  const targetX = road.x + (car.lane * laneWidth) + (laneWidth / 2) - (car.width / 2);
+  // Smooth movement to lane center
+  car.x += (targetX - car.x) * 0.18;
+  
+  // Body
+  ctx.fillStyle = '#e74c3c';
+  roundRect(ctx, car.x, car.y, car.width, car.height, 6, true, false);
+  // Roof/Window detail
+  ctx.fillStyle = '#c0392b';
+  roundRect(ctx, car.x, car.y + car.height * 0.2, car.width, car.height * 0.6, 4, true, false);
+}
+
+function drawObstacles(){
+  ctx.fillStyle = '#f1c40f';
+  obstacles.forEach(o => roundRect(ctx, o.x, o.y, o.width, o.height, 6, true, false));
+}
+
+// --- Obstacle Logic ---
+
+// create obstacle at a random available lane (0..2)
+function createObstacle(){
+  let availableLanes = [0,1,2];
+  // Logic to prevent obstacles in the same lane for two consecutive spawns
+  if (lastObstacleLanes.length >= 2){
+    availableLanes = availableLanes.filter(l => l !== lastObstacleLanes[0] && l !== lastObstacleLanes[1]);
+  }
+  
+  const laneToSpawn = availableLanes.length ? 
+                      availableLanes[Math.floor(Math.random()*availableLanes.length)] : 
+                      Math.floor(Math.random()*3); // Fallback if no safe lane
+
+  const x = road.x + (laneToSpawn * laneWidth) + (laneWidth / 2) - 20;
+  const y = -120; // Start off-screen above
+  const speed = obstacleBaseSpeed + Math.random()*2 + (carSpeed * 0.08); // Speed based on game state
+  
+  const obs = { x, y, width:40, height:70, speed, lane:laneToSpawn, scored:false };
+  obstacles.push(obs);
+  
+  // Update recent lane history
+  lastObstacleLanes.push(laneToSpawn);
+  if (lastObstacleLanes.length > 2) lastObstacleLanes.shift();
+}
+
+
+// --- Control Handlers ---
+
+// Shared swipe detection logic
+let touchStartX = null;
+
+function handleTouchStart(e){
+  if (!gameRunning) return;
+  touchStartX = e.touches ? e.touches[0].clientX : e.clientX;
+  e.preventDefault(); // Prevent scrolling on touch
+}
+
+function handleTouchMove(e){
+  if (!gameRunning || touchStartX === null) return;
+  const touchMoveX = e.touches ? e.touches[0].clientX : e.clientX;
+  const swipeDelta = touchMoveX - touchStartX;
+  
+  const SWIPE_THRESHOLD = 40;
+
+  if (swipeDelta > SWIPE_THRESHOLD && car.lane < 2) { 
+    car.lane++; 
+    touchStartX = touchMoveX; // Reset start to prevent immediate re-swipe
+  }
+  else if (swipeDelta < -SWIPE_THRESHOLD && car.lane > 0) { 
+    car.lane--; 
+    touchStartX = touchMoveX; // Reset start
+  }
+}
+
+function handleKeyDown(e){
+  if (!gameRunning) return;
+  if (e.key === 'ArrowLeft' && car.lane > 0) car.lane--;
+  if (e.key === 'ArrowRight' && car.lane < 2) car.lane++;
+}
+
+// Attach/Remove control listeners
+function attachControls() {
+  canvas.addEventListener('touchstart', handleTouchStart, {passive:false}); // passive:false to allow preventDefault
+  canvas.addEventListener('touchmove', handleTouchMove, {passive:false});
+  canvas.addEventListener('mousedown', handleTouchStart);
+  window.addEventListener('mousemove', handleTouchMove);
+  window.addEventListener('keydown', handleKeyDown);
+}
+
+function removeControls() {
+  canvas.removeEventListener('touchstart', handleTouchStart);
+  canvas.removeEventListener('touchmove', handleTouchMove);
+  canvas.removeEventListener('mousedown', handleTouchStart);
+  window.removeEventListener('mousemove', handleTouchMove);
+  window.removeEventListener('keydown', handleKeyDown);
+}
+
+// --- Main Game Loops ---
+
+// Main update loop
+function updateGame(timestamp){
+  if (!gameRunning) return;
+  
+  if (!lastTimestamp) lastTimestamp = timestamp;
+  const deltaTime = Math.min(40, timestamp - lastTimestamp); // Clamp to avoid huge jumps after a pause
+  lastTimestamp = timestamp;
+
+  // Clear canvas
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // Drawing
+  drawRoad();
+  drawObstacles(); // Draw obstacles before car so car can drive 'over' them (visually)
+  drawCar();
+
+  // --- Game State Updates ---
+
+  // Obstacle spawning
+  if (timestamp - lastObstacleTime > Math.max(400, obstacleInterval - carSpeed * 50)) {
+    createObstacle();
+    lastObstacleTime = timestamp;
+  }
+
+  // Update obstacle positions
+  obstacles.forEach(o => {
+    // Increase speed based on base speed and delta time
+    o.y += o.speed + deltaTime * 0.002 * o.speed;
+  });
+
+  // Collision detection
+  for (let i = 0; i < obstacles.length; i++){
+    const o = obstacles[i];
+    // AABB (Axis-Aligned Bounding Box) collision check
+    if (car.x < o.x + o.width &&
+        car.x + car.width > o.x &&
+        car.y < o.y + o.height &&
+        car.y + car.height > o.y) {
+      endGame();
+      return; // Stop the loop
     }
-    function handleTouchMove(e){
-      if (!gameRunning || touchStartX === null) return;
-      const touchMoveX = e.touches ? e.touches[0].clientX : e.clientX;
-      const swipeDelta = touchMoveX - touchStartX;
-      if (swipeDelta > 40 && car.lane < 2) { car.lane++; touchStartX = touchMoveX; }
-      else if (swipeDelta < -40 && car.lane > 0) { car.lane--; touchStartX = touchMoveX; }
+  }
+
+  // Remove off-screen obstacles and award score
+  obstacles = obstacles.filter(o => {
+    if (o.y > canvas.height) {
+      if (!o.scored) { score += 10; o.scored = true; } // Passed obstacle bonus
+      return false; // Remove
     }
+    return true;
+  });
 
-    // Drawing
-    function drawRoad(){
-      ctx.fillStyle = '#6c7a89';
-      ctx.fillRect(road.x, road.y, road.width, road.height);
-      ctx.strokeStyle = '#ecf0f1';
-      ctx.lineWidth = 4;
-      ctx.setLineDash([18, 18]);
-      ctx.beginPath();
-      ctx.moveTo(road.x + laneWidth, 0);
-      ctx.lineTo(road.x + laneWidth, canvas.height);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(road.x + 2 * laneWidth, 0);
-      ctx.lineTo(road.x + 2 * laneWidth, canvas.height);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
+  // Time-based scoring & speed ramp
+  score += deltaTime * scoreTimeFactor;
+  carSpeed += deltaTime * 0.0005;
+  obstacleBaseSpeed += deltaTime * 0.0002;
 
-    function drawCar(){
-      const targetX = road.x + (car.lane * laneWidth) + (laneWidth / 2) - (car.width / 2);
-      // smooth movement to lane center
-      car.x += (targetX - car.x) * 0.18;
-      ctx.fillStyle = '#e74c3c';
-      roundRect(ctx, car.x, car.y, car.width, car.height, 6, true, false);
-      // roof detail
-      ctx.fillStyle = '#c0392b';
-      roundRect(ctx, car.x, car.y + car.height * 0.2, car.width, car.height * 0.6, 4, true, false);
-    }
+  // Update display
+  scoreDisplay.textContent = `Score: ${Math.floor(score)}`;
 
-    function drawObstacles(){
-      ctx.fillStyle = '#f1c40f';
-      obstacles.forEach(o => roundRect(ctx, o.x, o.y, o.width, o.height, 6, true, false));
-    }
+  requestAnimationFrame(updateGame);
+}
 
-    // utility: rounded rect
-    function roundRect(ctx, x, y, w, h, r, fill, stroke){
-      if (w < 2 * r) r = w / 2;
-      if (h < 2 * r) r = h / 2;
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.arcTo(x + w, y, x + w, y + h, r);
-      ctx.arcTo(x + w, y + h, x, y + h, r);
-      ctx.arcTo(x, y + h, x, y, r);
-      ctx.arcTo(x, y, x + w, y, r);
-      ctx.closePath();
-      if (fill) ctx.fill();
-      if (stroke) ctx.stroke();
-    }
+function startGame(){
+  if (gameRunning) return;
 
-    // create obstacle at lane (0..2)
-    function createObstacle(){
-      let availableLanes = [0,1,2];
-      if (lastObstacleLanes.length >= 2){
-        availableLanes = availableLanes.filter(l => l !== lastObstacleLanes[0] && l !== lastObstacleLanes[1]);
-      }
-      const laneToSpawn = availableLanes.length ? availableLanes[Math.floor(Math.random()*availableLanes.length)] : Math.floor(Math.random()*3);
-      const x = road.x + (laneToSpawn * laneWidth) + (laneWidth / 2) - 20;
-      const y = -120;
-      const speed = obstacleBaseSpeed + Math.random()*2 + (carSpeed * 0.08);
-      const obs = { x, y, width:40, height:70, speed, lane:laneToSpawn, scored:false };
-      obstacles.push(obs);
-      lastObstacleLanes.push(laneToSpawn);
-      if (lastObstacleLanes.length > 2) lastObstacleLanes.shift();
-    }
+  gameRunning = true;
+  score = 0;
+  carSpeed = 5;
+  obstacleBaseSpeed = 3;
+  lastObstacleTime = 0;
+  obstacles = [];
+  lastObstacleLanes = [];
+  car.lane = 1;
 
-    // main update loop
-    function updateGame(timestamp){
-      if (!gameRunning) return;
-      if (!lastTimestamp) lastTimestamp = timestamp;
-      const deltaTime = Math.min(40, timestamp - lastTimestamp); // clamp to avoid huge jumps
-      lastTimestamp = timestamp;
+  // Recalculate car position to be exactly centered in lane 1
+  updateLayoutParams(); 
 
-      // resize check in case iframe or container changed size
-      resizeCanvas();
+  lastTimestamp = performance.now(); 
+  startButton.style.display = 'none';
+  document.getElementById('game-ui').style.opacity = 0; // Hide UI box slightly
+  scoreDisplay.style.display = 'block';
 
-      // clear
-      ctx.clearRect(0,0,canvas.width,canvas.height);
+  attachControls();
+  requestAnimationFrame(updateGame);
+}
 
-      // draw road and objects
-      drawRoad();
-      drawCar();
+function endGame(){
+  gameRunning = false;
+  removeControls();
 
-      // spawn obstacles based on elapsed time and speed
-      if (timestamp - lastObstacleTime > Math.max(400, obstacleInterval - carSpeed*50)) {
-        createObstacle();
-        lastObstacleTime = timestamp;
-      }
+  startButton.textContent = 'Play Again';
+  startButton.style.display = 'inline-block';
+  document.getElementById('game-ui').style.opacity = 1; // Show UI box
+  scoreDisplay.textContent = `Final Score: ${Math.floor(score)}`;
+}
 
-      // update obstacles
-      for (let i = 0; i < obstacles.length; i++){
-        const o = obstacles[i];
-        o.y += o.speed + deltaTime * 0.002 * o.speed;
-      }
+function drawInitial(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawRoad();
+  drawCar();
+}
 
-      // collision detection
-      for (let i = 0; i < obstacles.length; i++){
-        const o = obstacles[i];
-        if (car.x < o.x + o.width &&
-            car.x + car.width > o.x &&
-            car.y < o.y + o.height &&
-            car.y + car.height > o.y) {
-          endGame();
-          return;
-        }
-      }
+// Initialization and Event Listeners
+startButton.addEventListener('click', startGame);
 
-      // remove off-screen obstacles and award small score when passed
-      obstacles = obstacles.filter(o => {
-        if (o.y > canvas.height) {
-          // award small bonus once per passed obstacle
-          if (!o.scored) { score += 10; o.scored = true; }
-          return false; // remove
-        }
-        return true;
-      });
+// Watcher to ensure canvas stays sized correctly if its container changes (e.g., in a dynamic layout)
+let lastRect = gameContainer.getBoundingClientRect();
+setInterval(() => {
+  const r = gameContainer.getBoundingClientRect();
+  if (r.width !== lastRect.width || r.height !== lastRect.height) {
+    lastRect = r;
+    resizeCanvas();
+  }
+}, 300);
 
-      // time-based scoring
-      score += deltaTime * scoreTimeFactor;
-      scoreDisplay.textContent = `Score: ${Math.floor(score)}`;
+// Initial scene render
+drawInitial();
 
-      // gentle speed ramp
-      carSpeed += deltaTime * 0.0005;
-      obstacleBaseSpeed += deltaTime * 0.0002;
-
-      requestAnimationFrame(updateGame);
-    }
-
-    function startGame(){
-      gameRunning = true;
-      score = 0;
-      carSpeed = 5;
-      obstacleBaseSpeed = 3;
-      lastObstacleTime = 0;
-      obstacles = [];
-      lastObstacleLanes = [];
-      car.lane = 1;
-      // position car centered
-      car.x = road.x + (car.lane * laneWidth) + (laneWidth / 2) - (car.width / 2);
-
-      lastTimestamp = performance.now(); // reset timestamp to avoid huge deltas
-      startButton.style.display = 'none';
-      scoreDisplay.style.display = 'block';
-      // attach touch handlers
-      canvas.addEventListener('touchstart', handleTouchStart, {passive:true});
-      canvas.addEventListener('touchmove', handleTouchMove, {passive:true});
-      // also allow mouse swipes for testing
-      canvas.addEventListener('mousedown', handleTouchStart);
-      window.addEventListener('mousemove', handleTouchMove);
-
-      requestAnimationFrame(updateGame);
-    }
-
-    function endGame(){
-      gameRunning = false;
-      startButton.textContent = 'Play Again';
-      startButton.style.display = 'inline-block';
-      scoreDisplay.textContent = `Final Score: ${Math.floor(score)}`;
-      // cleanup listeners
-      canvas.removeEventListener('touchstart', handleTouchStart);
-      canvas.removeEventListener('touchmove', handleTouchMove);
-      canvas.removeEventListener('mousedown', handleTouchStart);
-      window.removeEventListener('mousemove', handleTouchMove);
-    }
-
-    startButton.addEventListener('click', startGame);
-
-    // initial draw
-    function drawInitial(){
-      resizeCanvas();
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      drawRoad();
-      drawCar();
-    }
-    drawInitial();
-
-    // make sure canvas resizes when iframe size changes (watcher)
-    let lastRect = gameContainer.getBoundingClientRect();
-    setInterval(() => {
-      const r = gameContainer.getBoundingClientRect();
-      if (r.width !== lastRect.width || r.height !== lastRect.height) {
-        lastRect = r;
-        resizeCanvas();
-        drawInitial();
-      }
-    }, 300);
-
-    // allow keyboard arrows for desktop testing
-    window.addEventListener('keydown', (e) => {
-      if (!gameRunning) return;
-      if (e.key === 'ArrowLeft' && car.lane > 0) car.lane--;
-      if (e.key === 'ArrowRight' && car.lane < 2) car.lane++;
-    });
-
-  })();
   </script>
 </body>
 </html>
