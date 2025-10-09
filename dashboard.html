@@ -71,13 +71,13 @@
     <h2 class="preview-heading">Website Preview</h2>
     <div id="edit-buttons-container" style="margin-top:10px;">
         <button id="toggle-edit-btn" class="edit-btn">Edit Text</button>
-        <button id="save-edit-btn" class="edit-btn">Save Changes</button>
+        <button id="save-edit-btn" class="edit-btn" style="display:none;">Save Changes</button>
     </div>
     <div id="website-iframe-container" class="iframe-container">
         <iframe id="website-preview-iframe" src="about:blank" frameborder="0"></iframe>
     </div>
     <button id="pay-button" class="launch-button">LAUNCH!</button>
-</div>v>
+</div>
         </div>
     </div>
 </div>
@@ -93,7 +93,8 @@
 <script src="dashboard.js"></script>
     <script src="footer.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" charset="utf-8">
-    const toggleEditBtn = document.getElementById("toggle-edit-btn");
+// ---- TEXT EDIT MODE TOGGLE ----
+const toggleEditBtn = document.getElementById("toggle-edit-btn");
 const saveEditBtn = document.getElementById("save-edit-btn");
 let editMode = false;
 let iframeDoc;
@@ -101,18 +102,16 @@ let iframeDoc;
 toggleEditBtn.addEventListener("click", () => {
     const iframe = document.getElementById("website-preview-iframe");
     if (!iframe) return alert("No iframe found");
-    iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
     
+    iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
     const editableEls = iframeDoc.querySelectorAll("h1,h2,h3,h4,h5,h6,p,span,button,a");
-    if (!editMode) {
-        editableEls.forEach(el => el.setAttribute("contenteditable", "true"));
-        toggleEditBtn.textContent = "Exit Edit Mode";
-        editMode = true;
-    } else {
-        editableEls.forEach(el => el.removeAttribute("contenteditable"));
-        toggleEditBtn.textContent = "Edit Text";
-        editMode = false;
-    }
+    
+    editableEls.forEach(el => el.setAttribute("contenteditable", "true"));
+    editMode = true;
+    
+    // Toggle buttons
+    toggleEditBtn.style.display = "none";
+    saveEditBtn.style.display = "inline-block";
 });
 
 saveEditBtn.addEventListener("click", async () => {
@@ -121,9 +120,10 @@ saveEditBtn.addEventListener("click", async () => {
     const updatedHTML = iframeDoc.documentElement.outerHTML;
     
     try {
-        const user = auth.currentUser;
+        const user = firebase.auth().currentUser;
         if (!user) return alert("Not signed in");
         const idToken = await user.getIdToken(true);
+        
         const repoFullName = window.currentRepoFullName || prompt("repo (owner/repo)");
         
         const resp = await fetch("/api/updateFile", {
@@ -142,8 +142,18 @@ saveEditBtn.addEventListener("click", async () => {
         
         const result = await resp.json();
         if (!resp.ok) return alert("Update failed: " + (result.error || JSON.stringify(result)));
+        
         alert("Site updated successfully! 🚀");
         document.getElementById("website-preview-iframe").srcdoc = updatedHTML;
+        
+        // Turn off edit mode
+        const editableEls = iframeDoc.querySelectorAll("h1,h2,h3,h4,h5,h6,p,span,button,a");
+        editableEls.forEach(el => el.removeAttribute("contenteditable"));
+        editMode = false;
+        
+        // Toggle buttons
+        toggleEditBtn.style.display = "inline-block";
+        saveEditBtn.style.display = "none";
         
     } catch (err) {
         console.error(err);
