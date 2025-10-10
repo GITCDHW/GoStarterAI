@@ -11,14 +11,14 @@ body {
     margin: 0;
     padding: 20px;
     /* Add some padding for smaller screens */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    /* Align to the top of the viewport */
     min-height: 100vh;
 }
-
+#container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: calc(100vh - 100px); /* leaves space for footer */
+}
 .dashboard-container {
     display: block;
     width: 100%;
@@ -234,6 +234,16 @@ body {
 .vercel span, .download-report-btn span {
     position: relative;
     z-index: 1;
+}
+
+#site-footer {
+    width: 100%;
+    background: #ffffff;
+    padding: 30px 20px;
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.05);
+    font-family: 'Poppins', sans-serif;
+    position: relative;
+    bottom: 0;
 }
 
 /* -------------------- Small tweak for layout consistency -------------------- */
