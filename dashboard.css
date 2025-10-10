@@ -173,9 +173,11 @@ body {
     overflow: hidden;
 }
 
-/* ================= FOOTER STICKY ================= */
+/* ================= FOOTER STICKY & CONFINED ================= */
 #site-footer {
     width: 100%;
+    max-width: 700px; /* confines width to dashboard size */
+    margin: 0 auto;   /* center footer horizontally */
     background: #ffffff;
     padding: 30px 20px;
     box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.05);
@@ -184,6 +186,7 @@ body {
     position: relative;
 }
 
+/* ================= ANIMATIONS ================= */
 @keyframes glass-slide {
   0% { transform: rotate(45deg) translateX(-100%); }
   100% { transform: rotate(45deg) translateX(200%); }
@@ -197,5 +200,12 @@ body {
     
     .iframe-container {
         height: 300px;
+    }
+    
+    /* Footer stretches full width on mobile */
+    #site-footer {
+        max-width: 100%;
+        margin: 0;
+        border-radius: 0;
     }
 }
