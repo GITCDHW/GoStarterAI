@@ -20,7 +20,6 @@ body {
 }
 
 .dashboard-container {
-    /* Removed flex properties and set a max width for the single card */
     display: block;
     width: 100%;
     max-width: 700px;
@@ -34,7 +33,6 @@ body {
     /* Center vertically better for a card */
 }
 
-/* Renamed and restyled for the single card */
 .card-pane {
     width: 100%;
     /* Takes full width of the container */
@@ -46,9 +44,6 @@ body {
     /* Space between main sections */
 }
 
-/* Removed right-pane styles */
-/* .right-pane is removed from HTML and CSS */
-
 .header-section {
     display: flex;
     flex-direction: column;
@@ -59,7 +54,6 @@ body {
 }
 
 .logo {
-    /* ... existing styles ... */
     display: flex;
     align-items: center;
     gap: 15px;
