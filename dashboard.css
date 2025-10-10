@@ -80,8 +80,6 @@ body {
     flex-direction: column;
 }
 
-/* * NEW: Styles for the Website Preview as a separate section/card 
-*/
 .website-preview-card {
     display: flex;
     flex-direction: column;
@@ -155,21 +153,10 @@ body {
     /* Center the button */
 }
 
-/* The rest of the styles are largely unchanged but ensure the removal of the right-pane background styling */
-
-.report-button {
-    /* ... existing styles ... */
-}
 
 .launch-button:hover {
     background-color: #3B7CDA;
     transform: translateY(-2px);
-}
-
-/* Remove abstract shapes as they were on the blue right pane */
-.right-pane::before,
-.right-pane::after {
-    content: none;
 }
 
 #edit-buttons-container {
@@ -205,6 +192,62 @@ body {
   background: linear-gradient(120deg, rgba(92, 255, 70, 0.3), rgba(15, 255, 105, 0.64), rgba(8, 201, 13, 0.7));
   transform: rotate(45deg) translateX(-100%);
   animation: glass-slide 2.5s linear infinite;
+}
+
+/* -------------------- Host & Download Buttons -------------------- */
+.vercel, .download-report-btn {
+    margin: 20px auto;
+    display: block;
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #4A90E2; /* poppin’ blue text */
+    background: rgba(255, 255, 255, 0.85); /* glassy feel */
+    border: 1px solid rgba(74,144,226,0.6);
+    border-radius: 16px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 6px 18px rgba(74,144,226,0.25);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated subtle streak for glass vibe */
+.vercel::before, .download-report-btn::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(120deg, rgba(74,144,226,0.3), rgba(74,144,226,0.6), rgba(74,144,226,0.3));
+    transform: rotate(45deg) translateX(-100%);
+    animation: glass-slide 2.5s linear infinite;
+    z-index: 0;
+}
+
+/* Hover effect */
+.vercel:hover, .download-report-btn:hover {
+    box-shadow: 0 10px 25px rgba(74,144,226,0.35);
+    transform: translateY(-2px);
+}
+
+/* Ensure text stays above animation */
+.vercel span, .download-report-btn span {
+    position: relative;
+    z-index: 1;
+}
+
+/* -------------------- Small tweak for layout consistency -------------------- */
+#business-info button {
+    width: 80%;
+    max-width: 300px;
+    margin: 10px auto;
+    display: block;
 }
 
 @keyframes glass-slide {
