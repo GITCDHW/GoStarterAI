@@ -181,23 +181,35 @@ body {
 }
 
 .edit-btn {
-  background: rgba(255, 255, 255, 0.2); /* semi-transparent glass */
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.25);
   color: #000;
-  padding: 12px 24px;
+  padding: 16px 32px; /* bigger for visibility */
   border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 12px;
-  font-weight: 600;
+  border-radius: 16px;
+  font-size: 18px; /* make text pop too */
+  font-weight: 700;
   cursor: pointer;
-  backdrop-filter: blur(10px); /* the glass blur effect */
-  -webkit-backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+}
+.edit-btn:before{
+      content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(120deg, rgba(92, 255, 70, 0.3), rgba(15, 255, 105, 0.64), rgba(8, 201, 13, 0.7));
+  transform: rotate(45deg) translateX(-100%);
+  animation: glass-slide 2.5s linear infinite;
 }
 
-.edit-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+@keyframes glass-slide {
+  0% { transform: rotate(45deg) translateX(-100%); }
+  100% { transform: rotate(45deg) translateX(200%); }
 }
 
 @media (max-width: 768px) {
