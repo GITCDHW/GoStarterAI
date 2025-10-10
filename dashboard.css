@@ -174,8 +174,10 @@ body {
 
 #edit-buttons-container {
     display: flex;
-    gap: 10px;           /* space between buttons */
-    margin-bottom: 10px; /* spacing from iframe */
+    justify-content: center;
+    align-items: center;
+    gap: 5px;           /* space between buttons */
+    margin-bottom: 7px; /* spacing from iframe */
 }
 
 .edit-btn {
