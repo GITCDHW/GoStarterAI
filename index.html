@@ -1,403 +1,350 @@
-<!DOCTYPE html>
+<!--
+  GoStarterAI — Clean SaaS Homepage (Adsense-friendly)
+  Single-file HTML + CSS + small JS
+  Keeps: Dino GIF (lazy-loaded) + Glassmorphism (toned down)
+  Notes: Replace "dino-eye-demo.gif" with your actual GIF path.
+-->
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GoStarterAI — Launch a startup in one prompt</title>
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="GoStarterAI — Launch a startup in one prompt. Generate landing pages, business plans, and one-click deployment." />
+  <title>GoStarterAI — Launch a startup in one prompt</title>
 
-body {
-    font-family: 'Poppins', sans-serif;
-    background: #fefefe;
-    color: #111;
-    overflow-x: hidden;
-}
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-/* Container */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-/* Links */
-a {
-    text-decoration: none;
-}
-
-/* Headings */
-h1, h2, h3 {
-    color: #111;
-}
-
-/* Hero */
-.hero {
-    display: grid;
-    grid-template-columns: 1fr 420px;
-    gap: 40px;
-    align-items: start; /* top align content */
-    margin-top: 40px;
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    padding: 40px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-    position: relative; /* allow absolute inside */
-}
-
-.hero-demo {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 80px; /* adjust size */
-    height: auto;
-    pointer-events: none; /* clickable elements below still work */
-    border-radius: 12px; /* optional frosted corner look */
-    overflow: hidden;
-}
-.hero-demo img {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-.hero-left {
-    margin-top: 0;
-}
-
-/* Tag */
-.tag {
-    display: inline-block;
-    background: rgba(59, 130, 246, 0.2);
-    color: #3b82f6;
-    padding: 8px 16px;
-    border-radius: 50px;
-    font-size: 14px;
-    margin-bottom: 20px;
-    text-shadow: 0 0 4px #3b82f6;
-}
-
-/* Headings */
-h1 {
-    font-size: 48px;
-    line-height: 1.2;
-    margin-bottom: 20px;
-}
-
-p {
-    font-size: 18px;
-    line-height: 1.6;
-    margin-bottom: 20px;
-    color: #555;
-}
-
-/* Glassy Buttons */
-.btn, .btn-outline {
-    display: inline-block;
-    padding: 14px 28px;
-    font-size: 16px;
-    border-radius: 16px;
-    font-weight: 700;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    transition: all 0.4s ease;
-    cursor: pointer;
-    margin-bottom: 10px;
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
-}
-
-.btn {
-    background: rgba(59, 130, 246, 0.6);
-    color: #fff;
-    border: none;
-}
-
-.btn:hover {
-    background: rgba(59, 130, 246, 0.85);
-    transform: scale(1.08) rotateZ(-1deg);
-    text-shadow: 0 0 12px #3b82f6;
-}
-
-.btn-outline {
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px solid rgba(59, 130, 246, 0.6);
-    color: #3b82f6;
-}
-
-.btn-outline:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: scale(1.08) rotateZ(1deg);
-    text-shadow: 0 0 8px #3b82f6;
-}
-
-/* Steps & Features */
-.steps, .features-grid {
-    display: grid;
-    gap: 24px;
-}
-
-.steps {
-    grid-template-columns: repeat(3, 1fr);
-}
-
-.features-grid {
-    grid-template-columns: repeat(3, 1fr);
-}
-
-.step, .feature-card {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 20px;
-    padding: 24px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(20px);
-    transition: all 0.4s ease;
-    transform-style: preserve-3d;
-    cursor: pointer;
-}
-
-.step:hover, .feature-card:hover {
-    transform: translateY(-10px) rotateX(2deg) rotateY(5deg);
-    box-shadow: 0 20px 60px rgba(59, 130, 246, 0.25);
-}
-
-.step h3, .feature-card h3 {
-    font-size: 20px;
-    margin-bottom: 12px;
-    color: #111;
-}
-
-.step p, .feature-card p {
-    color: #333;
-}
-
-/* Glowy/3D H2 Headings */
-h2 {
-    font-size: 36px;
-    margin-bottom: 40px;
-    margin-top: 10px;
-    text-align: center;
-    color: #111;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    background: linear-gradient(90deg, #3b82f6, #00BCFF);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
-    animation: neon-glow 2.5s infinite alternate;
-}
-
-/* Neon Glow Animation */
-@keyframes neon-glow {
-    0% { text-shadow: 0 0 6px rgba(59,130,246,0.6), 0 0 12px rgba(99,102,241,0.4); }
-    50% { text-shadow: 0 0 12px rgba(59,130,246,0.8), 0 0 24px rgba(99,102,241,0.6); }
-    100% { text-shadow: 0 0 8px rgba(59,130,246,0.7), 0 0 16px rgba(99,102,241,0.5); }
-}
-
-/* Testimonials */
-#testimonials {
-    margin-top: 80px;
-    text-align: center;
-}
-
-#testimonials p {
-    font-size: 18px;
-    color: #555;
-    margin-bottom: 10px;
-}
-
-/* FAQ */
-#faq {
-    margin-top: 80px;
-}
-
-#faq h3 {
-    margin-top: 20px;
-    margin-bottom: 6px;
-    color: #111;
-}
-
-#faq p {
-    color: #00BCFF;
-    margin-bottom: 10px;
-}
-
-/* FOMO Section */
-.fomo {
-    margin-top: 80px;
-    padding: 40px;
-    background: linear-gradient(135deg, #3b82f6, #6366f1);
-    color: #fff;
-    border-radius: 24px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-    perspective: 1000px;
-}
-
-.fomo h2 {
-    font-size: 36px;
-    margin-bottom: 20px;
-    text-shadow: 0 0 12px #fff;
-}
-
-.fomo p {
-    font-size: 20px;
-    margin-bottom: 30px;
-    color: #fff;
-}
-
-.countdown {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 20px;
-}
-
-.spots {
-    font-size: 20px;
-    margin-bottom: 20px;
-    color: #ffe066;
-}
-
-/* Footer */
-footer {
-    margin-top: 80px;
-    padding: 40px;
-    text-align: center;
-    background: rgba(255,255,255,0.2);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    color: #555;
-}
-
-footer a {
-    color: #3b82f6;
-    margin: 0 6px;
-}
-
-/* Responsive */
-@media(max-width:980px){
-    .hero {
-        display: block !important;
-        padding: 20px;
+  <style>
+    /* ===== Base Reset ===== */
+    :root{
+      --bg: #fbfcfd;
+      --panel: rgba(255,255,255,0.65);
+      --accent: #2563eb; /* blue-600 */
+      --muted: #6b7280;
+      --glass-border: rgba(15,23,42,0.06);
+      --card-shadow: 0 8px 30px rgba(15,23,42,0.07);
+      --radius: 14px;
+      --container: 1100px;
+      --glass-blur: 8px;
     }
-    .steps, .features-grid {
-        grid-template-columns: 1fr;
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,#f7f9fb 0%, var(--bg) 100%);
+      color:#0f172a;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
+      padding:28px 18px;
     }
-    h1 {
-        font-size: 36px;
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+
+    /* ===== Layout ===== */
+    .wrap{max-width:var(--container);margin:0 auto}
+    .container{padding:10px;border-radius:20px;background:transparent}
+
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:44px;height:44px;border-radius:10px;
+      background:linear-gradient(135deg,#1e40af,#60a5fa);
+      display:grid;place-items:center;color:#fff;font-weight:700;font-size:18px;
+      box-shadow:0 6px 20px rgba(37,99,235,0.16);
     }
-    .fomo h2 {
-        font-size: 28px;
+    .brand h1{font-size:18px;margin:0;font-weight:700;letter-spacing:-0.2px}
+    .nav{display:flex;gap:12px;align-items:center}
+    .nav a{font-size:14px;color:var(--muted);padding:8px 12px;border-radius:10px}
+    .nav a.cta{background:#eef6ff;color:var(--accent);border:1px solid rgba(37,99,235,0.08);font-weight:600}
+
+    /* ===== Hero ===== */
+    .hero{
+      display:grid;
+      grid-template-columns: 1fr 380px;
+      gap:28px;
+      align-items: center;
+      padding:28px;
+      background: var(--panel);
+      border-radius: calc(var(--radius) + 6px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--card-shadow);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
     }
-}
-</style>
+
+    .hero-left{}
+    .tag{
+      display:inline-block;padding:8px 14px;border-radius:999px;
+      background:rgba(37,99,235,0.08);color:var(--accent);font-weight:600;font-size:13px;margin-bottom:14px;
+    }
+    .hero h2{
+      font-size:34px;margin:6px 0 14px;line-height:1.05;font-weight:700;color:#0b1220;
+    }
+    .hero p{color: #475569;font-size:16px;margin-bottom:18px;max-width:68ch}
+
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border-radius:12px;font-weight:700;
+      background:linear-gradient(180deg,#2563eb,#1e40af);color:#fff;border:none;cursor:pointer;font-size:15px;
+      box-shadow:0 8px 24px rgba(37,99,235,0.12);transition:transform .18s ease,box-shadow .18s ease;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn.secondary{
+      background:transparent;color:var(--accent);border:1px solid rgba(37,99,235,0.12);box-shadow:none;font-weight:600;
+    }
+
+    /* Right demo card */
+    .hero-right{
+      display:grid;place-items:center;
+    }
+    .demo-card{
+      width:100%;
+      background:linear-gradient(180deg,rgba(255,255,255,0.9),rgba(250,250,251,0.85));
+      border-radius:12px;padding:12px;border:1px solid rgba(12,18,35,0.04);
+      box-shadow:0 10px 30px rgba(12,18,35,0.06);
+    }
+    .demo-frame{
+      width:100%;height:230px;border-radius:10px;overflow:hidden;background:#0b1220;display:flex;align-items:center;justify-content:center;
+      position:relative;
+    }
+    .demo-frame img{width:100%;height:100%;object-fit:cover}
+
+    /* Steps & features */
+    .section{margin-top:34px}
+    .section h3{font-size:20px;margin-bottom:16px;color:#0f172a}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .card{
+      background:var(--panel);padding:18px;border-radius:12px;border:1px solid var(--glass-border);
+      box-shadow:0 8px 20px rgba(12,18,35,0.04);backdrop-filter: blur(6px);
+    }
+    .card h4{font-size:16px;margin-bottom:8px}
+    .card p{color:var(--muted);font-size:14px}
+
+    /* Testimonials / FAQ / FOMO */
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .fomo{
+      padding:20px;border-radius:12px;background:linear-gradient(180deg,#eef2ff,#f8fafc);
+      border:1px solid rgba(37,99,235,0.06);
+    }
+    .countdown{font-weight:700;font-size:20px;color:#0b1220;margin-top:8px}
+
+    footer{
+      margin-top:40px;padding:18px;border-radius:12px;background:transparent;color:var(--muted);font-size:13px;text-align:center;
+    }
+
+    /* ===== Accessibility focus ===== */
+    a:focus, button:focus{outline:3px solid rgba(37,99,235,0.12);outline-offset:3px;border-radius:10px}
+
+    /* ===== Responsive ===== */
+    @media (max-width:1060px){
+      .hero{grid-template-columns:1fr 340px}
+      .demo-frame{height:200px}
+      .steps{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:820px){
+      header{flex-direction:column;align-items:flex-start;gap:12px}
+      .hero{grid-template-columns:1fr;gap:20px}
+      .hero-right{order:2}
+      .steps{grid-template-columns:1fr}
+      .two-col{grid-template-columns:1fr}
+    }
+    @media (max-width:420px){
+      body{padding:18px}
+      .hero h2{font-size:24px}
+      .demo-frame{height:170px}
+      .tag{font-size:12px;padding:6px 10px}
+    }
+
+    /* Small niceties */
+    .muted{color:var(--muted)}
+    .spaced{margin-top:12px}
+  </style>
 </head>
 <body>
-<div class="container">
+  <div class="wrap">
+    <div class="container" role="main" aria-labelledby="main-heading">
+      <!-- Header -->
+      <header>
+        <div class="brand" aria-hidden="false">
+          <div class="logo" aria-hidden="true">GS</div>
+          <div>
+            <h1 style="font-size:15px;margin-bottom:2px">GoStarterAI</h1>
+            <div style="font-size:12px;color:var(--muted)">Launch a startup in one prompt</div>
+          </div>
+        </div>
 
-<!-- Hero -->
-<section class="hero">
-  <div class="hero-left">
-    <div class="tag">AI • Hosting • Deploy</div>
-    <h1>Launch your startup in one prompt</h1>
-    <p>GoStarterAI turns an idea into a live product: website code, market plan, and one-click deployment — all automatically generated and hosted.</p>
-    <a href="#" class="btn">Get started free</a><br>
-    <a href="#how" class="btn-outline">How it works</a>
+        <nav class="nav" aria-label="top navigation">
+          <a href="#how">How it works</a>
+          <a href="#features">Features</a>
+          <a href="#faq">FAQ</a>
+          <a class="cta" href="https://go-starter-ai.vercel.app/home.html" target="_blank" rel="noopener">Live demo</a>
+        </nav>
+      </header>
+
+      <!-- Hero -->
+      <section class="hero" aria-labelledby="main-heading">
+        <div class="hero-left">
+          <div class="tag">GoStarterAI</div>
+          <h2 id="main-heading">Launch your startup with a single prompt</h2>
+          <p>GoStarterAI converts an idea into a live product: landing page, business plan, and one-click deployment — automatically generated and hosted. No code required.</p>
+
+          <div class="hero-actions spaced" role="group" aria-label="primary actions">
+            <a href="#features" class="btn secondary" role="button">See features</a>
+            <a href="https://go-starter-ai.vercel.app/home.html" class="btn" role="button">Get started — it's free</a>
+          </div>
+
+          <div class="spaced" style="font-size:13px;color:var(--muted)">
+            <strong>Pro tip:</strong> Use a clear one-sentence product description for the best result.
+          </div>
+        </div>
+
+        <div class="hero-right" aria-hidden="false">
+          <div class="demo-card" aria-label="Product demo">
+            <div class="demo-frame" role="img" aria-label="Dino demo preview">
+              <!-- Lazy-load the GIF, alt text for accessibility -->
+              <img src="dino-eye-demo.gif" alt="Animated demo showing a browser preview of GoStarterAI landing page" loading="lazy" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section id="how" class="section" aria-labelledby="how-heading">
+        <h3 id="how-heading">How it works</h3>
+        <div class="steps" role="list">
+          <article class="card" role="listitem" aria-label="Step 1">
+            <h4>1 — Describe your idea</h4>
+            <p class="muted">Write a short, clear prompt describing your product, target user, and the problem you solve. The AI does the rest.</p>
+          </article>
+
+          <article class="card" role="listitem" aria-label="Step 2">
+            <h4>2 — AI generates assets</h4>
+            <p class="muted">Get a ready-to-deploy landing page, brand copy, and a concise market & go-to-market plan.</p>
+          </article>
+
+          <article class="card" role="listitem" aria-label="Step 3">
+            <h4>3 — Launch instantly</h4>
+            <p class="muted">Deploy with one click to Vercel or your custom domain. CI, repo, and hosting configured automatically.</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section id="features" class="section" aria-labelledby="features-heading">
+        <h3 id="features-heading">Features & benefits</h3>
+        <div class="two-col spaced">
+          <div>
+            <div class="card" style="margin-bottom:12px">
+              <h4>AI-powered landing pages</h4>
+              <p class="muted">Responsive, production-ready HTML/CSS tailored to your idea and audience.</p>
+            </div>
+            <div class="card">
+              <h4>Business plan & market report</h4>
+              <p class="muted">Get concise market validation, monetization suggestions, and an investor-ready one-pager.</p>
+            </div>
+          </div>
+
+          <div>
+            <div class="card" style="margin-bottom:12px">
+              <h4>One-click deployment</h4>
+              <p class="muted">Auto-create a GitHub repo and deploy to Vercel with a single action — no dev ops needed.</p>
+            </div>
+            <div class="card">
+              <h4>Editable code</h4>
+              <p class="muted">Everything is yours: edit the generated code, connect a custom domain, or export assets.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Testimonials -->
+      <section id="testimonials" class="section" aria-labelledby="testimonials-heading">
+        <h3 id="testimonials-heading">What founders say</h3>
+        <div class="card spaced">
+          <p style="font-weight:600">“Saved me weeks. I launched a landing page and validated demand in hours.” — Alex P.</p>
+          <p class="muted spaced">“Market insights were practical and actionable.” — Priya K.</p>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section id="faq" class="section" aria-labelledby="faq-heading">
+        <h3 id="faq-heading">Frequently asked</h3>
+        <div class="card spaced">
+          <h4>Is GoStarterAI free?</h4>
+          <p class="muted">Start for free. Paid plans unlock custom domains, team seats, and advanced templates.</p>
+
+          <h4 style="margin-top:12px">Do I need coding skills?</h4>
+          <p class="muted">Nope. The generated site is editable, but you don't need to code to launch.</p>
+
+          <h4 style="margin-top:12px">Can I use my own domain?</h4>
+          <p class="muted">Yes. Connect a custom domain during deployment.</p>
+        </div>
+      </section>
+
+      <!-- FOMO / CTA -->
+      <section class="section spaced">
+        <div class="fomo">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+            <div>
+              <strong style="font-size:17px">Reserve your spot</strong>
+              <div class="muted" style="font-size:13px;margin-top:6px">Limited early-access seats for founders testing new ideas.</div>
+            </div>
+            <div style="text-align:right">
+              <div class="countdown" id="countdown" aria-live="polite">00:15:00</div>
+              <div class="muted" style="font-size:13px">Only 7 spots left today</div>
+            </div>
+          </div>
+
+          <div style="margin-top:14px;display:flex;gap:12px;flex-wrap:wrap">
+            <a href="https://go-starter-ai.vercel.app/signup" class="btn" role="button">Reserve spot</a>
+            <a href="#how" class="btn secondary" role="button">How it works</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer>
+        <div>© 2025 GoStarterAI · <a href="#" aria-label="Privacy Policy">Privacy</a> · <a href="#" aria-label="Terms of service">Terms</a> · <a href="#" aria-label="Contact">Contact</a></div>
+      </footer>
+    </div>
   </div>
-  
-  <div class="hero-demo">
-    <img src="dino-eye-demo.gif" alt="Dino Eye Demo" />
-  </div>
-</section>
 
-<!-- How it works -->
-<section id="how">
-  <h2>How it works</h2>
-  <div class="steps">
-    <div class="step">
-      <h3>1 — Describe your idea</h3>
-      <p>Type a concise prompt describing the product you want to build. The AI uses that prompt to generate tailored assets.</p>
-    </div>
-    <div class="step">
-      <h3>2 — AI generates assets</h3>
-      <p>GoStarterAI produces website HTML/CSS, market report, and brand copy — structured and ready for deployment.</p>
-    </div>
-    <div class="step">
-      <h3>3 — Launch instantly</h3>
-      <p>With one click, your startup goes live on your own custom domain via auto-deployment to hosting.</p>
-    </div>
-  </div>
-</section>
+  <!-- ===== Small Scripts ===== -->
+  <script>
+    // Countdown (15 minutes demo) — accessible and non-flashy (Adsense-friendly)
+    (function(){
+      var timeLeft = 15 * 60; // seconds
+      var el = document.getElementById('countdown');
+      if(!el) return;
+      function tick(){
+        var m = Math.floor(timeLeft/60);
+        var s = timeLeft % 60;
+        el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+        if(timeLeft > 0) timeLeft--;
+        else clearInterval(timer);
+      }
+      tick();
+      var timer = setInterval(tick,1000);
+    })();
 
-<!-- Features -->
-<section id="features">
-  <h2>Features & Benefits</h2>
-  <div class="features-grid">
-    <div class="feature-card">
-      <h3>AI-Powered Websites</h3>
-      <p>Instantly generate fully responsive, custom websites tailored to your idea.</p>
-    </div>
-    <div class="feature-card">
-      <h3>Market Analysis</h3>
-      <p>Get a ready-to-use market report to validate your startup idea in minutes.</p>
-    </div>
-    <div class="feature-card">
-      <h3>One-Click Deployment</h3>
-      <p>Deploy to a custom domain instantly without touching a line of code.</p>
-    </div>
-  </div>
-</section>
-
-<!-- Testimonials -->
-<section id="testimonials">
-  <h2>What Founders Say</h2>
-  <p>"GoStarterAI saved me weeks of development. I launched in hours!" — Alex P.</p>
-  <p>"The AI-generated market report is spot-on. Truly amazing." — Priya K.</p>
-</section>
-
-<!-- FAQ -->
-<section id="faq">
-  <h2>FAQ</h2>
-  <h3>Is GoStarterAI free?</h3>
-  <p>Yes! You can get started for free and upgrade as your startup grows.</p>
-  <h3>Do I need coding skills?</h3>
-  <p>Nope! Everything is automated — just provide your idea.</p>
-  <h3>Can I use my own domain?</h3>
-  <p>Absolutely, you can connect a custom domain instantly.</p>
-</section>
-
-<!-- FOMO Section -->
-<section class="fomo">
-  <h2>Don't miss out!</h2>
-  <p>Spots are filling up fast. Join hundreds of founders launching instantly!</p>
-  <div class="countdown" id="countdown">00:15:00</div>
-  <div class="spots">Only 7 spots left today!</div>
-  <a href="#" class="btn">Reserve your spot</a>
-</section>
-
-<!-- Footer -->
-<footer>
-  <p>© 2025 GoStarterAI | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a> | <a href="#">Contact</a></p>
-</footer>
-
-</div>
-
-<script>
-// Simple Countdown Timer (15 min demo)
-let timeLeft = 15 * 60;
-const countdownEl = document.getElementById('countdown');
-setInterval(() => {
-  let minutes = Math.floor(timeLeft / 60);
-  let seconds = timeLeft % 60;
-  countdownEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
-  if(timeLeft>0) timeLeft--;
-}, 1000);
-</script>
+    // Minimal safe lazy-loading fallback for older browsers
+    (function(){
+      var imgs = document.querySelectorAll('img[loading="lazy"]');
+      if('loading' in HTMLImageElement.prototype) return; // native supported
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var img = entry.target;
+            img.src = img.getAttribute('data-src') || img.src;
+            io.unobserve(img);
+          }
+        });
+      });
+      imgs.forEach(function(img){ io.observe(img); });
+    })();
+  </script>
 </body>
 </html>
