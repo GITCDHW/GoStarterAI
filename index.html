@@ -1,65 +1,403 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GoStarterAI</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoStarterAI — Launch a startup in one prompt</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #fefefe;
+    color: #111;
+    overflow-x: hidden;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Links */
+a {
+    text-decoration: none;
+}
+
+/* Headings */
+h1, h2, h3 {
+    color: #111;
+}
+
+/* Hero */
+.hero {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 40px;
+    align-items: start; /* top align content */
+    margin-top: 40px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    position: relative; /* allow absolute inside */
+}
+
+.hero-demo {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 80px; /* adjust size */
+    height: auto;
+    pointer-events: none; /* clickable elements below still work */
+    border-radius: 12px; /* optional frosted corner look */
+    overflow: hidden;
+}
+.hero-demo img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.hero-left {
+    margin-top: 0;
+}
+
+/* Tag */
+.tag {
+    display: inline-block;
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 14px;
+    margin-bottom: 20px;
+    text-shadow: 0 0 4px #3b82f6;
+}
+
+/* Headings */
+h1 {
+    font-size: 48px;
+    line-height: 1.2;
+    margin-bottom: 20px;
+}
+
+p {
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    color: #555;
+}
+
+/* Glassy Buttons */
+.btn, .btn-outline {
+    display: inline-block;
+    padding: 14px 28px;
+    font-size: 16px;
+    border-radius: 16px;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.4s ease;
+    cursor: pointer;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+}
+
+.btn {
+    background: rgba(59, 130, 246, 0.6);
+    color: #fff;
+    border: none;
+}
+
+.btn:hover {
+    background: rgba(59, 130, 246, 0.85);
+    transform: scale(1.08) rotateZ(-1deg);
+    text-shadow: 0 0 12px #3b82f6;
+}
+
+.btn-outline {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(59, 130, 246, 0.6);
+    color: #3b82f6;
+}
+
+.btn-outline:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.08) rotateZ(1deg);
+    text-shadow: 0 0 8px #3b82f6;
+}
+
+/* Steps & Features */
+.steps, .features-grid {
+    display: grid;
+    gap: 24px;
+}
+
+.steps {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.features-grid {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.step, .feature-card {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px);
+    transition: all 0.4s ease;
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+
+.step:hover, .feature-card:hover {
+    transform: translateY(-10px) rotateX(2deg) rotateY(5deg);
+    box-shadow: 0 20px 60px rgba(59, 130, 246, 0.25);
+}
+
+.step h3, .feature-card h3 {
+    font-size: 20px;
+    margin-bottom: 12px;
+    color: #111;
+}
+
+.step p, .feature-card p {
+    color: #333;
+}
+
+/* Glowy/3D H2 Headings */
+h2 {
+    font-size: 36px;
+    margin-bottom: 40px;
+    margin-top: 10px;
+    text-align: center;
+    color: #111;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: linear-gradient(90deg, #3b82f6, #00BCFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
+    animation: neon-glow 2.5s infinite alternate;
+}
+
+/* Neon Glow Animation */
+@keyframes neon-glow {
+    0% { text-shadow: 0 0 6px rgba(59,130,246,0.6), 0 0 12px rgba(99,102,241,0.4); }
+    50% { text-shadow: 0 0 12px rgba(59,130,246,0.8), 0 0 24px rgba(99,102,241,0.6); }
+    100% { text-shadow: 0 0 8px rgba(59,130,246,0.7), 0 0 16px rgba(99,102,241,0.5); }
+}
+
+/* Testimonials */
+#testimonials {
+    margin-top: 80px;
+    text-align: center;
+}
+
+#testimonials p {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+/* FAQ */
+#faq {
+    margin-top: 80px;
+}
+
+#faq h3 {
+    margin-top: 20px;
+    margin-bottom: 6px;
+    color: #111;
+}
+
+#faq p {
+    color: #00BCFF;
+    margin-bottom: 10px;
+}
+
+/* FOMO Section */
+.fomo {
+    margin-top: 80px;
+    padding: 40px;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    color: #fff;
+    border-radius: 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    perspective: 1000px;
+}
+
+.fomo h2 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    text-shadow: 0 0 12px #fff;
+}
+
+.fomo p {
+    font-size: 20px;
+    margin-bottom: 30px;
+    color: #fff;
+}
+
+.countdown {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.spots {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #ffe066;
+}
+
+/* Footer */
+footer {
+    margin-top: 80px;
+    padding: 40px;
+    text-align: center;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    color: #555;
+}
+
+footer a {
+    color: #3b82f6;
+    margin: 0 6px;
+}
+
+/* Responsive */
+@media(max-width:980px){
+    .hero {
+        display: block !important;
+        padding: 20px;
+    }
+    .steps, .features-grid {
+        grid-template-columns: 1fr;
+    }
+    h1 {
+        font-size: 36px;
+    }
+    .fomo h2 {
+        font-size: 28px;
+    }
+}
+</style>
 </head>
 <body>
+<div class="container">
 
-    <div class="main-container" style="display:none;">
-        <div class="logo-and-tagline">
-            <img src="logo.png" alt="GoStarterAI Logo" class="logo">
-            <h1 class="tagline">GoStarterAI - Gateway To Reality For Your Ideas</h1>
-        </div>
-        
-        <h2 class="dashboard-title">YOUR BUSINESSES</h2>
-        
-        <div id="business-list" class="business-grid"></div>
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="tag">AI • Hosting • Deploy</div>
+    <h1>Launch your startup in one prompt</h1>
+    <p>GoStarterAI turns an idea into a live product: website code, market plan, and one-click deployment — all automatically generated and hosted.</p>
+    <a href="#" class="btn">Get started free</a><br>
+    <a href="#how" class="btn-outline">How it works</a>
+  </div>
+  
+  <div class="hero-demo">
+    <img src="dino-eye-demo.gif" alt="Dino Eye Demo" />
+  </div>
+</section>
 
-        <button id="add-business-btn" class="launch-button">LAUNCH NEW BUSINESS</button>
+<!-- How it works -->
+<section id="how">
+  <h2>How it works</h2>
+  <div class="steps">
+    <div class="step">
+      <h3>1 — Describe your idea</h3>
+      <p>Type a concise prompt describing the product you want to build. The AI uses that prompt to generate tailored assets.</p>
     </div>
-
-    <div id="prompt-modal" class="modal-overlay" style="display:none;">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <div id="prompt_container">
-                <h2>What Are You Launching Today?</h2>
-                <form id="prompt_form">
-                    <div class="form-group">
-                        <label for="name">Your Business Name (Optional)</label>
-                        <input type="text" id="name" name="name" placeholder="E.g., GoStarterAI">
-                    </div>
-                    <div class="form-group">
-                        <label for="prompt">Describe Your Vision...</label>
-                        <textarea id="prompt" name="prompt" rows="6" required placeholder="Describe your business idea in detail."></textarea>
-                    </div>
-                    <button type="submit">Generate My Business</button>
-                </form>
-            </div>
-        </div>
+    <div class="step">
+      <h3>2 — AI generates assets</h3>
+      <p>GoStarterAI produces website HTML/CSS, market report, and brand copy — structured and ready for deployment.</p>
     </div>
-
-    <!-- loader iframe -->
-    <div id="loading-overlay" style="display:none;">
-        <!-- IMPORTANT: set title and allow fullscreen if you want -->
-        <iframe id="loader-iframe" src="loader.html" frameborder="0" scrolling="no" title="GoStarterAI Loader"></iframe>
+    <div class="step">
+      <h3>3 — Launch instantly</h3>
+      <p>With one click, your startup goes live on your own custom domain via auto-deployment to hosting.</p>
     </div>
+  </div>
+</section>
 
-    <div id="firebase-ui"></div>
-    <!-- Footer placeholder -->
-<div id="site-footer"></div>
+<!-- Features -->
+<section id="features">
+  <h2>Features & Benefits</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <h3>AI-Powered Websites</h3>
+      <p>Instantly generate fully responsive, custom websites tailored to your idea.</p>
+    </div>
+    <div class="feature-card">
+      <h3>Market Analysis</h3>
+      <p>Get a ready-to-use market report to validate your startup idea in minutes.</p>
+    </div>
+    <div class="feature-card">
+      <h3>One-Click Deployment</h3>
+      <p>Deploy to a custom domain instantly without touching a line of code.</p>
+    </div>
+  </div>
+</section>
 
-    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-database-compat.js"></script>
-    <script src="config.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
-    <script src="script.js" type="text/javascript" charset="utf-8"></script>
-    <script src="footer.js" type="text/javascript" charset="utf-8"></script>
+<!-- Testimonials -->
+<section id="testimonials">
+  <h2>What Founders Say</h2>
+  <p>"GoStarterAI saved me weeks of development. I launched in hours!" — Alex P.</p>
+  <p>"The AI-generated market report is spot-on. Truly amazing." — Priya K.</p>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <h2>FAQ</h2>
+  <h3>Is GoStarterAI free?</h3>
+  <p>Yes! You can get started for free and upgrade as your startup grows.</p>
+  <h3>Do I need coding skills?</h3>
+  <p>Nope! Everything is automated — just provide your idea.</p>
+  <h3>Can I use my own domain?</h3>
+  <p>Absolutely, you can connect a custom domain instantly.</p>
+</section>
+
+<!-- FOMO Section -->
+<section class="fomo">
+  <h2>Don't miss out!</h2>
+  <p>Spots are filling up fast. Join hundreds of founders launching instantly!</p>
+  <div class="countdown" id="countdown">00:15:00</div>
+  <div class="spots">Only 7 spots left today!</div>
+  <a href="#" class="btn">Reserve your spot</a>
+</section>
+
+<!-- Footer -->
+<footer>
+  <p>© 2025 GoStarterAI | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a> | <a href="#">Contact</a></p>
+</footer>
+
+</div>
+
+<script>
+// Simple Countdown Timer (15 min demo)
+let timeLeft = 15 * 60;
+const countdownEl = document.getElementById('countdown');
+setInterval(() => {
+  let minutes = Math.floor(timeLeft / 60);
+  let seconds = timeLeft % 60;
+  countdownEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+  if(timeLeft>0) timeLeft--;
+}, 1000);
+</script>
 </body>
 </html>

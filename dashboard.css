@@ -23,6 +23,8 @@ body {
     justify-content: center;
     align-items: flex-start;
     width:100vw;
+    overflow-x: hidden;
+
 }
 
 /* ========== DASHBOARD FULL WIDTH ========== */
@@ -177,8 +179,7 @@ body {
 
 /* ================= FOOTER STICKY & CONFINED ================= */
 #site-footer {
-    width: 100%;
-    max-width: 700px; /* confines width to dashboard size */
+    width: 100vw;
     margin: 0 auto;   /* center footer horizontally */
     background: #ffffff;
     padding: 30px 20px;
@@ -186,6 +187,9 @@ body {
     font-family: 'Poppins', sans-serif;
     margin-top: auto;
     position: relative;
+    display:flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* ================= ANIMATIONS ================= */

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GoStarterAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <div class="main-container" style="display:none;">
+        <div class="logo-and-tagline">
+            <img src="logo.png" alt="GoStarterAI Logo" class="logo">
+            <h1 class="tagline">GoStarterAI - Gateway To Reality For Your Ideas</h1>
+        </div>
+        
+        <h2 class="dashboard-title">YOUR BUSINESSES</h2>
+        
+        <div id="business-list" class="business-grid"></div>
+
+        <button id="add-business-btn" class="launch-button">LAUNCH NEW BUSINESS</button>
+    </div>
+
+    <div id="prompt-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <div id="prompt_container">
+                <h2>What Are You Launching Today?</h2>
+                <form id="prompt_form">
+                    <div class="form-group">
+                        <label for="name">Your Business Name (Optional)</label>
+                        <input type="text" id="name" name="name" placeholder="E.g., GoStarterAI">
+                    </div>
+                    <div class="form-group">
+                        <label for="prompt">Describe Your Vision...</label>
+                        <textarea id="prompt" name="prompt" rows="6" required placeholder="Describe your business idea in detail."></textarea>
+                    </div>
+                    <button type="submit">Generate My Business</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- loader iframe -->
+    <div id="loading-overlay" style="display:none;">
+        <!-- IMPORTANT: set title and allow fullscreen if you want -->
+        <iframe id="loader-iframe" src="loader.html" frameborder="0" scrolling="no" title="GoStarterAI Loader"></iframe>
+    </div>
+
+    <div id="firebase-ui"></div>
+    <!-- Footer placeholder -->
+<div id="site-footer"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-database-compat.js"></script>
+    <script src="config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
+    <script src="script.js" type="text/javascript" charset="utf-8"></script>
+    <script src="footer.js" type="text/javascript" charset="utf-8"></script>
+</body>
+</html>
